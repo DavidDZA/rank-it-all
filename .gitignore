@@ -6,3 +6,14 @@ dev-dist
 *.tsbuildinfo
 test-results
 playwright-report
+
+# Android (TWA) : clés de signature et sorties de compilation, jamais dans le dépôt
+*.p12
+*.keystore
+*.jks
+android/.gradle
+android/build
+android/app/build
+android/local.properties
+android/*.aab
+android/*.apk

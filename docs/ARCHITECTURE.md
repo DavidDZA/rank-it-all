@@ -28,6 +28,7 @@ wishlist et ses classements, par sessions courtes. Gratuite, sans publicité, op
 | Comptes | **Supabase** (auth + PostgreSQL + règles RLS), schéma dans `supabase/schema.sql`, types dans `src/lib/database.types.ts` |
 | Hébergement | **GitHub Pages** (`https://daviddza.github.io/rank-it-all/`), déployé par GitHub Actions à chaque push sur `main`. L'ancienne adresse `/Sort-your-stuffs/` redirige (dépôt `Sort-your-stuffs`, fichiers dans `tools/ancienne-adresse/`, dont un `sw.js` qui retire l'ancienne version installée) |
 | Secrets | GitHub : `TMDB_TOKEN`, `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY` (injectés au build en `VITE_…`). En local : `.env.local` (ignoré par git) |
+| Appli Android | **TWA** (Trusted Web Activity) : le site en plein écran dans une appli Play Store, `io.github.daviddza.rankitall` (voir § 2.1) |
 | Tests | **Vitest** (`tests/`, logique + base en mémoire) ; **Playwright** (`e2e/`, appli construite dans le Chrome installé, formats téléphone et PC) |
 
 ```
@@ -46,6 +47,24 @@ src/
 supabase/schema.sql  tout le schéma serveur, relançable sans risque
 tests/  e2e/         Vitest, Playwright
 ```
+
+### 2.1 Appli Android (TWA)
+
+L'appli Android ouvre `https://daviddza.github.io/rank-it-all/` en plein écran dans Chrome : mêmes données que
+le site (même adresse), connexion Google inchangée, mises à jour instantanées (c'est le site). Une nouvelle
+version Android n'est utile que pour changer ses réglages (nom, icône, couleurs, niveau d'API exigé par Google).
+
+- `android/twa-manifest.json` : réglages (package, couleurs, version, clé `upload`) ; `android/generate.mjs`
+  (bibliothèque Bubblewrap) génère le projet Gradle à côté, commité tel quel. Après modification :
+  `cd android && npm install && npm run generate`, en augmentant `appVersionCode` pour une nouvelle version.
+- `.github/workflows/android.yml` compile et signe (`rank-it-all.aab` pour la Play Console, `rank-it-all.apk`
+  pour tester) ; rien à installer sur le PC. Secrets `ANDROID_KEYSTORE_BASE64` / `ANDROID_KEYSTORE_PASSWORD` :
+  la clé de dépôt (`upload-key.p12`, alias `upload`), gardée hors du dépôt ; Google re-signe avec sa clé
+  (*Play App Signing*).
+- **Digital Asset Links** : `https://daviddza.github.io/.well-known/assetlinks.json` (dépôt `DavidDZA.github.io`,
+  source dans `tools/racine-du-site/`) liste les empreintes SHA-256 de la clé de dépôt **et** de la clé de
+  signature de Google Play. Sans lui, l'appli affiche une barre d'adresse. Les liens `…/rank-it-all/…`
+  (invitations, réinitialisation du mot de passe) ouvrent l'appli.
 
 ## 3. Données
 

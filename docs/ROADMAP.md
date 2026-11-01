@@ -8,55 +8,27 @@
 
 | # | Question | Recommandation |
 |---|---|---|
-| D5 | Appli Android : **Capacitor** (appli native qui embarque le site) ou **TWA** (le site en plein écran) ? | Capacitor (§ 2) |
-| D6 | Nom de l'appli sur le Play Store, nom de package (ex. `fr.<nom>.rankitall`) | Nom choisi : **Rank It All** ; identifiant de package à choisir |
 | D7 | **Licence open source** du dépôt (fichier `LICENSE`) | MIT (simple, permissive) ; GPL-3.0 si les dérivés doivent rester open source |
 | — | Contact sur la page de confidentialité : une adresse e-mail plutôt que les tickets GitHub (publics) ? | À choisir |
 
 ## 2. Appli Android
 
-### 2.1 Options
+Décidé le 01/11/2026 : **TWA** sans nom de domaine (le site en plein écran ; vérification par le dépôt
+`DavidDZA.github.io`), package **`io.github.daviddza.rankitall`**, nom **Rank It All**. Fonctionnement :
+ARCHITECTURE § 2.1. Capacitor écarté : données séparées du site, connexion Google à refaire (Google la refuse
+dans une page web intégrée), liens qui n'ouvrent pas l'appli. Il resservira peut-être pour iOS.
 
-| | **Capacitor** (recommandé) | **TWA** (Trusted Web Activity, ex. via PWABuilder / Bubblewrap) |
-|---|---|---|
-| Principe | Appli native qui embarque le site compilé (fichiers dans l'APK) | Lanceur natif qui ouvre le site en plein écran dans Chrome |
-| Hors ligne | Oui, tout est dans l'appli | Via le service worker de la PWA |
-| Fonctions natives | Vibration, partage natif, notifications, bouton Retour, barre d'état… (plugins) | Limitées à celles du web |
-| Mises à jour | Nouvelle version à publier sur le Store (ou mise à jour à chaud du contenu web, à encadrer) | Instantanées (c'est le site) |
-| Contraintes | Projet Android dans le dépôt, Android Studio pour compiler | Fichier `/.well-known/assetlinks.json` **à la racine du domaine** : impossible sur `daviddza.github.io/rank-it-all/` sans dépôt `DavidDZA.github.io` ou nom de domaine perso |
+Reste à faire :
 
-**Recommandation : Capacitor** — pas de contrainte de domaine, comportement d'une vraie appli, accès aux
-fonctions natives (vibration au swipe, partage du top 10 en natif).
-
-⚠️ Les données d'une appli Android sont **séparées** de celles du navigateur : c'est réglé par le compte et la synchro ;
-sans compte, prévoir l'export / import JSON pour la migration.
+1. Dépôt `DavidDZA.github.io` (contenu : `tools/racine-du-site/`) et secrets `ANDROID_KEYSTORE_*`.
+2. Compte Play Console, création de l'appli, premier `.aab` en test interne ; ajouter ensuite l'empreinte de la
+   clé de signature Google Play dans `assetlinks.json`.
+3. Bouton Retour Android : il remonte l'historique du site ; les fenêtres (fiche, filtres) ne sont pas dans
+   l'historique, le Retour quitte donc l'écran au lieu de fermer la fenêtre — à améliorer.
+4. Test fermé (12 testeurs, 14 jours), puis production (§ 3).
 
 ⚠️ Téléphone professionnel de l'utilisateur : selon la politique de son entreprise, l'installation depuis le
 Play Store peut être limitée (Play Store géré). La PWA reste la solution de repli.
-
-### 2.2 Étapes (Capacitor)
-
-1. Installer Android Studio (SDK, émulateur) et un JDK sur le PC.
-2. `npm i @capacitor/core @capacitor/cli @capacitor/android`, `npx cap init` (nom, identifiant de package D6),
-   `npx cap add android` → dossier `android/` versionné.
-3. Build web avec base `./` (le `BASE_PATH` GitHub Pages ne s'applique pas dans l'appli), puis
-   `npx cap sync android`.
-4. Adapter :
-   - routeur par ancre : compatible tel quel ;
-   - bouton Retour Android (plugin `@capacitor/app`) : fermer la fiche / revenir à l'accueil ;
-   - vibration (`@capacitor/haptics`) au seuil d'un coin, partage natif (`@capacitor/share`) pour les images ;
-   - icônes adaptatives et écran de démarrage (`@capacitor/assets`), barre d'état ;
-   - désactiver le service worker PWA dans l'appli (inutile, fichiers embarqués) ;
-   - liens d'invitation en **App Links** (nécessite aussi un `assetlinks.json` sur un domaine →
-     sinon schéma `rankitall://invite/<code>`).
-5. Clé TMDB : pour une appli publique, ne plus l'embarquer — passer par une **Edge Function Supabase** qui relaie
-   les appels TMDB (la clé reste côté serveur ; limiter le débit par utilisateur).
-6. Tester sur émulateur puis sur un téléphone perso (débogage USB).
-7. Générer un **Android App Bundle (.aab)** signé (Android Studio → Generate Signed Bundle) ; conserver
-   précieusement la clé d'envoi (keystore) et ses mots de passe, hors du dépôt.
-8. Optionnel : workflow GitHub Actions qui compile l'AAB (keystore en secret).
-
-**Effort : moyen** (gros si on ajoute beaucoup de natif).
 
 ---
 

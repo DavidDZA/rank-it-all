@@ -1,0 +1,10 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "io.github.daviddza.rankitall",
+      "sha256_cert_fingerprints": ["FC:02:12:7F:8B:C0:5B:E1:A7:5E:97:6E:E7:03:42:19:56:4C:55:25:1B:57:89:05:D6:25:EE:63:4F:DF:22:7C"]
+    }
+  }
+]
