@@ -9,7 +9,6 @@
 | # | Question | Recommandation |
 |---|---|---|
 | D7 | **Licence open source** du dépôt (fichier `LICENSE`) | MIT (simple, permissive) ; GPL-3.0 si les dérivés doivent rester open source |
-| — | Contact sur la page de confidentialité : une adresse e-mail plutôt que les tickets GitHub (publics) ? | À choisir |
 
 ## 2. Appli Android
 

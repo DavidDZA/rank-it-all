@@ -49,8 +49,8 @@ captures téléphone : les 6 de `captures/` dans l'ordre (accueil, swipe, duel, 
 
 **Catégorie** : Divertissement. **Tags** : Films et séries, Listes.
 
-**Coordonnées** : adresse e-mail publique **obligatoire** (à choisir : le compte Gmail d'envoi des e-mails de
-l'appli convient), site web `https://daviddza.github.io/rank-it-all/`.
+**Coordonnées** : e-mail `rankitall.app@gmail.com` (aussi l'expéditeur des e-mails de l'appli), site web
+`https://daviddza.github.io/rank-it-all/`.
 
 **Règles de confidentialité** : `https://daviddza.github.io/rank-it-all/confidentialite.html`
 
