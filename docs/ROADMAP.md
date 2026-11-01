@@ -21,7 +21,8 @@ dans une page web intégrée), liens qui n'ouvrent pas l'appli. Il resservira pe
 Reste à faire :
 
 1. Dépôt `DavidDZA.github.io` (contenu : `tools/racine-du-site/`) et secrets `ANDROID_KEYSTORE_*`.
-2. Compte Play Console, création de l'appli, premier `.aab` en test interne ; ajouter ensuite l'empreinte de la
+2. Fiche du Store prête : `store/fiche-play-store.md` (textes, formulaires), `store/captures/`, bannière.
+   Compte Play Console, création de l'appli, premier `.aab` en test interne ; ajouter ensuite l'empreinte de la
    clé de signature Google Play dans `assetlinks.json`.
 3. Test fermé (12 testeurs, 14 jours), puis production (§ 3).
 
