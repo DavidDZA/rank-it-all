@@ -109,7 +109,7 @@ export async function shareTop(category: Category, titles: Title[], filterLabel?
 
   ctx.fillStyle = 'rgba(246,244,255,0.55)';
   ctx.font = `500 24px ${FONT}`;
-  ctx.fillText('Fait avec Sort my stuffs 🍿', W / 2, H - 32);
+  ctx.fillText('Fait avec Rank It All 🍿', W / 2, H - 32);
 
   await shareCanvas(canvas, `mon-top-${slug(category)}.png`, `Mon top ${top.length}`);
 }
@@ -227,6 +227,6 @@ export async function shareTierList(category: Category, tiers: { label: string; 
   ctx.textBaseline = 'alphabetic';
   ctx.fillStyle = 'rgba(246,244,255,0.55)';
   ctx.font = `500 24px ${FONT}`;
-  ctx.fillText('Fait avec Sort my stuffs 🍿', W / 2, H - 28);
+  ctx.fillText('Fait avec Rank It All 🍿', W / 2, H - 28);
   await shareCanvas(canvas, `ma-tier-list-${slug(category)}.png`, 'Ma tier list');
 }

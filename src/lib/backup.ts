@@ -1,8 +1,11 @@
 import { splitAnimeRankings } from './ranking';
 import { db, detailsMarks, isUserMeta, setMeta, type Answer, type Meta, type Title } from './db';
 
+/** Sauvegardes faites quand l'appli s'appelait « Sort my stuffs » : toujours importables. */
+const APP_IDS = ['rank-it-all', 'sort-my-stuffs'];
+
 interface Backup {
-  app: 'sort-my-stuffs';
+  app: 'rank-it-all' | 'sort-my-stuffs';
   version: 1;
   exportedAt: string;
   titles: Title[];
@@ -15,12 +18,12 @@ export async function exportData(): Promise<void> {
   const answers = await db.answers.toArray();
   const titles = (await db.titles.bulkGet(answers.map((a) => a.key))).filter((t): t is Title => !!t);
   const meta = (await db.meta.toArray()).filter((m) => isUserMeta(m.key));
-  const backup: Backup = { app: 'sort-my-stuffs', version: 1, exportedAt: new Date().toISOString(), titles, answers, meta };
+  const backup: Backup = { app: 'rank-it-all', version: 1, exportedAt: new Date().toISOString(), titles, answers, meta };
 
   const blob = new Blob([JSON.stringify(backup)], { type: 'application/json' });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = `sort-my-stuffs-${backup.exportedAt.slice(0, 10)}.json`;
+  a.download = `rank-it-all-${backup.exportedAt.slice(0, 10)}.json`;
   a.click();
   setTimeout(() => URL.revokeObjectURL(a.href), 1000);
   await setMeta('lastExport', Date.now());
@@ -29,7 +32,7 @@ export async function exportData(): Promise<void> {
 /** Restaure une sauvegarde : remplace toutes les réponses et classements actuels. */
 export async function importData(file: File): Promise<number> {
   const backup = JSON.parse(await file.text()) as Backup;
-  if (backup.app !== 'sort-my-stuffs' || !Array.isArray(backup.answers)) throw new Error('Fichier de sauvegarde invalide.');
+  if (!APP_IDS.includes(backup.app) || !Array.isArray(backup.answers)) throw new Error('Fichier de sauvegarde invalide.');
   // Sauvegardes d'avant le 30/10 : les fiches détaillées sont dans les titres, on les range à part.
   const details = backup.titles.filter((t) => t.details).map((t) => ({ ...t.details!, key: t.key }));
   const titles = backup.titles.map((t) => (t.details ? { ...t, ...detailsMarks(t.type, t.details), details: undefined } : t));

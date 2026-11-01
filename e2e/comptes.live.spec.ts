@@ -21,9 +21,9 @@ const client = () => createClient(env('VITE_SUPABASE_URL'), env('VITE_SUPABASE_P
 test.describe('comptes et amis @live', () => {
   test('inscription, synchro, amis, « À deux », suppression', async ({ page }) => {
     const stamp = Date.now();
-    const emailA = `sms-e2e-a-${stamp}@test-sortmystuffs.dev`;
+    const emailA = `ria-e2e-a-${stamp}@test-rankitall.dev`;
     const b: SupabaseClient = client();
-    const { data: sb, error } = await b.auth.signUp({ email: `sms-e2e-b-${stamp}@test-sortmystuffs.dev`, password: PASSWORD, options: { data: { pseudo: 'Bob Test' } } });
+    const { data: sb, error } = await b.auth.signUp({ email: `ria-e2e-b-${stamp}@test-rankitall.dev`, password: PASSWORD, options: { data: { pseudo: 'Bob Test' } } });
     expect(error).toBeNull();
     const B = sb.user!.id;
     let a: SupabaseClient | null = null;
@@ -44,7 +44,7 @@ test.describe('comptes et amis @live', () => {
       await page.evaluate(
         () =>
           new Promise<void>((resolve) => {
-            const req = indexedDB.open('sort-my-stuffs');
+            const req = indexedDB.open('rank-it-all');
             req.onsuccess = () => {
               const tx = req.result.transaction(['titles', 'answers'], 'readwrite');
               tx.objectStore('titles').put({ key: 'movie:1', type: 'movie', tmdbId: 1, title: 'Film commun', originalTitle: 'Film commun', year: 2010, posterPath: null, overview: '', voteCount: 900, popularity: 1, genreIds: [18], originalLanguage: 'en' });

@@ -1,4 +1,4 @@
-# Architecture — comment marche Sort my stuffs
+# Architecture — comment marche Rank It All
 
 > **À lire en premier par toute nouvelle session de travail.** État au 30/10/2026. Ce qui reste à faire est dans
 > [ROADMAP.md](ROADMAP.md).
@@ -23,10 +23,10 @@ wishlist et ses classements, par sessions courtes. Gratuite, sans publicité, op
 | Élément | Choix |
 |---|---|
 | Front | Vite, React 19, TypeScript, CSS par écran (`src/styles/`) ; pages chargées à la demande (`App.tsx`) |
-| Base locale | IndexedDB via **Dexie** (`src/lib/db.ts`), schéma 3 : `titles`, `details`, `answers`, `meta`, `synced` |
+| Base locale | IndexedDB via **Dexie** (`src/lib/db.ts`), base `rank-it-all`, schéma 3 : `titles`, `details`, `answers`, `meta`, `synced` |
 | Catalogue | API **TMDB** depuis le navigateur (`src/lib/tmdb.ts`, `src/lib/sync.ts`) |
 | Comptes | **Supabase** (auth + PostgreSQL + règles RLS), schéma dans `supabase/schema.sql`, types dans `src/lib/database.types.ts` |
-| Hébergement | **GitHub Pages** (`https://daviddza.github.io/Sort-your-stuffs/`), déployé par GitHub Actions à chaque push sur `main` |
+| Hébergement | **GitHub Pages** (`https://daviddza.github.io/rank-it-all/`), déployé par GitHub Actions à chaque push sur `main`. L'ancienne adresse `/Sort-your-stuffs/` redirige (dépôt `Sort-your-stuffs`, fichiers dans `tools/ancienne-adresse/`, dont un `sw.js` qui retire l'ancienne version installée) |
 | Secrets | GitHub : `TMDB_TOKEN`, `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY` (injectés au build en `VITE_…`). En local : `.env.local` (ignoré par git) |
 | Tests | **Vitest** (`tests/`, logique + base en mémoire) ; **Playwright** (`e2e/`, appli construite dans le Chrome installé, formats téléphone et PC) |
 
@@ -50,6 +50,11 @@ tests/  e2e/         Vitest, Playwright
 ## 3. Données
 
 ### 3.1 Base locale (Dexie)
+
+- Nom : `rank-it-all`. Jusqu'au 01/11/2026, l'appli s'appelait « Sort my stuffs » et sa base `sort-my-stuffs` :
+  `migrateDatabaseName` (au démarrage, avant tout) la met au schéma actuel, recopie toutes ses tables en une
+  transaction avec un repère `renamed-from:sort-my-stuffs` (jamais recopiée deux fois), puis la supprime. Les
+  sauvegardes JSON portent `app: 'rank-it-all'` ; celles en `sort-my-stuffs` restent importables.
 
 - `titles` : le catalogue TMDB + titres ajoutés à la main. Clé `movie:550` / `tv:1399`. **Sans les fiches
   détaillées** : elles sont dans `details` (même clé), jointes à la lecture par `withDetails` là où il en faut

@@ -56,7 +56,7 @@ export async function seed(page: Page, data: Seed, hash = '#/'): Promise<void> {
   await page.evaluate(
     (d) =>
       new Promise<void>((resolve, reject) => {
-        const req = indexedDB.open('sort-my-stuffs');
+        const req = indexedDB.open('rank-it-all');
         req.onsuccess = () => {
           const tx = req.result.transaction(['titles', 'answers', 'meta', 'details'], 'readwrite');
           for (const t of d.titles ?? []) tx.objectStore('titles').put(t);

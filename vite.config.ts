@@ -2,7 +2,7 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
 
-// BASE_PATH vaut "/Sort-your-stuffs/" sur GitHub Pages, "/" en local.
+// BASE_PATH vaut "/<nom du dépôt>/" sur GitHub Pages ("/rank-it-all/"), "/" en local.
 export default defineConfig({
   base: process.env.BASE_PATH ?? '/',
   plugins: [
@@ -11,9 +11,9 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['icons/favicon.svg', 'icons/apple-touch-icon.png'],
       manifest: {
-        name: 'Sort my stuffs',
-        short_name: 'Sort my stuffs',
-        description: 'Trier les films et séries que tu as vus.',
+        name: 'Rank It All',
+        short_name: 'Rank It All',
+        description: 'Classer les films, séries et animes que tu as vus.',
         lang: 'fr',
         display: 'standalone',
         orientation: 'portrait',

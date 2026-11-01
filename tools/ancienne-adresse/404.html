@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Rank It All</title>
+    <script>
+      // « Sort my stuffs » s'appelle maintenant « Rank It All » : même appli, nouvelle adresse.
+      // L'ancre est gardée (liens d'invitation #/invite/…, connexion Google ?code=…).
+      location.replace('/rank-it-all/' + location.search + location.hash);
+    </script>
+  </head>
+  <body style="background: #12121a; color: #f2f2f7; font-family: sans-serif; text-align: center; padding: 40px 16px">
+    <p>Sort my stuffs s’appelle maintenant <b>Rank It All</b>.</p>
+    <p><a style="color: #8b7cff" href="/rank-it-all/">Ouvrir Rank It All →</a></p>
+  </body>
+</html>

@@ -9,7 +9,7 @@
 | # | Question | Recommandation |
 |---|---|---|
 | D5 | Appli Android : **Capacitor** (appli native qui embarque le site) ou **TWA** (le site en plein écran) ? | Capacitor (§ 2) |
-| D6 | Nom de l'appli sur le Play Store, nom de package (ex. `fr.<nom>.sortmystuffs`) | À choisir |
+| D6 | Nom de l'appli sur le Play Store, nom de package (ex. `fr.<nom>.rankitall`) | Nom choisi : **Rank It All** ; identifiant de package à choisir |
 | D7 | **Licence open source** du dépôt (fichier `LICENSE`) | MIT (simple, permissive) ; GPL-3.0 si les dérivés doivent rester open source |
 | — | Contact sur la page de confidentialité : une adresse e-mail plutôt que les tickets GitHub (publics) ? | À choisir |
 
@@ -23,7 +23,7 @@
 | Hors ligne | Oui, tout est dans l'appli | Via le service worker de la PWA |
 | Fonctions natives | Vibration, partage natif, notifications, bouton Retour, barre d'état… (plugins) | Limitées à celles du web |
 | Mises à jour | Nouvelle version à publier sur le Store (ou mise à jour à chaud du contenu web, à encadrer) | Instantanées (c'est le site) |
-| Contraintes | Projet Android dans le dépôt, Android Studio pour compiler | Fichier `/.well-known/assetlinks.json` **à la racine du domaine** : impossible sur `daviddza.github.io/Sort-your-stuffs/` sans dépôt `DavidDZA.github.io` ou nom de domaine perso |
+| Contraintes | Projet Android dans le dépôt, Android Studio pour compiler | Fichier `/.well-known/assetlinks.json` **à la racine du domaine** : impossible sur `daviddza.github.io/rank-it-all/` sans dépôt `DavidDZA.github.io` ou nom de domaine perso |
 
 **Recommandation : Capacitor** — pas de contrainte de domaine, comportement d'une vraie appli, accès aux
 fonctions natives (vibration au swipe, partage du top 10 en natif).
@@ -48,7 +48,7 @@ Play Store peut être limitée (Play Store géré). La PWA reste la solution de 
    - icônes adaptatives et écran de démarrage (`@capacitor/assets`), barre d'état ;
    - désactiver le service worker PWA dans l'appli (inutile, fichiers embarqués) ;
    - liens d'invitation en **App Links** (nécessite aussi un `assetlinks.json` sur un domaine →
-     sinon schéma `sortmystuffs://invite/<code>`).
+     sinon schéma `rankitall://invite/<code>`).
 5. Clé TMDB : pour une appli publique, ne plus l'embarquer — passer par une **Edge Function Supabase** qui relaie
    les appels TMDB (la clé reste côté serveur ; limiter le débit par utilisateur).
 6. Tester sur émulateur puis sur un téléphone perso (débogage USB).
@@ -126,7 +126,7 @@ libres (TMDB, Supabase) — c'est autorisé. Utile aussi si le Play Store est bl
   photos et extraits de 30 s Deezer ; Spotify à éviter (restrictions depuis 2024).
 - **Même appli pour les jeux vidéo** : base IGDB (Twitch) — jaquettes, plateformes, séries, jeux similaires,
   « time to beat » ; clé secrète → catalogue préparé par GitHub Actions et fiches via un relais Supabase.
-- Dans les deux cas, décider d'abord : appli séparée, ou un « Sort your stuffs » avec plusieurs espaces et un
+- Dans les deux cas, décider d'abord : appli séparée, ou un « Rank It All » avec plusieurs espaces et un
   cœur commun (comptes, synchro, duels, amis).
 
 ## 6. Risques et points d'attention

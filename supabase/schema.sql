@@ -1,4 +1,4 @@
--- Sort my stuffs — schéma Supabase : comptes et synchro (phase 1), amis (phase 2).
+-- Rank It All — schéma Supabase : comptes et synchro (phase 1), amis (phase 2).
 -- À coller en entier dans Supabase : SQL Editor → New query → Run. Peut être relancé sans risque.
 
 -- ---------------------------------------------------------------------------

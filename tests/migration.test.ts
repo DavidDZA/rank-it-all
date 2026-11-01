@@ -17,8 +17,8 @@ const details = (extra: Partial<Details> = {}): Details => ({
   ...extra,
 });
 
-describe('base locale : fiches détaillées rangées à part', () => {
-  it('migre les fiches enregistrées dans les titres (base d’avant le 30/10)', async () => {
+describe('base locale : ancienne base reprise, fiches détaillées rangées à part', () => {
+  it('reprend la base « sort-my-stuffs » et migre les fiches enregistrées dans les titres (base d’avant le 30/10)', async () => {
     // Base telle que l'écrivait l'ancienne version (schéma 2), avec une fiche dans un titre.
     const old = new Dexie('sort-my-stuffs');
     old.version(1).stores({ titles: 'key, type', answers: 'key, type, status, [type+status], updatedAt', meta: 'key' });
@@ -30,7 +30,11 @@ describe('base locale : fiches détaillées rangées à part', () => {
     ]);
     old.close();
 
-    const { db, withDetails, getDetails } = await import('../src/lib/db');
+    // Reprise sous le nouveau nom de l'appli (« Rank It All »), puis suppression de l'ancienne base.
+    const { db, withDetails, getDetails, migrateDatabaseName, OLD_DB_NAME } = await import('../src/lib/db');
+    await migrateDatabaseName();
+    expect(db.name).toBe('rank-it-all');
+    expect(await Dexie.exists(OLD_DB_NAME)).toBe(false);
     const titles = await db.titles.toArray();
     expect(titles.every((t) => !('details' in t))).toBe(true);
     expect(await db.titles.get('movie:1')).toMatchObject({ detailsAt: 1000, collectionId: 42 });
@@ -50,5 +54,33 @@ describe('base locale : fiches détaillées rangées à part', () => {
     await db.titles.update('tv:3', { details: details() });
     expect((await db.titles.toArray()).every((t) => t.details === undefined)).toBe(true);
     expect((await db.titles.get('movie:1'))?.title).toBe('Renommé');
+  });
+});
+
+describe('reprise de l’ancienne base', () => {
+  it('copie toutes les tables une seule fois, sans écraser les données plus récentes', async () => {
+    const { db, migrateDatabaseName, OLD_DB_NAME } = await import('../src/lib/db');
+    await Promise.all(db.tables.map((t) => t.clear())); // nouvel appareil : rien de repris encore
+    const old = new Dexie(OLD_DB_NAME);
+    old.version(3).stores({ titles: 'key, type', answers: 'key, type, status, [type+status], updatedAt', meta: 'key', synced: 'id', details: 'key' });
+    await old.table('answers').put({ key: 'movie:9', type: 'movie', status: 'seen', updatedAt: 1 });
+    await old.table('meta').put({ key: 'ranking:movie', value: ['movie:9'], updatedAt: 1 });
+    await old.table('synced').put({ id: 'a:movie:9', hash: 'h' });
+    old.close();
+
+    await migrateDatabaseName();
+    expect((await db.answers.get('movie:9'))?.status).toBe('seen');
+    expect((await db.meta.get('ranking:movie'))?.value).toEqual(['movie:9']);
+    expect(await db.synced.get('a:movie:9')).toEqual({ id: 'a:movie:9', hash: 'h' });
+
+    // Ancienne base revenue (suppression ratée) : plus jamais recopiée par-dessus.
+    await db.answers.put({ key: 'movie:9', type: 'movie', status: 'wish', updatedAt: 2 });
+    const again = new Dexie(OLD_DB_NAME);
+    again.version(3).stores({ answers: 'key, type, status, [type+status], updatedAt' });
+    await again.table('answers').put({ key: 'movie:9', type: 'movie', status: 'seen', updatedAt: 1 });
+    again.close();
+    await migrateDatabaseName();
+    expect((await db.answers.get('movie:9'))?.status).toBe('wish');
+    expect(await Dexie.exists(OLD_DB_NAME)).toBe(false);
   });
 });

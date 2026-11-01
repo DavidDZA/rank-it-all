@@ -1,4 +1,6 @@
-# Sort my stuffs
+# Rank It All
+
+_Anciennement « Sort my stuffs »._
 
 Web app (PWA) pour construire petit à petit la liste des films et séries qu'on a vus, sa wishlist, et son classement.
 

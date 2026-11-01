@@ -79,7 +79,7 @@ export interface Synced {
   hash: string;
 }
 
-export const db = new Dexie('sort-my-stuffs') as Dexie & {
+type Database = Dexie & {
   titles: EntityTable<Title, 'key'>;
   answers: EntityTable<Answer, 'key'>;
   meta: EntityTable<Meta, 'key'>;
@@ -87,30 +87,69 @@ export const db = new Dexie('sort-my-stuffs') as Dexie & {
   details: EntityTable<DetailsRow, 'key'>;
 };
 
-db.version(1).stores({
-  titles: 'key, type',
-  answers: 'key, type, status, [type+status], updatedAt',
-  meta: 'key',
-});
-
-db.version(2).stores({ synced: 'id' });
-
-// Les fiches détaillées quittent la table des titres : le swipe lit le catalogue sans elles.
-db.version(3)
-  .stores({ details: 'key' })
-  .upgrade(async (tx) => {
-    const rows: DetailsRow[] = [];
-    await tx
-      .table('titles')
-      .toCollection()
-      .modify((t: Title) => {
-        if (!t.details) return;
-        rows.push({ ...t.details, key: t.key });
-        Object.assign(t, detailsMarks(t.type, t.details));
-        delete t.details;
-      });
-    await tx.table('details').bulkPut(rows);
+/** Schéma et ses migrations, pour la base de l'appli comme pour l'ancienne (reprise sous le nouveau nom). */
+function withSchema(d: Dexie): Database {
+  d.version(1).stores({
+    titles: 'key, type',
+    answers: 'key, type, status, [type+status], updatedAt',
+    meta: 'key',
   });
+
+  d.version(2).stores({ synced: 'id' });
+
+  // Les fiches détaillées quittent la table des titres : le swipe lit le catalogue sans elles.
+  d.version(3)
+    .stores({ details: 'key' })
+    .upgrade(async (tx) => {
+      const rows: DetailsRow[] = [];
+      await tx
+        .table('titles')
+        .toCollection()
+        .modify((t: Title) => {
+          if (!t.details) return;
+          rows.push({ ...t.details, key: t.key });
+          Object.assign(t, detailsMarks(t.type, t.details));
+          delete t.details;
+        });
+      await tx.table('details').bulkPut(rows);
+    });
+  return d as Database;
+}
+
+export const db = withSchema(new Dexie('rank-it-all'));
+
+/** Nom de la base quand l'appli s'appelait « Sort my stuffs » (jusqu'au 01/11/2026). */
+export const OLD_DB_NAME = 'sort-my-stuffs';
+
+/** Repère (meta propre à l'appareil) : l'ancienne base a été reprise, elle ne doit plus jamais être recopiée. */
+const RENAMED_META = 'renamed-from:' + OLD_DB_NAME;
+
+/**
+ * Reprend l'ancienne base sous le nouveau nom, une seule fois : elle est d'abord mise au schéma actuel, puis toutes
+ * ses tables (synchro comprise : rien n'est renvoyé au compte) sont recopiées en une seule transaction, avec un
+ * repère. Elle n'est supprimée qu'ensuite ; si sa suppression échoue, le repère empêche de la recopier par-dessus
+ * des données plus récentes. Interrompue avant la fin de la copie, la reprise recommence au lancement suivant.
+ * Un verrou évite que deux onglets la fassent en même temps.
+ */
+export async function migrateDatabaseName(): Promise<void> {
+  if (!(await Dexie.exists(OLD_DB_NAME))) return;
+  const run = async () => {
+    if (!(await Dexie.exists(OLD_DB_NAME))) return; // faite entre-temps par un autre onglet
+    if (!(await db.meta.get(RENAMED_META))) {
+      const old = withSchema(new Dexie(OLD_DB_NAME));
+      const tables = await old.transaction('r', old.tables, () => Promise.all(old.tables.map(async (t) => ({ name: t.name, rows: await t.toArray() }))));
+      old.close();
+      await db.transaction('rw', db.tables, async () => {
+        for (const { name, rows } of tables) await db.table(name).bulkPut(rows);
+        await db.meta.put({ key: RENAMED_META, value: Date.now() });
+      });
+    }
+    // Bloquée par un onglet resté ouvert sur l'ancienne version : on n'attend pas, elle sera refaite plus tard.
+    await Promise.race([Dexie.delete(OLD_DB_NAME), new Promise((resolve) => setTimeout(resolve, 3000))]);
+  };
+  const locks = typeof navigator !== 'undefined' ? navigator.locks : undefined;
+  await (locks ? locks.request('rank-it-all:db-rename', run) : run());
+}
 
 /** Repères gardés sur le titre quand sa fiche est connue (sans avoir à la relire). */
 export function detailsMarks(type: MediaType, d: Details): Pick<Title, 'detailsAt' | 'collectionId'> {

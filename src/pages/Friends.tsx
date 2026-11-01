@@ -80,7 +80,7 @@ function FriendsHome({ invite }: { invite?: string }) {
     const url = inviteLink(profile.friendCode);
     if (navigator.share) {
       try {
-        await navigator.share({ title: 'Sort my stuffs', text: 'Ajoute-moi sur Sort my stuffs pour comparer nos films et séries !', url });
+        await navigator.share({ title: 'Rank It All', text: 'Ajoute-moi sur Rank It All pour comparer nos films et séries !', url });
       } catch {
         // Partage annulé.
       }

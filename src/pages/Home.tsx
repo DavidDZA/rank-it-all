@@ -92,7 +92,7 @@ export default function Home() {
       <header className="home-header">
         <img className="logo" src={`${import.meta.env.BASE_URL}icons/favicon.svg`} alt="" />
         <div className="home-title">
-          <h1>Sort my stuffs</h1>
+          <h1>Rank It All</h1>
           <p className="tagline">{tagline}</p>
         </div>
         {cloud.user && (
