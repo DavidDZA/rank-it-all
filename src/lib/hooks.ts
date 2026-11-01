@@ -59,3 +59,45 @@ export function useIsDesktop(): boolean {
   }, []);
   return desktop;
 }
+
+/*
+ * Bouton Retour (téléphone, appli Android, navigateur) : chaque fenêtre ou panneau ouvert ajoute une entrée à
+ * l'historique, pour que Retour ferme celui du dessus au lieu de quitter l'écran. Fermé autrement (✕, Échap,
+ * toucher à côté), il retire son entrée. L'ancre ne change pas : le routeur (hashchange) n'est pas concerné.
+ */
+const backStack: (() => void)[] = [];
+let ignoredPops = 0;
+
+if (typeof window !== 'undefined') {
+  addEventListener('popstate', () => {
+    if (ignoredPops > 0) ignoredPops--;
+    else backStack[backStack.length - 1]?.();
+  });
+}
+
+/** Ferme (`onClose`) au bouton Retour tant que le composant est affiché. */
+export function useCloseOnBack(onClose: () => void): void {
+  const close = useRef(onClose);
+  close.current = onClose;
+  useEffect(() => {
+    let byBack = false;
+    const onBack = () => {
+      byBack = true;
+      backStack.splice(backStack.indexOf(onBack), 1);
+      close.current();
+    };
+    backStack.push(onBack);
+    const depth = backStack.length;
+    history.pushState({ ...history.state, back: depth }, '');
+    return () => {
+      if (byBack) return;
+      const i = backStack.indexOf(onBack);
+      if (i !== -1) backStack.splice(i, 1);
+      // Toujours sur l'entrée ajoutée (pas de changement de page entre-temps) : on la retire.
+      if (history.state?.back === depth) {
+        ignoredPops++;
+        history.back();
+      }
+    };
+  }, []);
+}

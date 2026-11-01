@@ -23,9 +23,7 @@ Reste à faire :
 1. Dépôt `DavidDZA.github.io` (contenu : `tools/racine-du-site/`) et secrets `ANDROID_KEYSTORE_*`.
 2. Compte Play Console, création de l'appli, premier `.aab` en test interne ; ajouter ensuite l'empreinte de la
    clé de signature Google Play dans `assetlinks.json`.
-3. Bouton Retour Android : il remonte l'historique du site ; les fenêtres (fiche, filtres) ne sont pas dans
-   l'historique, le Retour quitte donc l'écran au lieu de fermer la fenêtre — à améliorer.
-4. Test fermé (12 testeurs, 14 jours), puis production (§ 3).
+3. Test fermé (12 testeurs, 14 jours), puis production (§ 3).
 
 ⚠️ Téléphone professionnel de l'utilisateur : selon la politique de son entreprise, l'installation depuis le
 Play Store peut être limitée (Play Store géré). La PWA reste la solution de repli.

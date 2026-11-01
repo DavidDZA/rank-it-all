@@ -6,7 +6,7 @@ import { changeStatus } from '../lib/ranking';
 import { boostFrom } from '../lib/recommend';
 import { ensureDetails, posterUrl, profileUrl, providerLogo } from '../lib/tmdb';
 import { groupProviders, hasMyProviders, isMineGroup, loadMyProviders } from '../lib/providers';
-import { useLongPress } from '../lib/hooks';
+import { useCloseOnBack, useLongPress } from '../lib/hooks';
 import { openFiche } from './Fiche';
 
 /** Bouton retour à l'accueil : chevron dessiné (centré exactement, contrairement au caractère « ‹ »). */
@@ -212,8 +212,9 @@ export function SearchBox({ value, onChange, placeholder = 'Rechercher un titre�
   return <input className="input" type="search" placeholder={`🔍 ${placeholder}`} value={value} onChange={(e) => onChange(e.target.value)} />;
 }
 
-/** Fenêtre modale qui monte du bas de l'écran. */
+/** Fenêtre modale qui monte du bas de l'écran ; le bouton Retour la referme. */
 export function Sheet({ onClose, children, label }: { onClose: () => void; children: ReactNode; label: string }) {
+  useCloseOnBack(onClose);
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose();
     addEventListener('keydown', onKey);
@@ -229,6 +230,12 @@ export function Sheet({ onClose, children, label }: { onClose: () => void; child
       </div>
     </div>
   );
+}
+
+/** Panneau affiché par-dessus l'écran (résumé…) : le bouton Retour le referme. Ne rend rien. */
+export function CloseOnBack({ onClose }: { onClose: () => void }) {
+  useCloseOnBack(onClose);
+  return null;
 }
 
 /**

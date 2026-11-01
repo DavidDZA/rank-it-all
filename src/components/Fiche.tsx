@@ -12,26 +12,18 @@ export function openFiche(title: Title): void {
   dispatchEvent(new CustomEvent('open-fiche', { detail: title }));
 }
 
-/** Affiche la fiche demandée ; le bouton Retour du téléphone la referme. */
+/** Affiche la fiche demandée ; le bouton Retour la referme (comme toute fenêtre, voir Sheet). */
 export function FicheHost() {
   const [title, setTitle] = useState<Title | null>(null);
 
   useEffect(() => {
-    const onOpen = (e: Event) => {
-      setTitle((e as CustomEvent<Title>).detail);
-      history.pushState({ fiche: true }, '');
-    };
-    const onPop = () => setTitle(null);
+    const onOpen = (e: Event) => setTitle((e as CustomEvent<Title>).detail);
     addEventListener('open-fiche', onOpen);
-    addEventListener('popstate', onPop);
-    return () => {
-      removeEventListener('open-fiche', onOpen);
-      removeEventListener('popstate', onPop);
-    };
+    return () => removeEventListener('open-fiche', onOpen);
   }, []);
 
   if (!title) return null;
-  return <Fiche key={title.key} title={title} onClose={() => history.back()} />;
+  return <Fiche key={title.key} title={title} onClose={() => setTitle(null)} />;
 }
 
 const STATUS_LABEL: Record<Status, string> = { seen: '✓ Vu', wish: '💖 Wishlist', unseen: '🙈 Pas vu' };

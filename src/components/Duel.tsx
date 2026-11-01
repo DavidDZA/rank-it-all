@@ -18,6 +18,7 @@ import {
 import { burst, centerOf, toast } from '../lib/fun';
 import { recordActivity } from '../lib/activity';
 import { DuelCard } from './DuelCard';
+import { CloseOnBack } from './common';
 
 interface DuelState {
   ranking: string[];
@@ -321,6 +322,7 @@ export function Duel({
         {question}
       </p>
       <div className="duel">
+        {showInfo && <CloseOnBack onClose={() => setShowInfo(false)} />}
         <span className="vs" aria-hidden>
           VS
         </span>

@@ -6,7 +6,7 @@ import { recordActivity } from '../../lib/activity';
 import { boostFactor, boostFrom, loadBoosts, type Boosts } from '../../lib/recommend';
 import { getSwipeMode, readPref, writePref } from '../../lib/settings';
 import { isNoTheme, matchesTheme, NO_THEME, ratingMissing, themeLabel, type Theme } from '../../lib/themes';
-import { BackLink, Poster, RatingBadge, TitleText } from '../../components/common';
+import { BackLink, CloseOnBack, Poster, RatingBadge, TitleText } from '../../components/common';
 import SwipeCard, { type Dir, type Tone } from '../../components/SwipeCard';
 import { openFiche } from '../../components/Fiche';
 import { ARROWS, CORNERS, isCorner, PHASES, TONES, type Corner, type Phase } from './config';
@@ -415,6 +415,7 @@ export default function Swipe({ category }: { category: Category }) {
               <RatingBadge title={current} />
               {showInfo && (
                 <div className="card-overview" onPointerDown={(e) => e.stopPropagation()}>
+                  <CloseOnBack onClose={() => setShowInfo(false)} />
                   <button className="overview-close" onClick={() => setShowInfo(false)} aria-label="Fermer le résumé" title="Fermer le résumé">
                     ✕
                   </button>
