@@ -91,6 +91,13 @@ libres (TMDB, Supabase) — c'est autorisé. Utile aussi si le Play Store est bl
 
 ## 5. Pistes plus lointaines
 
+- **Pourboire** (idée gardée, mise de côté le 02/11/2026) : page **Ko-fi** (dons ponctuels sans compte, sans
+  commission de la plateforme) et bouton discret en bas des Réglages, **masqué dans l'appli Android** (Google exige
+  sa facturation pour les paiements dans une appli, sauf dons à des organismes caritatifs ; des applis ont été
+  retirées pour un lien « Donate »). Plus tard, éventuellement, pourboires via Google Play (15 %). Avant :
+  **demander à TMDB** si des dons restent compatibles avec la clé gratuite (usage non commercial ; dons non
+  traités dans leurs conditions). Pourboires = revenus à déclarer (BNC).
+
 - **Même appli pour la musique** : catalogue Last.fm (top artistes par pays et par style, artistes similaires),
   photos et extraits de 30 s Deezer ; Spotify à éviter (restrictions depuis 2024).
 - **Même appli pour les jeux vidéo** : base IGDB (Twitch) — jaquettes, plateformes, séries, jeux similaires,
