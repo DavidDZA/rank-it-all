@@ -119,8 +119,10 @@ lignes ; un ami lit en lecture seule ce qu'on partage (`share_wishlist` : wishli
 modification (à faire par l'utilisateur dans *SQL Editor*).
 
 Réglages du projet Supabase : URL du site et `http://localhost:5173/**` dans *Authentication → URL
-Configuration* ; confirmation d'e-mail désactivée (l'envoi d'e-mails gratuit ne marche que pour l'équipe du
-projet) ; fournisseur Google configuré (écran de consentement publié). Facebook abandonné (Meta exige une
+Configuration* ; confirmation d'e-mail désactivée ; e-mails (réinitialisation du mot de passe) envoyés par un **compte Gmail
+dédié** en SMTP (*Authentication → Emails → SMTP Settings*, mot de passe d'application), modèle en anglais ; sans
+nom de domaine, Hotmail / Outlook les classent en indésirables (solution : domaine + Brevo, à décider avec Android) ;
+mot de passe : 8 caractères, minuscule, majuscule, chiffre et symbole (repris dans `PASSWORD_RULES`, `cloud.ts`) ; fournisseur Google configuré (écran de consentement publié). Facebook abandonné (Meta exige une
 entreprise vérifiée).
 
 ### 4.3 Sauvegarde et restauration
