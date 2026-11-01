@@ -116,6 +116,33 @@ describe('synchro entre deux appareils', () => {
     expect(await readRanking(seen)).toEqual(['movie:1']);
   });
 
+  it('copies de titres allégées : aucune pour « pas vu », sans résumé ni popularité sinon', async () => {
+    const remote = fakeRemote();
+    const t = makeTitle(3, { overview: 'Un long résumé…', genreIds: [16], originalLanguage: 'ja', rating: 7.5, detailsAt: 1, collectionId: 9 });
+    await setStatus(t, 'seen');
+    await setStatus(makeTitle(4, { overview: 'Résumé' }), 'unseen');
+    await syncWith(remote, USER);
+    expect(remote.data.get('a:movie:4')?.title).toBeUndefined();
+    expect(remote.data.get('a:movie:3')?.title).toEqual({
+      key: 'movie:3', type: 'movie', tmdbId: 3, title: 'Titre 3', originalTitle: 'Title 3', year: 2000, posterPath: null,
+      genreIds: [16], originalLanguage: 'ja', rating: 7.5, manual: undefined,
+    });
+
+    // Nouvel appareil : titre reconstitué depuis la copie allégée ; « pas vu » gardé sans titre.
+    await restore([[], [], [], []]);
+    await syncWith(remote, USER);
+    expect(await db.titles.get('movie:3')).toMatchObject({ key: 'movie:3', title: 'Titre 3', overview: '', voteCount: 0, genreIds: [16] });
+    expect((await db.answers.get('movie:4'))?.status).toBe('unseen');
+    expect(await db.titles.get('movie:4')).toBeUndefined();
+  });
+
+  it('lit toujours les copies complètes envoyées avant le 01/11', async () => {
+    const remote = fakeRemote();
+    await remote.push('answers', [{ id: 'a:movie:5', data: { status: 'wish', tier: null }, at: 1, title: makeTitle(5, { overview: 'Ancien résumé', voteCount: 4000 }) }]);
+    await syncWith(remote, USER);
+    expect(await db.titles.get('movie:5')).toMatchObject({ overview: 'Ancien résumé', voteCount: 4000 });
+  });
+
   it('propage les modifications et les suppressions', async () => {
     const remote = fakeRemote();
     await setStatus(makeTitle(1), 'wish');

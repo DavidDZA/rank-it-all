@@ -1,7 +1,7 @@
 import { db, type Status, type Tier, type Title } from './db';
 import { readRanking, splitAnime } from './ranking';
 import { isAnimeTitle } from './category';
-import { frError, siteUrl } from './cloud';
+import { frError, siteUrl, titleFromCopy, type TitleCopy } from './cloud';
 import { supabase } from './supabase';
 import type { Side } from './together';
 import type { Database } from './database.types';
@@ -123,7 +123,7 @@ export async function loadFriendData(friendId: string, fresh = false): Promise<F
     if (error) throw new Error(frError(error));
     for (const r of data) {
       answers.set(r.key, { status: r.status as Status, tier: (r.tier as Tier | null) ?? null });
-      if (r.title) titles.set(r.key, r.title as unknown as Title); // copie envoyée par la synchro (cloud.ts)
+      if (r.title) titles.set(r.key, titleFromCopy(r.title as unknown as TitleCopy)); // copie envoyée par la synchro (cloud.ts)
     }
     if (data.length < PAGE) break;
   }

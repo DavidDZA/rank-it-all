@@ -51,13 +51,23 @@ async function localRows(table: Table): Promise<Map<string, Row>> {
   return rows;
 }
 
-/** Copie du titre jointe à une réponse envoyée (sans la fiche détaillée, rechargée à la demande). */
-function titleCopy(t: Title | undefined): Title | undefined {
-  if (!t) return undefined;
-  // Repères propres à cet appareil (sa fiche n'est pas envoyée) : retirés de la copie.
-  const { details: _details, detailsAt: _at, collectionId: _saga, ...copy } = t;
-  return copy;
+/**
+ * Copie du titre jointe à une réponse envoyée, pour l'afficher chez un ami ou sur un nouvel appareil qui ne l'ont pas
+ * au catalogue. Aucune pour « pas vu / pas envie » (jamais montrés aux amis ; sur un nouvel appareil, la réponse
+ * suffit à ne pas le reproposer). Sinon, le strict nécessaire : ni résumé, ni popularité, ni fiche (rechargée à la
+ * demande). Clé, type et identifiant TMDB restent : les versions d'avant le 01/11 enregistrent la copie telle quelle.
+ */
+export function titleCopy(t: Title | undefined, status: Status): TitleCopy | undefined {
+  if (!t || status === 'unseen') return undefined;
+  const { key, type, tmdbId, title, originalTitle, year, posterPath, genreIds, originalLanguage, rating, manual } = t;
+  return { key, type, tmdbId, title, originalTitle, year, posterPath, genreIds, originalLanguage, rating, manual };
 }
+
+export type TitleCopy = Pick<Title, 'key' | 'type' | 'tmdbId' | 'title' | 'originalTitle' | 'year' | 'posterPath'> &
+  Partial<Pick<Title, 'genreIds' | 'originalLanguage' | 'rating' | 'manual' | 'overview' | 'voteCount' | 'popularity'>>;
+
+/** Titre complet à partir d'une copie reçue (allégée, ou complète si envoyée avant le 01/11). */
+export const titleFromCopy = (copy: TitleCopy): Title => ({ overview: '', voteCount: 0, popularity: 0, ...copy });
 
 /**
  * Écrit les lignes reçues, sauf celles modifiées sur l'appareil pendant la synchro (comparées à `seen`,
@@ -83,7 +93,7 @@ async function applyRows(table: Table, rows: Row[], seen: Map<string, Row>): Pro
         }
         const { status, tier } = r.data as AnswerData;
         puts.push({ key: keys[i], type: keys[i].split(':')[0] as MediaType, status, ...(tier ? { tier } : {}), updatedAt: r.at });
-        if (!titles[i] && r.title) newTitles.push(r.title as Title);
+        if (!titles[i] && r.title) newTitles.push(titleFromCopy(r.title as TitleCopy));
       }
       await db.titles.bulkPut(newTitles);
       await db.answers.bulkPut(puts);
@@ -125,7 +135,7 @@ export async function syncWith(remote: Remote, userId: string): Promise<void> {
       let push = p.push;
       if (table === 'answers') {
         const titles = await db.titles.bulkGet(push.map((r) => r.id.slice(2)));
-        push = push.map((r, i) => (r.data === undefined ? r : { ...r, title: titleCopy(titles[i]) }));
+        push = push.map((r, i) => (r.data === undefined ? r : { ...r, title: titleCopy(titles[i], (r.data as AnswerData).status) }));
       }
       await remote.push(table, push);
       await db.synced.bulkPut(push.filter((r) => r.data !== undefined).map((r) => ({ id: r.id, hash: hashOf(r.data)! })));

@@ -104,6 +104,10 @@ modification, au retour sur l'onglet ou du réseau, toutes les 2 min).
   (les règles laissent aussi lire ce que partagent les amis).
 - Meta synchronisées : `isUserMeta` (`ranking:`, `saga:`, `boosts:`, `activity`, `badges`, `min-votes`,
   `show-anime`, `custom-imports`) — les mêmes que la sauvegarde JSON.
+- Chaque réponse envoyée porte une **copie allégée du titre** (`titleCopy` : clé, type, id TMDB, titres, année,
+  affiche, genres, langue, note), pour l'afficher chez un ami ou sur un nouvel appareil ; aucune pour « pas vu ».
+  C'est l'essentiel de la place prise sur Supabase (≈ 0,3 Ko par titre vu ou en wishlist, ≈ 0,1 Ko sinon).
+  Nettoyage des anciennes copies complètes : `supabase/2026-11-01-copies-allegees.sql` (lancé une fois).
 - Connexion Google en PKCE (`?code=…`, l'ancre reste au routeur).
 
 ### 4.2 Serveur (`supabase/schema.sql`)
