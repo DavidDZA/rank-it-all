@@ -123,6 +123,26 @@ Configuration* ; confirmation d'e-mail désactivée (l'envoi d'e-mails gratuit n
 projet) ; fournisseur Google configuré (écran de consentement publié). Facebook abandonné (Meta exige une
 entreprise vérifiée).
 
+### 4.3 Sauvegarde et restauration
+
+L'offre gratuite de Supabase n'a pas de sauvegarde. Le workflow `.github/workflows/backup.yml` en fait une chaque nuit
+(rôles, schéma, données, comptes `auth.users` compris), chiffrée en AES-256 et gardée 90 jours dans GitHub Actions
+(fichiers du workflow, téléchargeables par tout compte GitHub : d'où le chiffrement). Il échoue — et GitHub prévient
+par e-mail — si une table manque. Secrets : `SUPABASE_DB_URL` (chaîne **Session pooler**, *Connect* dans Supabase :
+les machines GitHub n'ont pas d'IPv6) et `BACKUP_PASSPHRASE` (à garder aussi dans un gestionnaire de mots de passe).
+GitHub suspend les workflows planifiés d'un dépôt public sans activité depuis 60 jours (un e-mail prévient).
+
+Restaurer (dans un projet Supabase neuf, ou le même vidé) :
+
+1. *Actions → Sauvegarde Supabase* → une exécution → télécharger le fichier, le dézipper.
+2. Déchiffrer (Git Bash) : `gpg -d rank-it-all-AAAA-MM-JJ.tar.gz.gpg | tar xzf -` → dossier `backup/`.
+3. Recharger (client PostgreSQL `psql`, ou `docker run --rm -it -v "$PWD/backup:/b" postgres:17 psql …`) :
+   ```sh
+   psql --single-transaction --variable ON_ERROR_STOP=1      --file backup/roles.sql --file backup/schema.sql      --command 'SET session_replication_role = replica'      --file backup/data.sql --dbname "<chaîne Session pooler du projet cible>"
+   ```
+4. Projet neuf : refaire les réglages du § 4.2 (URL, Google) et changer les secrets `SUPABASE_URL` /
+   `SUPABASE_PUBLISHABLE_KEY` (déploiement) et `SUPABASE_DB_URL` (sauvegarde).
+
 ## 5. Tests et vérifications
 
 - `npx tsc -b`, `npm test` (Vitest), `npm run build` avant chaque push.

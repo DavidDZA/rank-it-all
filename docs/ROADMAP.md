@@ -111,7 +111,7 @@ libres (TMDB, Supabase) — c'est autorisé. Utile aussi si le Play Store est bl
 - **Code ami** : nouvel essai automatique si le code tiré existe déjà (risque infime aujourd'hui : l'inscription
   échouerait) — quelques lignes dans `schema.sql`.
 - **Pseudo** : le demander à la première connexion Google (aujourd'hui : le nom du compte Google, modifiable).
-- **Rappel d'export** mensuel même avec un compte (l'offre gratuite Supabase n'a pas de sauvegarde automatique).
+- **Rappel d'export** mensuel même avec un compte (en plus de la sauvegarde nocturne de la base, voir ARCHITECTURE § 4.3).
 - **Statistiques d'usage** : table « sessions » dans Supabase (temps passé par compte), ou mesure d'audience sans
   cookie (GoatCounter, Umami) ; dans les deux cas, mettre à jour la page de confidentialité. En attendant, des
   requêtes SQL sur `auth.users`, `answers` et l'activité synchronisée donnent l'essentiel.
@@ -132,7 +132,7 @@ libres (TMDB, Supabase) — c'est autorisé. Utile aussi si le Play Store est bl
 ## 6. Risques et points d'attention
 
 - **Pause du projet Supabase gratuit** après 7 jours sans activité (données gardées, réactivation manuelle) ;
-  pas de sauvegarde automatique téléchargeable dans l'offre gratuite.
+  pas de sauvegarde dans l'offre gratuite : sauvegarde nocturne chiffrée par GitHub Actions (ARCHITECTURE § 4.3).
 - **Mise à jour du catalogue** : les titres absents qui ne sont ni vus ni en wishlist sont supprimés, et ces suppressions se propagent à tous les appareils : garder les seuils
   synchronisés.
 - **Clé TMDB** lisible dans le site (§ 4) ; **téléphone pro** : le Play Store peut y être restreint, garder la PWA.

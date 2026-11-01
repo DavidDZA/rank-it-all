@@ -1,0 +1,65 @@
+name: Sauvegarde Supabase
+
+# Chaque nuit : rôles, schéma et données (comptes compris) de la base Supabase, chiffrés (AES-256) avant d'être
+# déposés comme fichier du workflow, gardé 90 jours. Le dépôt est public : n'importe quel compte GitHub peut
+# télécharger ces fichiers, d'où le chiffrement. Restauration : docs/ARCHITECTURE.md, § 4.3.
+#
+# Secrets : SUPABASE_DB_URL (chaîne « Session pooler » : les machines GitHub n'ont pas d'IPv6) et
+# BACKUP_PASSPHRASE (phrase de chiffrement, à garder aussi ailleurs : sans elle, les sauvegardes sont illisibles).
+
+on:
+  schedule:
+    - cron: '17 2 * * *' # 2 h 17 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: backup
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Copie de la base
+        env:
+          DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+        run: |
+          mkdir backup
+          supabase db dump --db-url "$DB_URL" -f backup/roles.sql --role-only
+          supabase db dump --db-url "$DB_URL" -f backup/schema.sql
+          supabase db dump --db-url "$DB_URL" -f backup/data.sql --use-copy --data-only \
+            -x "storage.buckets_vectors" -x "storage.vector_indexes"
+
+      # Une sauvegarde incomplète doit faire échouer le workflow (GitHub prévient alors par e-mail).
+      - name: Contrôle
+        run: |
+          for table in auth.users public.profiles public.answers public.user_meta public.friendships; do
+            schema=${table%.*}; name=${table#*.}
+            grep -Eq "^COPY \"?$schema\"?\.\"?$name\"? " backup/data.sql || { echo "Table $table absente de la sauvegarde"; exit 1; }
+          done
+          ls -l backup
+
+      - name: Chiffrement
+        env:
+          PASSPHRASE: ${{ secrets.BACKUP_PASSPHRASE }}
+        run: |
+          [ -n "$PASSPHRASE" ] || { echo "Secret BACKUP_PASSPHRASE manquant"; exit 1; }
+          name="rank-it-all-$(date -u +%Y-%m-%d)"
+          tar czf - backup | gpg --batch --yes --pinentry-mode loopback --passphrase-fd 3 \
+            --symmetric --cipher-algo AES256 -o "$name.tar.gz.gpg" 3<<< "$PASSPHRASE"
+          rm -rf backup
+          echo "NAME=$name" >> "$GITHUB_ENV"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.NAME }}
+          path: ${{ env.NAME }}.tar.gz.gpg
+          retention-days: 90
+          if-no-files-found: error
+          compression-level: 0 # déjà compressé et chiffré
