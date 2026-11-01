@@ -2,6 +2,8 @@ import { useEffect, useState, type FormEvent } from 'react';
 import {
   cancelRecovery,
   deleteAccount,
+  passwordOk,
+  PASSWORD_RULES,
   sendPasswordReset,
   signIn,
   signInWithGoogle,
@@ -65,7 +67,7 @@ function SignedOut() {
     else
       run(async () => {
         await sendPasswordReset(email);
-        return '✓ Si un compte existe avec cette adresse, un e-mail pour choisir un nouveau mot de passe vient d’être envoyé.';
+        return '✓ Si un compte existe avec cette adresse, un e-mail pour choisir un nouveau mot de passe vient d’être envoyé (pense à regarder dans les indésirables).';
       });
   };
 
@@ -95,13 +97,13 @@ function SignedOut() {
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            placeholder={mode === 'signup' ? 'Mot de passe (6 caractères min.)' : 'Mot de passe'}
-            minLength={mode === 'signup' ? 6 : undefined}
+            placeholder="Mot de passe"
             required
             autoComplete={mode === 'signup' ? 'new-password' : 'current-password'}
           />
         )}
-        <button className="btn primary" type="submit" disabled={busy}>
+        {mode === 'signup' && <PasswordRules password={password} />}
+        <button className="btn primary" type="submit" disabled={busy || (mode === 'signup' && !passwordOk(password))}>
           {mode === 'signin' ? 'Se connecter' : mode === 'signup' ? 'Créer mon compte' : 'Recevoir le lien'}
         </button>
       </form>
@@ -251,9 +253,10 @@ function NewPassword() {
   return (
     <form className="auth-form" onSubmit={submit}>
       <p className="small">Choisis ton nouveau mot de passe.</p>
-      <input className="input" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Nouveau mot de passe (6 caractères min.)" minLength={6} required autoComplete="new-password" />
+      <input className="input" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Nouveau mot de passe" required autoComplete="new-password" />
+      <PasswordRules password={password} />
       <div className="row">
-        <button className="btn primary" type="submit">
+        <button className="btn primary" type="submit" disabled={!passwordOk(password)}>
           Enregistrer
         </button>
         <button className="btn" type="button" onClick={cancelRecovery}>
@@ -262,6 +265,22 @@ function NewPassword() {
       </div>
       {msg && <p className="small">{msg}</p>}
     </form>
+  );
+}
+
+/** Règles du mot de passe, cochées au fil de la saisie (celles de Supabase, voir PASSWORD_RULES). */
+function PasswordRules({ password }: { password: string }) {
+  return (
+    <p className="password-rules tiny" aria-live="polite">
+      {PASSWORD_RULES.map((r) => {
+        const ok = r.test(password);
+        return (
+          <span key={r.label} className={ok ? 'ok' : 'muted'}>
+            {ok ? '✓' : '○'} {r.label}
+          </span>
+        );
+      })}
+    </p>
   );
 }
 

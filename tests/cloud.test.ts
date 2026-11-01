@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import type { Table } from 'dexie';
 import { db, setMeta, setStatus, clearStatus } from '../src/lib/db';
 import { hashOf, mergeMeta, plan, stableStringify, type Row } from '../src/lib/cloudMerge';
-import { syncWith, type Remote } from '../src/lib/cloud';
+import { frError, passwordOk, syncWith, type Remote } from '../src/lib/cloud';
 import { readRanking, saveRanking } from '../src/lib/ranking';
 import { DEFAULT_MIN_VOTES, getMinVotes, migrateMinVotes } from '../src/lib/settings';
 import { makeTitle } from './helpers';
@@ -222,5 +222,24 @@ describe('seuils de votes', () => {
     } finally {
       delete (globalThis as { localStorage?: Storage }).localStorage;
     }
+  });
+});
+
+describe('mot de passe (règles de Supabase)', () => {
+  it('exige 8 caractères, minuscule, majuscule, chiffre et symbole de Supabase', () => {
+    expect(passwordOk('Test-123456!')).toBe(true);
+    expect(passwordOk('Ab1\\defg')).toBe(true); // antislash : symbole accepté
+    expect(passwordOk('Ab1]defg')).toBe(true);
+    expect(passwordOk('Ab1!def')).toBe(false); // 7 caractères
+    expect(passwordOk('ab1!defgh')).toBe(false); // pas de majuscule
+    expect(passwordOk('AB1!DEFGH')).toBe(false); // pas de minuscule
+    expect(passwordOk('Abc!defgh')).toBe(false); // pas de chiffre
+    expect(passwordOk('Ab1édefgh')).toBe(false); // une lettre accentuée n'est pas un symbole
+  });
+
+  it('traduit les refus de Supabase', () => {
+    expect(frError({ message: 'Password should be at least 8 characters.' })).toMatch(/8 caractères/);
+    expect(frError({ message: 'Password should contain at least one character of each: abcdefghijklmnopqrstuvwxyz, ABCDEFGHIJKLMNOPQRSTUVWXYZ, 0123456789, !@#$%^&*()_+-=[]{};\':"|<>?,./`~.' })).toMatch(/minuscule, une majuscule/);
+    expect(frError({ message: 'Password is known to be weak and easy to guess, please choose a different one.' })).toMatch(/trop courant/);
   });
 });

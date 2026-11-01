@@ -60,7 +60,7 @@ test.describe('comptes et amis @live', () => {
       await page.getByText('Créer un compte').click();
       await page.getByPlaceholder('Pseudo').fill('Alice Test');
       await page.getByPlaceholder('E-mail').fill(emailA);
-      await page.getByPlaceholder('Mot de passe (6 caractères min.)').fill(PASSWORD);
+      await page.getByPlaceholder('Mot de passe', { exact: true }).fill(PASSWORD);
       await page.getByRole('button', { name: 'Créer mon compte' }).click();
       await expect(page.getByText('✓ À jour')).toBeVisible({ timeout: 20_000 });
 

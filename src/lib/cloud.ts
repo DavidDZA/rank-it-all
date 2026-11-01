@@ -234,12 +234,29 @@ export function useCloud(): CloudState {
 }
 
 /** Messages d'erreur de Supabase, en français. */
+/**
+ * Règles du mot de passe : les mêmes que celles réglées dans Supabase (Authentication → Sign In / Providers → Email :
+ * 8 caractères, minuscule, majuscule, chiffre et symbole, mots de passe trop courants refusés). Les symboles acceptés
+ * sont ceux de Supabase : une lettre accentuée ne compte pas.
+ */
+export const PASSWORD_RULES: { label: string; test: (p: string) => boolean }[] = [
+  { label: '8 caractères', test: (p) => p.length >= 8 },
+  { label: 'une minuscule', test: (p) => /[a-z]/.test(p) },
+  { label: 'une majuscule', test: (p) => /[A-Z]/.test(p) },
+  { label: 'un chiffre', test: (p) => /[0-9]/.test(p) },
+  { label: 'un symbole (!?@#…)', test: (p) => /[!@#$%^&*()_+\-=[\]{};':"|<>?,./`~\\]/.test(p) },
+];
+
+export const passwordOk = (p: string) => PASSWORD_RULES.every((r) => r.test(p));
+
 export function frError(e: unknown): string {
   const msg = (e as { message?: string })?.message ?? String(e);
   const known: [RegExp, string][] = [
     [/invalid login credentials/i, 'E-mail ou mot de passe incorrect.'],
     [/already registered|already exists/i, 'Un compte existe déjà avec cet e-mail.'],
-    [/password should be at least (\d+)/i, 'Le mot de passe doit faire au moins 6 caractères.'],
+    [/password should be at least (\d+)/i, 'Le mot de passe doit faire au moins 8 caractères.'],
+    [/password should contain at least one character of each/i, 'Le mot de passe doit contenir une minuscule, une majuscule, un chiffre et un symbole.'],
+    [/known to be weak|easy to guess|pwned|leaked/i, 'Ce mot de passe est trop courant (on le trouve dans des fuites de données) : choisis-en un autre.'],
     [/email not confirmed/i, 'Confirme d’abord ton adresse e-mail (lien reçu par e-mail).'],
     [/unable to validate email|invalid email|email address .* is invalid/i, 'Adresse e-mail invalide.'],
     [/rate limit|too many requests/i, 'Trop de tentatives : réessaie dans quelques minutes.'],
