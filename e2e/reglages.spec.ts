@@ -5,12 +5,12 @@ test.describe('réglages', () => {
     await page.goto('/#/settings');
     await expect(page.locator('main > .card > h3')).toHaveText([
       '☁️ Compte',
-      '💾 Sauvegarde',
       '🕹️ Mode de swipe',
       '📺 Mes abonnements',
       '📦 Catalogue',
       '🧩 Import sur mesure (films)',
       '🔑 Clé TMDB',
+      '💾 Sauvegarde',
       '⚠️ Zone dangereuse',
     ]);
   });

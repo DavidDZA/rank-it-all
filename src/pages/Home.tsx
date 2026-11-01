@@ -78,8 +78,8 @@ export default function Home() {
   const noToken = !getToken();
   const emptyCatalogue = stats && stats.movie.total + stats.tv.total + stats.anime.total === 0;
   const answered = stats ? stats.movie.answered + stats.tv.answered + stats.anime.answered : 0;
-  // Avec un compte, les données sont synchronisées : plus de rappel de sauvegarde.
-  const backupDue = !cloud.user && stats && answered >= 20 && (!stats.lastExport || daysAgo(stats.lastExport) >= 14);
+  // Le compte sauvegarde tout (bandeau « Connecte-toi ») : rappel d'export seulement si aucun compte n'est possible.
+  const backupDue = !cloudEnabled && stats && answered >= 20 && (!stats.lastExport || daysAgo(stats.lastExport) >= 14);
   const catalogueOld = stats?.lastSync && daysAgo(stats.lastSync) >= 30;
 
   const backupNow = async () => {
@@ -113,7 +113,7 @@ export default function Home() {
 
       {cloudEnabled && cloud.ready && !cloud.user && (
         <a className="banner-soft row-banner" href="#/settings" title="Se connecter ou créer un compte (Google ou e-mail)">
-          <span>{desktop ? '☁️ Connecte-toi pour retrouver tes titres sur tous tes appareils et comparer avec tes amis' : '☁️ Connecte-toi : synchro et amis'}</span>
+          <span>{desktop ? '☁️ Connecte-toi pour ne jamais perdre tes titres, les retrouver sur tous tes appareils et comparer avec tes amis' : '☁️ Connecte-toi : sauvegarde, synchro et amis'}</span>
           <span className="btn small primary">Se connecter</span>
         </a>
       )}

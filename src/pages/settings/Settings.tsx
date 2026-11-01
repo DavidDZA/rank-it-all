@@ -16,12 +16,12 @@ export default function Settings({ section }: { section?: string }) {
     <main className="page">
       <TopBar title="⚙️ Réglages" />
       <Account />
-      <BackupSetting />
       <SwipeModeSetting />
       <MyProviders />
       <CatalogueSetting />
       <CustomImportSetting />
       <TokenSetting />
+      <BackupSetting />
       <DangerZone />
       <p className="muted small center">
         Données et affiches fournies par TMDB.

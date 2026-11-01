@@ -2,7 +2,10 @@ import { useRef, useState } from 'react';
 import { exportData, importData } from '../../lib/backup';
 import { useCloud } from '../../lib/cloud';
 
-/** Réglages → Sauvegarde : export / import d'un fichier JSON. */
+/**
+ * Réglages → Sauvegarde : export / import d'un fichier JSON. Rarement utile : avec un compte, tout est synchronisé
+ * (et la base sauvegardée chaque nuit) ; sans compte, mieux vaut en créer un. Reste pour garder une copie à soi.
+ */
 export function BackupSetting() {
   const [msg, setMsg] = useState<string | null>(null);
   const fileInput = useRef<HTMLInputElement>(null);
@@ -24,8 +27,8 @@ export function BackupSetting() {
       <h3>💾 Sauvegarde</h3>
       <p className="muted small">
         {signedIn
-          ? 'Tes données sont synchronisées avec ton compte. Tu peux quand même en garder une copie dans un fichier.'
-          : 'Sans compte, tes données ne sont stockées que dans ce navigateur. Exporte-les régulièrement.'}
+          ? 'Rien à faire : tes données sont enregistrées sur ton compte. Ce fichier ne sert qu’à en garder une copie à toi.'
+          : 'Sans compte, tes données ne sont que sur cet appareil : connecte-toi (en haut de la page) pour ne plus jamais les perdre, ou garde-en une copie dans un fichier.'}
       </p>
       <div className="row">
         <button className="btn" onClick={() => exportData()} title="Télécharger un fichier avec tes réponses et classements">

@@ -29,7 +29,8 @@ Exclus : documentaires, courts métrages (< 40 min), émissions (télé-réalit�
 - Catalogue : [TMDB](https://www.themoviedb.org/) (`/discover`), filtré par un nombre minimum de votes (réglable). Mise à jour manuelle depuis les réglages.
   **Import sur mesure** (films) : genre, langue, pays de production et période, avec son propre seuil de votes
   (150 par défaut) ; gardé et relancé à chaque mise à jour du catalogue.
-- Tout est stocké dans le navigateur (IndexedDB). Sans compte, penser à **exporter** régulièrement (Réglages → Sauvegarde).
+- Tout est stocké dans le navigateur (IndexedDB). Avec un compte, tout est synchronisé et la base est sauvegardée
+  chaque nuit ; l'export / import JSON (Réglages → Sauvegarde) ne sert plus qu'à garder une copie à soi.
 - **Compte optionnel** (Réglages → Compte : e-mail ou Google) : réponses et classements synchronisés
   entre appareils via [Supabase](https://supabase.com/). Schéma et règles d'accès : [supabase/schema.sql](supabase/schema.sql).
   L'adresse du projet et sa clé publique sont injectées au build (secrets `SUPABASE_URL` et

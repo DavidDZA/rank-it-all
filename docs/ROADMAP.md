@@ -81,7 +81,6 @@ libres (TMDB, Supabase) — c'est autorisé. Utile aussi si le Play Store est bl
 - **Code ami** : nouvel essai automatique si le code tiré existe déjà (risque infime aujourd'hui : l'inscription
   échouerait) — quelques lignes dans `schema.sql`.
 - **Pseudo** : le demander à la première connexion Google (aujourd'hui : le nom du compte Google, modifiable).
-- **Rappel d'export** mensuel même avec un compte (en plus de la sauvegarde nocturne de la base, voir ARCHITECTURE § 4.3).
 - **Statistiques d'usage** : table « sessions » dans Supabase (temps passé par compte), ou mesure d'audience sans
   cookie (GoatCounter, Umami) ; dans les deux cas, mettre à jour la page de confidentialité. En attendant, des
   requêtes SQL sur `auth.users`, `answers` et l'activité synchronisée donnent l'essentiel.
