@@ -29,7 +29,25 @@ export interface Seed {
   titles?: SeedTitle[];
   answers?: { key: string; status: 'seen' | 'unseen' | 'wish'; tier?: 'good' | 'meh' }[];
   meta?: Record<string, unknown>;
+  details?: ({ key: string } & Record<string, unknown>)[];
 }
+
+/** Fiche détaillée à jour (rien à télécharger), disponible en abonnement sur `providers`. */
+export const details = (key: string, providers: string[] = []) => ({
+  key,
+  fetchedAt: Date.now(),
+  directors: [],
+  cast: [],
+  topCast: [],
+  genres: [],
+  genreIds: [18],
+  originalLanguage: 'en',
+  rating: 7,
+  runtime: 120,
+  collection: null,
+  trailer: null,
+  providers: { flatrate: providers.map((name, i) => ({ id: 100 + i, name, logo: null })), rent: [], buy: [], link: null },
+});
 
 /** Ouvre l'appli (qui crée sa base), y écrit les données de test, puis recharge la page `hash`. */
 export async function seed(page: Page, data: Seed, hash = '#/'): Promise<void> {
@@ -40,10 +58,11 @@ export async function seed(page: Page, data: Seed, hash = '#/'): Promise<void> {
       new Promise<void>((resolve, reject) => {
         const req = indexedDB.open('sort-my-stuffs');
         req.onsuccess = () => {
-          const tx = req.result.transaction(['titles', 'answers', 'meta'], 'readwrite');
+          const tx = req.result.transaction(['titles', 'answers', 'meta', 'details'], 'readwrite');
           for (const t of d.titles ?? []) tx.objectStore('titles').put(t);
           for (const a of d.answers ?? []) tx.objectStore('answers').put({ ...a, type: a.key.split(':')[0], updatedAt: Date.now() });
           for (const [key, value] of Object.entries(d.meta ?? {})) tx.objectStore('meta').put({ key, value });
+          for (const x of d.details ?? []) tx.objectStore('details').put(x);
           tx.oncomplete = () => {
             req.result.close();
             resolve();

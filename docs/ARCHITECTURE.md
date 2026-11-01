@@ -12,7 +12,8 @@ wishlist et ses classements, par sessions courtes. Gratuite, sans publicité, op
   Tirage pondéré par les votes TMDB, filtres (période, genre, langue, note, personne), recommandations des titres
   aimés (« ✨ Comme … »), sagas enchaînées dans l'ordre.
 - **Classement** par duels (insertion dichotomique), vérifications entre voisins, **déplacement à la main**
-  (poignée ⠿ ou numéro), tier list, partage en image. Même chose pour prioriser la wishlist.
+  (poignée ⠿ ou numéro), tier list, partage en image, filtre « dispo sur mes abonnements » (ce qu'on peut revoir).
+  Même chose pour prioriser la wishlist.
 - **Ce soir ?**, **Mes listes**, **ajout manuel**, **stats & badges**.
 - **Compte optionnel** (Google ou e-mail) : synchro entre appareils ; **amis** (code ou lien d'invitation) et page
   **« À deux »** : son top, wishlist commune, tirage à deux, conseils croisés, compatibilité.

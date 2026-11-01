@@ -4,8 +4,9 @@ import { db, withDetails, type Title } from '../lib/db';
 import { CATEGORY_LABEL, capitalize, keysOfCategory, mediaOf, type Category } from '../lib/category';
 import { changeStatus, readRanking, unrank, type Scope } from '../lib/ranking';
 import { matchesTheme, missingFilterInfo, themeFilter, themeLabel } from '../lib/themes';
-import { prefetchDetails } from '../lib/tmdb';
-import { TopBar, TypeFilter } from '../components/common';
+import { prefetchDetails, WEEK } from '../lib/tmdb';
+import { loadMyProviders, mineFilter } from '../lib/providers';
+import { MineChip, ProviderLine, TopBar, TypeFilter } from '../components/common';
 import { Duel } from '../components/Duel';
 import { RankedList } from '../components/RankedList';
 import { TierList } from '../components/TierList';
@@ -20,10 +21,15 @@ export default function Rank({ category }: { category: Category }) {
   const [view, setView] = useState<View>('duel');
   const [sharing, setSharing] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
+  const [onlyMine, setOnlyMine] = useState(false);
   const [theme, setTheme] = useSavedFilter(`rank-filter:${category}`);
   const scope: Scope = { category: category, list: 'seen' };
   const filter = themeFilter(theme);
   const label = themeLabel(media, theme);
+  // « Dispo sur mes abonnements » : ce qu'on peut revoir (classement et tier list, pas les duels).
+  const byMine = view === 'duel' ? null : mineFilter(onlyMine, loadMyProviders());
+  const listFilter = filter || byMine ? (t: Title) => (!filter || filter(t)) && (!byMine || byMine(t)) : null;
+  const listLabel = [filter && label, byMine && '📺 Dispo sur mes abonnements'].filter(Boolean).join(' · ');
 
   // Titres vus de ce type : pour compter ce que gardent les filtres.
   const seen = useLiveQuery(async () => {
@@ -37,6 +43,11 @@ export default function Rank({ category }: { category: Category }) {
     if (pending.length) prefetchDetails(pending, 0);
   }, [pending.length > 0]);
 
+  // Plateformes à jour (moins d'une semaine) quand on filtre sur ses abonnements.
+  useEffect(() => {
+    if (byMine && seen) prefetchDetails(seen, WEEK);
+  }, [!!byMine, seen?.length]);
+
   const toWishlist = async (t: Title) => {
     if (confirm(`Remettre « ${t.title} » dans la wishlist ? Il sera retiré des titres vus et du classement.`)) {
       await changeStatus(t, 'wish');
@@ -45,14 +56,14 @@ export default function Rank({ category }: { category: Category }) {
 
   const share = async () => {
     const all = (await db.titles.bulkGet(await readRanking(scope))).filter((t): t is Title => !!t);
-    const titles = (filter ? all.filter(filter) : all).slice(0, 10);
+    const titles = (listFilter ? all.filter(listFilter) : all).slice(0, 10);
     if (!titles.length) {
       toast('Classe au moins un titre pour partager ton top !');
       return;
     }
     setSharing(true);
     try {
-      await shareTop(category, titles, filter ? label : undefined);
+      await shareTop(category, titles, listFilter ? listLabel : undefined);
     } catch (e) {
       toast(`✕ ${(e as Error).message}`);
     } finally {
@@ -76,8 +87,9 @@ export default function Rank({ category }: { category: Category }) {
         ]}
         onChange={setView}
       />
+      {view !== 'duel' && <MineChip value={onlyMine} onChange={setOnlyMine} title="N’afficher que les titres disponibles sur tes abonnements, pour voir ce que tu peux revoir" />}
       {view === 'tiers' ? (
-        <TierList category={category} filter={filter} filterLabel={label} />
+        <TierList category={category} filter={listFilter} filterLabel={listLabel} />
       ) : view === 'duel' ? (
         <Duel
           key={JSON.stringify(theme)}
@@ -93,7 +105,8 @@ export default function Rank({ category }: { category: Category }) {
           </button>
           <RankedList
             scope={scope}
-            filter={filter}
+            filter={listFilter}
+            below={byMine ? (t) => <ProviderLine title={t} maxAge={WEEK} /> : undefined}
             empty="Aucun titre vu pour l’instant."
             actions={(t, ranked) => (
               <>
@@ -108,6 +121,7 @@ export default function Rank({ category }: { category: Category }) {
               </>
             )}
           />
+          {byMine && <p className="muted tiny center">Disponibilités : JustWatch</p>}
         </>
       )}
 

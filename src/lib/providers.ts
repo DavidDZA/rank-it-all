@@ -1,4 +1,4 @@
-import type { Provider } from './db';
+import type { Provider, Title } from './db';
 import { getMyProviderFamilies, getMyProviders } from './settings';
 
 /**
@@ -75,3 +75,7 @@ export const isMineGroup = (g: ProviderGroup, m: MyProviders) => m.families.has(
 
 /** Le titre est-il disponible en abonnement sur l'une de mes plateformes (toutes variantes comprises) ? */
 export const availableOnMine = (flatrate: Provider[], m: MyProviders) => groupProviders(flatrate).some((g) => isMineGroup(g, m));
+
+/** Filtre de liste « dispo sur mes abonnements » (d'après la fiche jointe au titre) : null si désactivé. */
+export const mineFilter = (on: boolean, m: MyProviders): ((t: Title) => boolean) | null =>
+  on ? (t) => !!t.details && availableOnMine(t.details.providers.flatrate, m) : null;

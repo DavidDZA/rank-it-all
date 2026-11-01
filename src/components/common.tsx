@@ -5,7 +5,7 @@ import { CATEGORY_LABEL, categoryOf } from '../lib/category';
 import { changeStatus } from '../lib/ranking';
 import { boostFrom } from '../lib/recommend';
 import { ensureDetails, posterUrl, profileUrl, providerLogo } from '../lib/tmdb';
-import { groupProviders, isMineGroup, loadMyProviders } from '../lib/providers';
+import { groupProviders, hasMyProviders, isMineGroup, loadMyProviders } from '../lib/providers';
 import { useLongPress } from '../lib/hooks';
 import { openFiche } from './Fiche';
 
@@ -118,6 +118,22 @@ export function ProviderLine({ title, maxAge }: { title: Title; maxAge?: number 
           />
         ))}
     </div>
+  );
+}
+
+/** Bouton « dispo sur mes abonnements », ou lien vers les réglages si aucun abonnement n'est choisi. */
+export function MineChip({ value, onChange, title }: { value: boolean; onChange: (v: boolean) => void; title: string }) {
+  if (!hasMyProviders(loadMyProviders())) {
+    return (
+      <a className="muted small" href="#/settings">
+        📺 Choisis tes abonnements dans les réglages pour filtrer ce qui est dispo chez toi →
+      </a>
+    );
+  }
+  return (
+    <button className={`chip ${value ? 'active' : ''}`} onClick={() => onChange(!value)} title={title}>
+      📺 Dispo sur mes abonnements
+    </button>
   );
 }
 

@@ -4,10 +4,10 @@ import { db, withDetails, type Title } from '../lib/db';
 import { categoryOf, categoryOptions, mediaOf, useCategories, type Category } from '../lib/category';
 import { changeStatus, scopeId, unrank, type Scope } from '../lib/ranking';
 import { prefetchDetails, WEEK } from '../lib/tmdb';
-import { availableOnMine, hasMyProviders, loadMyProviders } from '../lib/providers';
+import { loadMyProviders, mineFilter } from '../lib/providers';
 import { matchesSearch } from '../lib/hooks';
 import { matchesTheme, missingFilterInfo, themeFilter, themeLabel } from '../lib/themes';
-import { ProviderLine, SearchBox, SeenButtons, TitleRow, TopBar, TypeFilter } from '../components/common';
+import { MineChip, ProviderLine, SearchBox, SeenButtons, TitleRow, TopBar, TypeFilter } from '../components/common';
 import { FilterButton, FilterSheet, FilterStrip, useSavedFilter } from '../components/FilterSheet';
 import { Duel } from '../components/Duel';
 import { RankedList } from '../components/RankedList';
@@ -41,7 +41,7 @@ export default function Wishlist() {
   const listType = listCat && mediaOf(listCat);
   const theme = listType ? savedTheme : { ...savedTheme, genre: null };
   const byTheme = themeFilter(theme);
-  const byMine = onlyMine ? (t: Title) => !!t.details && availableOnMine(t.details.providers.flatrate, mine) : null;
+  const byMine = mineFilter(onlyMine, mine);
   const combined = byTheme || byMine ? (t: Title) => (!byTheme || byTheme(t)) && (!byMine || byMine(t)) : null;
   const label = themeLabel(listType, theme);
 
@@ -80,20 +80,7 @@ export default function Wishlist() {
         ]}
         onChange={setFilter}
       />
-      {view === 'list' &&
-        (hasMyProviders(mine) ? (
-          <button
-            className={`chip ${onlyMine ? 'active' : ''}`}
-            onClick={() => setOnlyMine((v) => !v)}
-            title="N’afficher que les titres disponibles sur tes abonnements"
-          >
-            📺 Dispo sur mes abonnements
-          </button>
-        ) : (
-          <a className="muted small" href="#/settings">
-            📺 Choisis tes abonnements dans les réglages pour filtrer ce qui est dispo chez toi →
-          </a>
-        ))}
+      {view === 'list' && <MineChip value={onlyMine} onChange={setOnlyMine} title="N’afficher que les titres disponibles sur tes abonnements" />}
       {view === 'duel' ? (
         <Duel
           key={`${scopeId(scope)}-${JSON.stringify(theme)}`}

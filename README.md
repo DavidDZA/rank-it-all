@@ -6,7 +6,7 @@ Web app (PWA) pour construire petit à petit la liste des films et séries qu'on
 
 1. **Swiper les films** : un titre à la fois, tiré au hasard (pondéré par la popularité). Droite = vu, gauche = pas vu → second swipe : droite = wishlist, gauche = non.
 2. **Swiper les séries** : idem.
-3. **Classer les films** : duels entre deux films vus ; chaque film est placé par insertion dichotomique (~log₂(n) duels).
+3. **Classer les films** : duels entre deux films vus ; chaque film est placé par insertion dichotomique (~log₂(n) duels). Filtre « dispo sur mes abonnements » sur le classement et la tier list, pour voir ce qu'on peut revoir.
 4. **Classer les séries** : idem.
 5. **Ajout manuel** : recherche par titre, par réalisateur ou par acteur (filmographie complète), pour marquer des titres vus ou les ajouter à la wishlist.
 6. **Wishlist** : filtre films / séries, priorisation par duels, plateformes de streaming (et filtre « dispo sur mes abonnements »).
