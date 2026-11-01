@@ -1,6 +1,6 @@
 # Architecture — comment marche Rank It All
 
-> **À lire en premier par toute nouvelle session de travail.** État au 30/10/2026. Ce qui reste à faire est dans
+> **À lire en premier par toute nouvelle session de travail.** État au 02/11/2026. Ce qui reste à faire est dans
 > [ROADMAP.md](ROADMAP.md).
 
 ## 1. L'appli

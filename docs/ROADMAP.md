@@ -1,8 +1,16 @@
 # Feuille de route — ce qui reste à faire
 
-> État au 30/10/2026. Comment l'appli marche aujourd'hui : [ARCHITECTURE.md](ARCHITECTURE.md).
+> État au 02/11/2026. Comment l'appli marche aujourd'hui : [ARCHITECTURE.md](ARCHITECTURE.md).
 > Fait : comptes et synchro, amis et « À deux », catégorie Animes, seuils français / vieux films, classement à
-> la main, refonte (fiches à part, chargement découpé, types Supabase, tests de bout en bout).
+> la main, refonte (fiches à part, chargement découpé, types Supabase, tests de bout en bout) ; puis (01-02/11)
+> renommage en **Rank It All** (base locale migrée, ancienne adresse redirigée), filtre « dispo sur mes
+> abonnements » dans les classements, import sur mesure de films, copies de titres allégées sur Supabase (÷ 5),
+> sauvegarde nocturne chiffrée, e-mails par Gmail et règles du mot de passe, bouton Retour, appli Android (TWA)
+> compilée et signée, fiche Play Store prête.
+>
+> **Prochaines étapes** : (1) compte Play Console en cours de validation → créer l'appli, envoyer le `.aab` en
+> test interne, ajouter l'empreinte de la clé Google dans `assetlinks.json` ; (2) recruter 12 testeurs ;
+> (3) relais TMDB sur Cloudflare (§ 4) avant la production ; puis traduction, puis musique et jeux vidéo (§ 5).
 
 ## 1. Décisions en attente
 
@@ -84,8 +92,15 @@ libres (TMDB, Supabase) — c'est autorisé. Utile aussi si le Play Store est bl
 - **Statistiques d'usage** : table « sessions » dans Supabase (temps passé par compte), ou mesure d'audience sans
   cookie (GoatCounter, Umami) ; dans les deux cas, mettre à jour la page de confidentialité. En attendant, des
   requêtes SQL sur `auth.users`, `answers` et l'activité synchronisée donnent l'essentiel.
-- **Relais TMDB** (fonction Supabase) pour ne plus exposer la clé dans le site — indispensable avant une appli
-  publique.
+- **Relais TMDB** pour ne plus exposer la clé dans le site — à faire avant la production sur le Play Store.
+  Recommandation (02/11) : **Cloudflare Worker** gratuit (100 000 requêtes/jour, pas de limite de trafic), clé en
+  secret, n'accepte que les demandes du site, limite le débit par appareil, cache partagé des réponses identiques
+  (pages du catalogue, fiches). Tous les appels passent par `tmdb()` (`src/lib/tmdb.ts`) : seule l'adresse change ;
+  l'option « ta propre clé » reste en secours. Pas Supabase : son trafic sortant gratuit (5 Go/mois) serait vite
+  épuisé (≈ 900 requêtes par téléchargement du catalogue). À faire par l'utilisateur : compte Cloudflare, et jeton
+  d'API en secret GitHub pour un déploiement automatique. Plus tard, si l'appli grandit : **catalogue préparé
+  chaque nuit par GitHub Actions** et publié sur GitHub Pages (un téléchargement au lieu de ≈ 900 requêtes ; un
+  fichier par langue avec la traduction).
 - **Viralité** : lien / QR code sur l'image du top 10, carte de compatibilité à partager, demande de note sur le
   store.
 
