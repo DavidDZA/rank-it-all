@@ -125,3 +125,29 @@
   flex-direction: column;
   gap: 6px;
 }
+
+/* Import sur mesure : deux champs par ligne, même au format téléphone. */
+.import-form .row {
+  flex-wrap: nowrap;
+}
+.import-form .field {
+  min-width: 0;
+}
+.import-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.import-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 8px 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+}

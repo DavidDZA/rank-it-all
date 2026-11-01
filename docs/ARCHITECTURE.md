@@ -57,7 +57,7 @@ tests/  e2e/         Vitest, Playwright
   `collectionId` (saga). Garde-fou : un hook Dexie empêche d'enregistrer une fiche dans un titre.
 - `answers` : une réponse par titre (`seen` / `unseen` / `wish`, avis `good` / `meh`, `updatedAt`).
 - `meta` : classements `ranking:<catégorie>` et `ranking:wish:<catégorie>`, placement en cours `insert:…`,
-  `activity`, `badges`, `boosts:movie|tv`, `saga:<id>`, `min-votes`, `show-anime`, `lastSync`, `lastExport`.
+  `activity`, `badges`, `boosts:movie|tv`, `saga:<id>`, `min-votes`, `show-anime`, `custom-imports`, `lastSync`, `lastExport`.
   `setMeta` date chaque écriture (`updatedAt`, pour la synchro).
 - `synced` : état de la synchro (voir 4.1).
 - `localStorage` : préférences propres à l'appareil (clé TMDB, abonnements, mode de swipe, filtres).
@@ -79,6 +79,11 @@ ceux **vus ou en wishlist** (ajouts manuels compris), qui restent avec leur plac
 jamais triés ou « pas vu / pas envie » partent avec leur réponse, donc aussi sur le compte. Les seuils sont
 synchronisés pour que deux appareils ne s'effacent pas des titres.
 
+**Imports sur mesure** (films seulement, `customImports.ts`, Réglages → Import sur mesure) : une requête de plus
+par import (genre, langue originale, pays de production, années ; 150 votes par défaut), lancée tout de suite
+(`importCustom`) puis relancée par chaque `syncCatalogue`. Retenus dans la meta `custom-imports` (synchronisée) :
+supprimer un import laisse partir ses films à la prochaine mise à jour, sauf ceux vus ou en wishlist.
+
 ## 4. Compte et amis (Supabase)
 
 ### 4.1 Synchro (`cloud.ts`, `cloudMerge.ts`)
@@ -93,7 +98,7 @@ modification, au retour sur l'onglet ou du réseau, toutes les 2 min).
   pierres tombales (`deleted`). Relecture de 60 s de recouvrement. La lecture filtre sur son propre `user_id`
   (les règles laissent aussi lire ce que partagent les amis).
 - Meta synchronisées : `isUserMeta` (`ranking:`, `saga:`, `boosts:`, `activity`, `badges`, `min-votes`,
-  `show-anime`) — les mêmes que la sauvegarde JSON.
+  `show-anime`, `custom-imports`) — les mêmes que la sauvegarde JSON.
 - Connexion Google en PKCE (`?code=…`, l'ancre reste au routeur).
 
 ### 4.2 Serveur (`supabase/schema.sql`)

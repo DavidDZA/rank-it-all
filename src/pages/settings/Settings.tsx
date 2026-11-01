@@ -5,6 +5,7 @@ import { BackupSetting } from './BackupSetting';
 import { SwipeModeSetting } from './SwipeModeSetting';
 import { MyProviders } from './MyProviders';
 import { CatalogueSetting } from './CatalogueSetting';
+import { CustomImportSetting } from './CustomImportSetting';
 import { TokenSetting } from './TokenSetting';
 import { DangerZone } from './DangerZone';
 
@@ -19,6 +20,7 @@ export default function Settings({ section }: { section?: string }) {
       <SwipeModeSetting />
       <MyProviders />
       <CatalogueSetting />
+      <CustomImportSetting />
       <TokenSetting />
       <DangerZone />
       <p className="muted small center">

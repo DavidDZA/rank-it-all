@@ -2,7 +2,8 @@ import 'fake-indexeddb/auto';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { db, getMeta, setStatus } from '../src/lib/db';
 import { readRanking, saveRanking } from '../src/lib/ranking';
-import { syncCatalogue } from '../src/lib/sync';
+import { importCustom, syncCatalogue } from '../src/lib/sync';
+import { newCustomImport, setCustomImports } from '../src/lib/customImports';
 import { DEFAULT_MIN_VOTES, type MinVotes } from '../src/lib/settings';
 import { makeTitle } from './helpers';
 
@@ -97,5 +98,26 @@ describe('titres en français et vieux films', () => {
   it('un titre trouvé par deux requêtes ne compte qu’une fois', async () => {
     const r = await syncCatalogue(votes({ frMovie: 100, oldMovie: 100, movie: 100 }), () => {});
     expect(r.movie).toBe(4);
+  });
+});
+
+describe('import sur mesure (films)', () => {
+  // Films en anglais d'avant 2000 avec au moins 150 votes : seul le vieux classique.
+  const custom = { ...newCustomImport(), lang: 'en', to: 1999 };
+
+  it('ajoute les films trouvés tout de suite', async () => {
+    await syncCatalogue(votes({}), () => {});
+    expect(await importCustom(custom, () => {})).toEqual({ found: 1, added: 1 });
+    expect(await db.titles.get('movie:4')).toBeDefined();
+    expect(await importCustom(custom, () => {})).toEqual({ found: 1, added: 0 }); // déjà là
+  });
+
+  it('gardé tant que l’import est enregistré, retiré ensuite', async () => {
+    await setCustomImports([custom]);
+    expect((await syncCatalogue(votes({}), () => {})).movie).toBe(2);
+    expect((await db.titles.where('type').equals('movie').primaryKeys()).sort()).toEqual(['movie:1', 'movie:4']);
+    await setCustomImports([]);
+    await syncCatalogue(votes({}), () => {});
+    expect(await db.titles.where('type').equals('movie').primaryKeys()).toEqual(['movie:1']);
   });
 });

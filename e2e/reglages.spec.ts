@@ -9,6 +9,7 @@ test.describe('réglages', () => {
       '🕹️ Mode de swipe',
       '📺 Mes abonnements',
       '📦 Catalogue',
+      '🧩 Import sur mesure (films)',
       '🔑 Clé TMDB',
       '⚠️ Zone dangereuse',
     ]);

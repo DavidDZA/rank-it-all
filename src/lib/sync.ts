@@ -2,6 +2,7 @@ import { db, setMeta, type MediaType, type Title } from './db';
 import { EXCLUDED_GENRES, isAnimeResult, isExcluded, tmdb, toTitle, type Page, type RawResult } from './tmdb';
 import type { MinVotes } from './settings';
 import { forgetCategories, isAnimeTitle } from './category';
+import { customImportLabel, getCustomImports, type CustomImport } from './customImports';
 
 const MAX_PAGES = 500; // limite imposée par TMDB sur /discover
 const CONCURRENCY = 6;
@@ -15,6 +16,8 @@ interface Query {
   minVotes: number;
   label: string; // pour la progression : « films », « films en français »…
   extra?: Record<string, string>;
+  /** Première date de sortie ; par défaut, depuis 1870. */
+  since?: number;
   /** Dernière date de sortie (films anciens) ; par défaut, jusqu'à l'an prochain. */
   until?: number;
   /** Tri plus fin après coup (séries et animes ont chacun leur seuil). */
@@ -52,6 +55,9 @@ async function splitRanges(q: Query, from: number, to: number): Promise<Range[]>
   return [{ from, to, first }];
 }
 
+const since = (q: Query) => q.since ?? Date.UTC(1870, 0, 1);
+const until = (q: Query) => q.until ?? Date.UTC(new Date().getUTCFullYear() + 1, 11, 31);
+
 async function runPool(tasks: (() => Promise<void>)[], concurrency: number) {
   let next = 0;
   const worker = async () => {
@@ -65,8 +71,7 @@ export type Progress = (message: string) => void;
 /** Récupère les titres d'une requête ; `seen` reçoit leurs clés (un titre trouvé par deux requêtes compte une fois). */
 async function fetchQuery(q: Query, onProgress: Progress, seen: Set<string>): Promise<void> {
   onProgress(`Préparation des ${q.label}…`);
-  const until = q.until ?? Date.UTC(new Date().getUTCFullYear() + 1, 11, 31);
-  const ranges = await splitRanges(q, Date.UTC(1870, 0, 1), until);
+  const ranges = await splitRanges(q, since(q), until(q));
 
   let buffer: Title[] = [];
   let count = 0;
@@ -129,6 +134,37 @@ export function catalogueQueries(v: MinVotes): Query[] {
   ];
 }
 
+/** Requête d'un import sur mesure (films) : ses critères deviennent des filtres TMDB. */
+export function customQuery(c: CustomImport): Query {
+  const extra: Record<string, string> = {};
+  if (c.genre !== null) extra.with_genres = String(c.genre);
+  if (c.lang) extra.with_original_language = c.lang;
+  if (c.country) extra.with_origin_country = c.country;
+  return {
+    type: 'movie',
+    minVotes: c.minVotes,
+    label: `films « ${customImportLabel(c)} »`,
+    extra,
+    since: c.from !== null ? Date.UTC(c.from, 0, 1) : undefined,
+    until: c.to !== null ? Date.UTC(c.to, 11, 31) : undefined,
+  };
+}
+
+/** Nombre de films d'un import sur mesure chez TMDB (avant exclusions), pour aider à régler le seuil. */
+export async function countCustom(c: CustomImport): Promise<number> {
+  const q = customQuery(c);
+  return (await discover(q, since(q), until(q), 1)).total_results;
+}
+
+/** Lance un import sur mesure tout de suite : films trouvés, et combien n'étaient pas encore au catalogue. */
+export async function importCustom(c: CustomImport, onProgress: Progress): Promise<{ found: number; added: number }> {
+  const movies = () => db.titles.where('type').equals('movie').count();
+  const before = await movies();
+  const found = new Set<string>();
+  await fetchQuery(customQuery(c), onProgress, found);
+  return { found: found.size, added: (await movies()) - before };
+}
+
 /**
  * Supprime les titres absents du nouveau téléchargement (seuil de votes relevé, ajout manuel…),
  * sauf ceux qu'on a vus ou mis dans sa wishlist : ils restent, avec leur place dans les classements.
@@ -146,12 +182,13 @@ async function removeMissing(seen: Set<string>): Promise<number> {
 }
 
 /**
- * Télécharge ou met à jour le catalogue. Les titres qui n'en font plus partie sont supprimés,
- * sauf ceux déjà vus ou dans la wishlist (ajouts manuels compris).
+ * Télécharge ou met à jour le catalogue, imports sur mesure compris. Les titres qui n'en font plus partie
+ * sont supprimés, sauf ceux déjà vus ou dans la wishlist (ajouts manuels compris).
  */
 export async function syncCatalogue(minVotes: MinVotes, onProgress: Progress): Promise<{ movie: number; tv: number; anime: number; removed: number }> {
   const seen = new Set<string>();
-  for (const q of catalogueQueries(minVotes)) await fetchQuery(q, onProgress, seen);
+  const queries = [...catalogueQueries(minVotes), ...(await getCustomImports()).map(customQuery)];
+  for (const q of queries) await fetchQuery(q, onProgress, seen);
   const removed = await removeMissing(seen);
   forgetCategories();
   await setMeta('lastSync', Date.now());
