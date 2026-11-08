@@ -4,7 +4,10 @@
     "target": {
       "namespace": "android_app",
       "package_name": "io.github.daviddza.rankitall",
-      "sha256_cert_fingerprints": ["FC:02:12:7F:8B:C0:5B:E1:A7:5E:97:6E:E7:03:42:19:56:4C:55:25:1B:57:89:05:D6:25:EE:63:4F:DF:22:7C"]
+      "sha256_cert_fingerprints": [
+        "FC:02:12:7F:8B:C0:5B:E1:A7:5E:97:6E:E7:03:42:19:56:4C:55:25:1B:57:89:05:D6:25:EE:63:4F:DF:22:7C",
+        "8A:D2:DB:16:27:60:C7:22:F4:A8:A3:4D:52:D0:BF:CF:8E:27:0E:40:C9:A5:7F:5D:1A:C5:DB:A6:8C:11:D4:4C"
+      ]
     }
   }
 ]
