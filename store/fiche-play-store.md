@@ -65,7 +65,7 @@ captures téléphone : les 6 de `captures/` dans l'ordre (accueil, swipe, duel, 
 | Public cible | 18 ans et plus (évite les règles « Familles » ; l'appli n'est pas destinée aux enfants) |
 | Appli d'actualité | Non |
 | Applis gouvernementales, financières, santé | Non |
-| Suppression de compte | Oui, dans l'appli. **Adresse web** : `https://daviddza.github.io/rank-it-all/confidentialite.html#suppression` (explique comment supprimer son compte depuis le site, sans l'appli) |
+| Suppression de compte | Oui, dans l'appli. **Adresse web** : `https://daviddza.github.io/rank-it-all/confidentialite.html#suppression` (explique comment supprimer son compte depuis le site, sans l'appli) ; **suppression partielle des données** : oui, `https://daviddza.github.io/rank-it-all/confidentialite.html#suppression-partielle` |
 
 ### Sécurité des données
 
