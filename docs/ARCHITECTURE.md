@@ -57,6 +57,8 @@ version Android n'est utile que pour changer ses réglages (nom, icône, couleur
 - `android/twa-manifest.json` : réglages (package, couleurs, version, clé `upload`) ; `android/generate.mjs`
   (bibliothèque Bubblewrap) génère le projet Gradle à côté, commité tel quel. Après modification :
   `cd android && npm install && npm run generate`, en augmentant `appVersionCode` pour une nouvelle version.
+  ⚠️ Laisser `enableSiteSettingsShortcut` à `true` : à `false`, `androidbrowserhelper` 2.7.4 plante au démarrage
+  (il désactive `ManageDataLauncherActivity`, alors absente du manifeste — version 1, corrigée en version 2).
 - `.github/workflows/android.yml` compile et signe (`rank-it-all.aab` pour la Play Console, `rank-it-all.apk`
   pour tester) ; rien à installer sur le PC. Secrets `ANDROID_KEYSTORE_BASE64` / `ANDROID_KEYSTORE_PASSWORD` :
   la clé de dépôt (`upload-key.p12`, alias `upload`), gardée hors du dépôt ; Google re-signe avec sa clé
