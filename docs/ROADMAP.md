@@ -14,9 +14,7 @@
 
 ## 1. Décisions en attente
 
-| # | Question | Recommandation |
-|---|---|---|
-| D7 | **Licence open source** du dépôt (fichier `LICENSE`) | MIT (simple, permissive) ; GPL-3.0 si les dérivés doivent rester open source |
+Aucune. Dernière tranchée : D7, licence du dépôt → **MIT** (`LICENSE`, © DavidDZA, le 08/11/2026).
 
 ## 2. Appli Android
 
@@ -75,7 +73,7 @@ Play Store peut être limitée (Play Store géré). La PWA reste la solution de 
 
 L'appli étant open source, elle peut aussi être publiée sur **F-Droid** (gratuit, pas de compte développeur
 payant, pas de test fermé de 14 jours). F-Droid compile l'appli lui-même depuis le dépôt public : il faut une
-licence libre (§ 1), une compilation reproductible sans dépendance propriétaire (Capacitor et le client Supabase
+licence libre (MIT, fait), une compilation reproductible sans dépendance propriétaire (Capacitor et le client Supabase
 sont open source ; pas de Google Play Services), et une demande d'inclusion (merge request sur
 `gitlab.com/fdroid/fdroiddata`). L'appli serait marquée « NonFreeNet » car elle dépend de services en ligne non
 libres (TMDB, Supabase) — c'est autorisé. Utile aussi si le Play Store est bloqué sur un téléphone donné.

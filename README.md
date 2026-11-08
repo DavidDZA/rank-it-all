@@ -92,6 +92,10 @@ voir [docs/ROADMAP.md](docs/ROADMAP.md).
 Chaque push sur `main` déploie sur GitHub Pages via `.github/workflows/deploy.yml`
 (Settings → Pages → Source : **GitHub Actions**).
 
+## Licence
+
+[MIT](LICENSE) © 2026 DavidDZA.
+
 ---
 
 This product uses the TMDB API but is not endorsed or certified by TMDB.
