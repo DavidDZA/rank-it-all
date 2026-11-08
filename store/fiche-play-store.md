@@ -103,3 +103,34 @@ des affiches), sans lien avec le compte : pas une collecte par l'appli.
 
 ⚠️ Les captures montrent des affiches de films (images TMDB, utilisées avec attribution, comme les autres
 applis de listes de films). Si Google les refusait un jour, refaire des captures sans affiches reconnaissables.
+
+## Message aux testeurs
+
+À envoyer **après la validation** de la version du test fermé (avant, les liens 2 et 3 affichent une erreur ; le
+lien 1 marche déjà). Notes de version du test fermé :
+
+```
+<fr-FR>
+Première version de test. Merci de garder l'appli installée et de l'ouvrir de temps en temps pendant 14 jours !
+</fr-FR>
+```
+
+Message :
+
+```
+Salut ! 👋
+
+J'ai créé une appli, Rank It All, pour trier et classer les films, séries et animes qu'on a vus : on swipe (vu / pas vu / envie), puis on classe par duels (« lequel tu préfères ? »). Gratuite, sans pub.
+
+Pour la publier sur le Play Store, Google m'oblige à la faire tester par au moins 12 personnes pendant 14 jours. Tu veux bien m'aider ? Ça prend 2 minutes, depuis ton téléphone Android :
+
+1️⃣ Rejoins le groupe des testeurs : https://groups.google.com/g/rank-it-all--testeurs (bouton « Rejoindre le groupe »)
+2️⃣ Accepte le test : https://play.google.com/apps/testing/io.github.daviddza.rankitall (bouton « Devenir testeur »)
+3️⃣ Installe l'appli : https://play.google.com/store/apps/details?id=io.github.daviddza.rankitall
+
+⚠️ Utilise le même compte Google que celui de ton Play Store pour les 3 étapes.
+
+Ensuite, garde l'appli installée au moins 14 jours et ouvre-la de temps en temps. Pas besoin de créer de compte dans l'appli. Si tu vois un bug ou si tu as une idée, dis-le-moi !
+
+Merci 🙏
+```

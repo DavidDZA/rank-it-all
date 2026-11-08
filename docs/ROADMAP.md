@@ -8,11 +8,12 @@
 > sauvegarde nocturne chiffrée, e-mails par Gmail et règles du mot de passe, bouton Retour, appli Android (TWA)
 > compilée et signée, fiche Play Store prête ; (08/11) appli créée dans la Play Console, **version 2 (1.0.1) en
 > test interne, vérifiée sur le téléphone** (plein écran, connexion Google, données), empreinte de la clé Google
-> dans `assetlinks.json`.
+> dans `assetlinks.json` ; fiche du Store et tous les formulaires « Contenu de l'appli » remplis (réponses dans
+> `store/fiche-play-store.md`) ; groupe Google des testeurs créé.
 >
-> **Prochaines étapes** : (1) test fermé : fiche et contenu de l'appli dans la Play Console, 12 testeurs pendant
-> 14 jours ; (2) pendant ce temps : traduction (fiche du Store multilingue à la sortie) et relais TMDB sur
-> Cloudflare (§ 4), obligatoire avant la production ; puis musique et jeux vidéo (§ 5).
+> **Reprendre ici (arrêt le 08/11 au soir)** — test fermé, voir § 2 « Reprise ». Puis, pendant les 14 jours :
+> traduction (fiche du Store multilingue à la sortie) et relais TMDB sur Cloudflare (§ 4), obligatoire avant la
+> production ; puis musique et jeux vidéo (§ 5).
 
 ## 1. Décisions en attente
 
@@ -32,6 +33,27 @@ Reste à faire :
    plantait au démarrage, voir ARCHITECTURE § 2.1).
 2. Test fermé (12 testeurs, 14 jours), puis production (§ 3). La traduction ne bloque pas : les fiches dans
    d'autres langues s'ajoutent dans la Play Console sans nouvelle version.
+
+**Reprise (état au 08/11/2026 au soir)** — fait dans la Play Console : appli créée, version 2 en test interne,
+fiche principale (textes, icône, bannière, 6 captures ; pas de captures tablette), catégorie Divertissement et tags,
+coordonnées, accès à l'appli (compte de démonstration), annonces, classification, public cible (18 ans et plus,
+sans blocage des mineurs), sécurité des données, suppression de compte et suppression partielle (lien
+`confidentialite.html#suppression-partielle`), déclaration IA (rien à signaler). Groupe Google
+`rank-it-all--testeurs@googlegroups.com` créé (propriétaire `rankitall.app`, l'utilisateur y est membre).
+**Rien d'autre n'est fait.** Étapes suivantes, dans l'ordre :
+
+1. Vérifier que le **compte de démonstration** `rankitall.app+review@gmail.com` existe bien dans l'appli et se
+   connecte (mot de passe dans le gestionnaire de mots de passe de l'utilisateur, jamais dans le dépôt) ; idéalement
+   ami du compte de l'utilisateur. Sinon l'examinateur ne pourra pas se connecter → refus.
+2. Tableau de bord de la Play Console : toutes les tâches « Configurer votre application » en vert.
+3. *Tester et publier → Tests → Test fermé → Gérer la piste* : pays (France + ceux des testeurs) ; testeurs =
+   **Groupes Google** → `rank-it-all--testeurs@googlegroups.com` ; commentaires → `rankitall.app@gmail.com` ;
+   **Créer une version → Ajouter depuis la bibliothèque → 2 (1.0.1)**, notes de version (texte dans la fiche) ;
+   Enregistrer.
+4. *Vue d'ensemble de la publication* → **Envoyer les modifications pour examen** (quelques heures à quelques jours).
+5. En attendant : faire rejoindre le groupe (lien déjà actif). Après validation : envoyer le message aux testeurs
+   (texte prêt dans `store/fiche-play-store.md`, § « Message aux testeurs »). Viser 15-20 testeurs.
+6. 14 jours après le 12ᵉ inscrit : demander l'accès à la production (tableau de bord).
 
 ⚠️ Téléphone professionnel de l'utilisateur : selon la politique de son entreprise, l'installation depuis le
 Play Store peut être limitée (Play Store géré). La PWA reste la solution de repli.
