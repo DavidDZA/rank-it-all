@@ -14,7 +14,7 @@
 
 ## 1. Décisions en attente
 
-Aucune. Dernière tranchée : D7, licence du dépôt → **MIT** (`LICENSE`, © DavidDZA, le 08/11/2026).
+Aucune. Dernière tranchée : D7, licence du dépôt → **MIT** (`LICENSE`, © Super Bobiz, le 08/11/2026).
 
 ## 2. Appli Android
 

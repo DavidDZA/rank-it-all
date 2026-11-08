@@ -94,7 +94,7 @@ Chaque push sur `main` déploie sur GitHub Pages via `.github/workflows/deploy.y
 
 ## Licence
 
-[MIT](LICENSE) © 2026 DavidDZA.
+[MIT](LICENSE) © 2026 Super Bobiz.
 
 ---
 
