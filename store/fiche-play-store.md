@@ -47,7 +47,7 @@ This product uses the TMDB API but is not endorsed or certified by TMDB.
 **Images** : icône 512 × 512 (`android/store_icon.png`), bannière 1024 × 500 (`banniere-1024x500.png`),
 captures téléphone : les 6 de `captures/` dans l'ordre (accueil, swipe, duel, classement, tier list, wishlist).
 
-**Catégorie** : Divertissement. **Tags** : Films et séries, Listes.
+**Catégorie** : Divertissement. **Tags** (liste imposée par Google) : Films, Télévision, Divertissement. Écartés : « Billets de cinéma, critiques… » (ni billets, ni séances, ni critiques), « Programme télé », « Streaming vidéo » (on ne regarde rien dans l'appli). Téléphone : vide (public). Marketing externe : activé.
 
 **Coordonnées** : e-mail `rankitall.app@gmail.com` (aussi l'expéditeur des e-mails de l'appli), site web
 `https://daviddza.github.io/rank-it-all/`.
