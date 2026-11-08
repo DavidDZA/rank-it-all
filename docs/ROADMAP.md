@@ -1,16 +1,18 @@
 # Feuille de route — ce qui reste à faire
 
-> État au 02/11/2026. Comment l'appli marche aujourd'hui : [ARCHITECTURE.md](ARCHITECTURE.md).
+> État au 08/11/2026. Comment l'appli marche aujourd'hui : [ARCHITECTURE.md](ARCHITECTURE.md).
 > Fait : comptes et synchro, amis et « À deux », catégorie Animes, seuils français / vieux films, classement à
 > la main, refonte (fiches à part, chargement découpé, types Supabase, tests de bout en bout) ; puis (01-02/11)
 > renommage en **Rank It All** (base locale migrée, ancienne adresse redirigée), filtre « dispo sur mes
 > abonnements » dans les classements, import sur mesure de films, copies de titres allégées sur Supabase (÷ 5),
 > sauvegarde nocturne chiffrée, e-mails par Gmail et règles du mot de passe, bouton Retour, appli Android (TWA)
-> compilée et signée, fiche Play Store prête.
+> compilée et signée, fiche Play Store prête ; (08/11) appli créée dans la Play Console, **version 2 (1.0.1) en
+> test interne, vérifiée sur le téléphone** (plein écran, connexion Google, données), empreinte de la clé Google
+> dans `assetlinks.json`.
 >
-> **Prochaines étapes** : (1) compte Play Console en cours de validation → créer l'appli, envoyer le `.aab` en
-> test interne, ajouter l'empreinte de la clé Google dans `assetlinks.json` ; (2) recruter 12 testeurs ;
-> (3) relais TMDB sur Cloudflare (§ 4) avant la production ; puis traduction, puis musique et jeux vidéo (§ 5).
+> **Prochaines étapes** : (1) test fermé : fiche et contenu de l'appli dans la Play Console, 12 testeurs pendant
+> 14 jours ; (2) pendant ce temps : traduction (fiche du Store multilingue à la sortie) et relais TMDB sur
+> Cloudflare (§ 4), obligatoire avant la production ; puis musique et jeux vidéo (§ 5).
 
 ## 1. Décisions en attente
 
@@ -25,11 +27,11 @@ dans une page web intégrée), liens qui n'ouvrent pas l'appli. Il resservira pe
 
 Reste à faire :
 
-1. Dépôt `DavidDZA.github.io` (contenu : `tools/racine-du-site/`) et secrets `ANDROID_KEYSTORE_*`.
-2. Fiche du Store prête : `store/fiche-play-store.md` (textes, formulaires), `store/captures/`, bannière.
-   Compte Play Console, création de l'appli, premier `.aab` en test interne ; ajouter ensuite l'empreinte de la
-   clé de signature Google Play dans `assetlinks.json`.
-3. Test fermé (12 testeurs, 14 jours), puis production (§ 3).
+1. ~~Dépôt `DavidDZA.github.io`, secrets `ANDROID_KEYSTORE_*`, fiche du Store, compte Play Console, appli créée,
+   test interne, empreinte de la clé Google dans `assetlinks.json`~~ — fait (08/11, version 2 : la version 1
+   plantait au démarrage, voir ARCHITECTURE § 2.1).
+2. Test fermé (12 testeurs, 14 jours), puis production (§ 3). La traduction ne bloque pas : les fiches dans
+   d'autres langues s'ajoutent dans la Play Console sans nouvelle version.
 
 ⚠️ Téléphone professionnel de l'utilisateur : selon la politique de son entreprise, l'installation depuis le
 Play Store peut être limitée (Play Store géré). La PWA reste la solution de repli.
