@@ -60,7 +60,7 @@ captures téléphone : les 6 de `captures/` dans l'ordre (accueil, swipe, duel, 
 |---|---|
 | Règles de confidentialité | l'adresse ci-dessus |
 | Annonces | Non, l'appli ne contient pas d'annonces |
-| Accès à l'appli | Toutes les fonctions sont accessibles sans compte (le compte est facultatif) |
+| Accès à l'appli | **Oui, une partie est limitée** (synchro, amis, « À deux » demandent un compte). Instruction : compte de démonstration par e-mail `rankitall.app+review@gmail.com` (mot de passe dans le gestionnaire de mots de passe, jamais dans le dépôt), ami de l'utilisateur ; texte en anglais : *The account is optional: every feature except sync and friends works without signing in. To sign in: Settings (gear icon) → Account → sign in with email and password (not Google). Friends: the "Together" page (À deux) shows the friend linked to this demo account. The app is in French.* |
 | Classification du contenu | Questionnaire IARC, catégorie « Divertissement » : pas de violence, sexe, langage grossier, drogues ni jeux d'argent **dans l'appli** (les affiches sont celles de films grand public, adultes exclus) ; les utilisateurs **peuvent échanger** du contenu de façon limitée (amis : voir les listes de l'autre), pas de discussion ; pas d'achat ; pas de partage de position |
 | Public cible | 18 ans et plus (évite les règles « Familles » ; l'appli n'est pas destinée aux enfants) |
 | Appli d'actualité | Non |
