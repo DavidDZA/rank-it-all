@@ -92,8 +92,12 @@ des affiches), sans lien avec le compte : pas une collecte par l'appli.
 2. *Configuration → Intégrité de l'appli → Signature d'application* : copier l'**empreinte SHA-256 de la clé de
    signature d'application** → l'ajouter à `assetlinks.json` (dépôt `DavidDZA.github.io`, source
    `tools/racine-du-site/`). Sans elle, l'appli installée depuis le Play Store affiche une barre d'adresse.
-3. *Test fermé* : liste de testeurs (adresses des comptes Google), au moins **12 testeurs inscrits pendant
-   14 jours d'affilée** ; puis demander l'accès à la production.
+3. *Test fermé* : testeurs = groupe Google **`rank-it-all--testeurs@googlegroups.com`** (propriétaire
+   `rankitall.app`, inscription libre, membres visibles des seuls gestionnaires). Au moins **12 testeurs inscrits
+   pendant 14 jours d'affilée** ; puis demander l'accès à la production. Liens à envoyer, dans l'ordre :
+   groupe `https://groups.google.com/g/rank-it-all--testeurs`, inscription au test
+   `https://play.google.com/apps/testing/io.github.daviddza.rankitall`, puis l'appli
+   `https://play.google.com/store/apps/details?id=io.github.daviddza.rankitall` (même compte Google partout).
 4. Chaque nouvelle version Android (rare : le contenu est le site) : `appVersionCode` + 1 dans
    `android/twa-manifest.json`, `npm run generate`, workflow, envoi du nouvel `.aab`.
 
