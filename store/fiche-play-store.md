@@ -60,6 +60,7 @@ captures téléphone : les 6 de `captures/` dans l'ordre (accueil, swipe, duel, 
 |---|---|
 | Règles de confidentialité | l'adresse ci-dessus |
 | Annonces | Non, l'appli ne contient pas d'annonces |
+| Identifiant publicitaire | **Non** (10/11/2026) : seule dépendance `androidbrowserhelper`, pas de permission `AD_ID` dans le manifeste, pas de SDK de pub ni de statistiques |
 | Accès à l'appli | **Oui, une partie est limitée** (synchro, amis, « À deux » demandent un compte). Instruction : compte de démonstration par e-mail `rankitall.app+review@gmail.com` (mot de passe dans le gestionnaire de mots de passe, jamais dans le dépôt), ami de l'utilisateur ; texte en anglais : *The account is optional: every feature except sync and friends works without signing in. To sign in: Settings (gear icon) → Account → sign in with email and password (not Google). Friends: the "Together" page (À deux) shows the friend linked to this demo account. The app is in French.* |
 | Classification du contenu | Questionnaire IARC (08/11/2026), e-mail `rankitall.app@gmail.com`, catégorie « Toutes les autres types d'applis ». **Package : rien** (coquille TWA). **Partage entre utilisateurs : oui** (pseudo, listes entre amis) — pas la source principale, rien de public, blocage oui (retirer l'ami, changer de code), signalement non, pas de conversation, limité aux amis invités. **Contenu en ligne : oui** (catalogue TMDB : affiches, résumés, bandes-annonces de films grand public, adultes exclus) → violence oui (jamais l'objet principal ; visuelle, sanglante possible, texte), sexualité oui (visuelle, nudité partielle possible, **jamais pornographique**, texte), langage oui, drogues oui. Produits assujettis à l'âge, position, achats, récompenses, navigateur, actualité / éducation : non. Le public cible étant 18 ans et plus, une classification 16-18 ne change rien. |
 | Public cible | 18 ans et plus (évite les règles « Familles » ; l'appli n'est pas destinée aux enfants) |
@@ -124,9 +125,9 @@ J'ai créé une appli, Rank It All, pour trier et classer les films, séries et 
 
 Pour la publier sur le Play Store, Google m'oblige à la faire tester par au moins 12 personnes pendant 14 jours. Tu veux bien m'aider ? Ça prend 2 minutes, depuis ton téléphone Android :
 
-1️⃣ Rejoins le groupe des testeurs : https://groups.google.com/g/rank-it-all--testeurs (bouton « Rejoindre le groupe »)
+1️⃣ Rejoins le groupe des testeurs (si ce n'est pas déjà fait) : https://groups.google.com/g/rank-it-all--testeurs (bouton « Rejoindre le groupe »)
 2️⃣ Accepte le test : https://play.google.com/apps/testing/io.github.daviddza.rankitall (bouton « Devenir testeur »)
-3️⃣ Installe l'appli : https://play.google.com/store/apps/details?id=io.github.daviddza.rankitall
+3️⃣ Installe l'appli : https://play.google.com/store/apps/details?id=io.github.daviddza.rankitall (si elle est « introuvable », réessaie dans quelques minutes)
 
 ⚠️ Utilise le même compte Google que celui de ton Play Store pour les 3 étapes.
 

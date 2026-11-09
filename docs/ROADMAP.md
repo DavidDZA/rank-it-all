@@ -11,7 +11,7 @@
 > dans `assetlinks.json` ; fiche du Store et tous les formulaires « Contenu de l'appli » remplis (réponses dans
 > `store/fiche-play-store.md`) ; groupe Google des testeurs créé.
 >
-> **Reprendre ici (arrêt le 08/11 au soir)** — test fermé, voir § 2 « Reprise ». Puis, pendant les 14 jours :
+> **Reprendre ici** — test fermé **envoyé pour examen le 10/11** ; ensuite étapes 5-6 du § 2 « Reprise ». Puis, pendant les 14 jours :
 > traduction (fiche du Store multilingue à la sortie) et relais TMDB sur Cloudflare (§ 4), obligatoire avant la
 > production ; puis musique et jeux vidéo (§ 5).
 
@@ -42,15 +42,17 @@ sans blocage des mineurs), sécurité des données, suppression de compte et sup
 `rank-it-all--testeurs@googlegroups.com` créé (propriétaire `rankitall.app`, l'utilisateur y est membre).
 **Rien d'autre n'est fait.** Étapes suivantes, dans l'ordre :
 
-1. Vérifier que le **compte de démonstration** `rankitall.app+review@gmail.com` existe bien dans l'appli et se
-   connecte (mot de passe dans le gestionnaire de mots de passe de l'utilisateur, jamais dans le dépôt) ; idéalement
-   ami du compte de l'utilisateur. Sinon l'examinateur ne pourra pas se connecter → refus.
+1. ~~**Compte de démonstration** `rankitall.app+review@gmail.com`~~ — fait (09/11) : créé, adresse confirmée,
+   quelques titres classés, ami du compte de l'utilisateur, identifiants (mot de passe compris) saisis dans
+   « Accès à l'appli » (mot de passe dans le gestionnaire de mots de passe de l'utilisateur, jamais dans le dépôt).
 2. Tableau de bord de la Play Console : toutes les tâches « Configurer votre application » en vert.
 3. *Tester et publier → Tests → Test fermé → Gérer la piste* : pays (France + ceux des testeurs) ; testeurs =
    **Groupes Google** → `rank-it-all--testeurs@googlegroups.com` ; commentaires → `rankitall.app@gmail.com` ;
    **Créer une version → Ajouter depuis la bibliothèque → 2 (1.0.1)**, notes de version (texte dans la fiche) ;
-   Enregistrer.
+   Enregistrer. — fait (10/11), version enregistrée.
 4. *Vue d'ensemble de la publication* → **Envoyer les modifications pour examen** (quelques heures à quelques jours).
+   — fait le 10/11 (avec la déclaration « Identifiant publicitaire : non » demandée au passage). **En attente du
+   résultat de l'examen** (e-mail de Google).
 5. En attendant : faire rejoindre le groupe (lien déjà actif). Après validation : envoyer le message aux testeurs
    (texte prêt dans `store/fiche-play-store.md`, § « Message aux testeurs »). Viser 15-20 testeurs.
 6. 14 jours après le 12ᵉ inscrit : demander l'accès à la production (tableau de bord).
