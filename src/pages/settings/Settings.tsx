@@ -1,5 +1,7 @@
 import { useEffect } from 'react';
 import { TopBar } from '../../components/common';
+import { resetTutorials } from '../../lib/tutorial';
+import { toast } from '../../lib/fun';
 import { Account } from './Account';
 import { BackupSetting } from './BackupSetting';
 import { SwipeModeSetting } from './SwipeModeSetting';
@@ -23,6 +25,18 @@ export default function Settings({ section }: { section?: string }) {
       <TokenSetting />
       <BackupSetting />
       <DangerZone />
+      <div className="center">
+        <button
+          className="btn small"
+          onClick={() => {
+            resetTutorials();
+            toast('💡 Les astuces reviendront à la prochaine visite de chaque écran.');
+          }}
+          title="Réafficher l’astuce de chaque écran à ta prochaine visite"
+        >
+          💡 Revoir les astuces
+        </button>
+      </div>
       <p className="muted small center">
         Données et affiches fournies par TMDB.
         <br />

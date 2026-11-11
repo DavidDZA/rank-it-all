@@ -4,6 +4,7 @@ import { db, type Answer, type Status, type Title } from '../lib/db';
 import { changeStatus } from '../lib/ranking';
 import { KNOWN_VOTES, personFilmography, search, searchPeople, type Person, type PersonRole } from '../lib/tmdb';
 import { PersonAvatar, SeenButtons, TitleRow, TopBar, TypeFilter } from '../components/common';
+import { Tutorial } from '../components/Tutorial';
 
 type Mode = 'title' | PersonRole;
 
@@ -106,6 +107,7 @@ export default function AddManual() {
 
   return (
     <main className="page">
+      <Tutorial id="add" />
       <TopBar title="🔍 Ajout manuel" />
       <TypeFilter<Mode>
         value={mode}

@@ -11,6 +11,7 @@ import { MineChip, ProviderLine, SearchBox, SeenButtons, TitleRow, TopBar, TypeF
 import { FilterButton, FilterSheet, FilterStrip, useSavedFilter } from '../components/FilterSheet';
 import { Duel } from '../components/Duel';
 import { RankedList } from '../components/RankedList';
+import { Tutorial } from '../components/Tutorial';
 
 type View = 'list' | 'duel';
 type Filter = 'all' | Category;
@@ -59,6 +60,7 @@ export default function Wishlist() {
 
   return (
     <main className="page wide wishlist-page">
+      <Tutorial id="wishlist" />
       <TopBar title={wishes ? `💖 Wishlist (${wishes.length})` : '💖 Wishlist'} right={<FilterButton active={!!byTheme} label={label} onClick={() => setShowFilters(true)} />} />
       {byTheme && <FilterStrip label={label} onClick={() => setShowFilters(true)} />}
       <TypeFilter<View>

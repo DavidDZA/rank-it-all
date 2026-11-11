@@ -10,6 +10,7 @@ import { matchesTonight, NO_FILTERS, pickWeighted, priorityWeight, type TonightF
 import { burst, toast } from '../lib/fun';
 import { Poster, ProviderLine, RatingBadge, SeenButtons, TitleText, TopBar, TypeFilter } from '../components/common';
 import { openFiche } from '../components/Fiche';
+import { Tutorial } from '../components/Tutorial';
 
 const PREF = 'tonight-filters';
 
@@ -168,6 +169,7 @@ export default function Tonight() {
 function Shell({ children }: { children: React.ReactNode }) {
   return (
     <main className="page">
+      <Tutorial id="tonight" />
       <TopBar title="🍿 Ce soir ?" />
       {children}
     </main>

@@ -30,6 +30,7 @@ import { ActionButton, CardTag } from './controls';
 import { KNOWN_VOTES, personFilmography } from '../../lib/tmdb';
 import { downloadCatalogue, useCatalogueDownload } from '../../lib/catalogueDownload';
 import { CatalogueProgress } from '../../components/CatalogueProgress';
+import { Tutorial } from '../../components/Tutorial';
 
 const FLIP_MS = 350; // durée du retournement de la carte (animation flip-in)
 
@@ -342,6 +343,7 @@ export default function Swipe({ category }: { category: Category }) {
 
   return (
     <main className={`page swipe-page ${mode}`}>
+      <Tutorial id={mode === 'corners' ? 'swipe-corners' : 'swipe-horizontal'} />
       <header className="swipe-top">
         <BackLink />
         <h2 className={`swipe-title ${mode === 'horizontal' && current ? `question ${phase}` : ''}`}>

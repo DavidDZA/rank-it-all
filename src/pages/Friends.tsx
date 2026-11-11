@@ -16,12 +16,14 @@ import {
 import { toast } from '../lib/fun';
 import { TopBar } from '../components/common';
 import { Account } from './settings/Account';
+import { Tutorial } from '../components/Tutorial';
 
 /** Amis : mon code et mon lien d'invitation, ajout par code, liste, ce que je partage. `invite` : code reçu par lien. */
 export default function Friends({ invite }: { invite?: string }) {
   const cloud = useCloud();
   return (
     <main className="page">
+      <Tutorial id="friends" />
       <TopBar title="👥 Amis" />
       {!cloudEnabled ? (
         <p className="muted center">Les comptes ne sont pas disponibles sur cette version du site.</p>

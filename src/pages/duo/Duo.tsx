@@ -10,6 +10,7 @@ import { CommonWishlist } from './CommonWishlist';
 import { TonightDuo } from './TonightDuo';
 import { AdviceLists } from './AdviceLists';
 import { MatchView } from './MatchView';
+import { Tutorial } from '../../components/Tutorial';
 
 type Tab = 'top' | 'wish' | 'tonight' | 'advice' | 'match';
 /** « À deux » avec un ami : wishlist commune, tirage du soir, conseils croisés, compatibilité des classements. */
@@ -55,6 +56,7 @@ export default function Duo({ friendId }: { friendId: string }) {
 
   return (
     <main className="page">
+      <Tutorial id="duo" />
       <TopBar title={`👥 Toi & ${pseudo}`} />
       {!cloud.ready ? (
         <p className="muted center">Chargement…</p>

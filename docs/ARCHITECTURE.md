@@ -90,7 +90,11 @@ version Android n'est utile que pour changer ses réglages (nom, icône, couleur
   `activity`, `badges`, `boosts:movie|tv`, `saga:<id>`, `min-votes`, `show-anime`, `custom-imports`, `lastSync`, `lastExport`.
   `setMeta` date chaque écriture (`updatedAt`, pour la synchro).
 - `synced` : état de la synchro (voir 4.1).
-- `localStorage` : préférences propres à l'appareil (clé TMDB, abonnements, mode de swipe, filtres).
+- `localStorage` : préférences propres à l'appareil (clé TMDB, abonnements, mode de swipe, filtres, astuces vues).
+  Astuces de première visite : `lib/tutorial.ts` (identifiants, une par type d'écran : swipe 4 coins / 2 directions,
+  classement… communes aux films, séries et animes), textes dans `components/Tutorial.tsx` ; « Revoir les astuces »
+  en bas des réglages. Les tests de bout en bout les marquent toutes vues (`playwright.config.ts`), sauf
+  `tutoriel.spec.ts`.
 
 ### 3.2 Catégories
 

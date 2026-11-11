@@ -13,6 +13,7 @@ import { TierList } from '../components/TierList';
 import { FilterButton, FilterSheet, FilterStrip, useSavedFilter } from '../components/FilterSheet';
 import { shareTop } from '../lib/share';
 import { toast } from '../lib/fun';
+import { Tutorial } from '../components/Tutorial';
 
 type View = 'duel' | 'list' | 'tiers';
 
@@ -73,6 +74,7 @@ export default function Rank({ category }: { category: Category }) {
 
   return (
     <main className="page wide">
+      <Tutorial id="rank" />
       <TopBar
         title={`${{ movie: '🏆', tv: '🥇', anime: '🏯' }[category]} ${capitalize(CATEGORY_LABEL[category].plural)}`}
         right={<FilterButton active={!!filter} label={label} onClick={() => setShowFilters(true)} />}

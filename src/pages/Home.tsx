@@ -14,6 +14,7 @@ import { useCloud } from '../lib/cloud';
 import { cloudEnabled } from '../lib/supabase';
 import { downloadCatalogue, useCatalogueDownload } from '../lib/catalogueDownload';
 import { CatalogueProgress } from '../components/CatalogueProgress';
+import { Tutorial } from '../components/Tutorial';
 
 const fmt = (n: number) => Math.max(0, n).toLocaleString('fr-FR');
 const DAY = 86_400_000;
@@ -92,6 +93,7 @@ export default function Home() {
 
   return (
     <main className="page">
+      <Tutorial id="home" />
       <header className="home-header">
         <img className="logo" src={`${import.meta.env.BASE_URL}icons/favicon.svg`} alt="" />
         <div className="home-title">

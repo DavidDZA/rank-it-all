@@ -5,6 +5,7 @@ import { categoryOf, categoryOptions, useCategories, type Category } from '../li
 import { changeStatus } from '../lib/ranking';
 import { matchesSearch } from '../lib/hooks';
 import { SearchBox, SeenButtons, TitleRow, TopBar, TypeFilter } from '../components/common';
+import { Tutorial } from '../components/Tutorial';
 
 type ListId = 'seen' | 'unseen';
 type Filter = 'all' | Category;
@@ -32,6 +33,7 @@ export default function Lists() {
 
   return (
     <main className="page">
+      <Tutorial id="lists" />
       <TopBar title="📚 Mes listes" right={items && <span className="pill">{items.length.toLocaleString('fr-FR')}</span>} />
       <TypeFilter<ListId>
         value={list}

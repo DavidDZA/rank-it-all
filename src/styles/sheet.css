@@ -201,3 +201,62 @@
   margin-left: 4px;
   opacity: 0.7;
 }
+
+/* Astuce de première visite : quelques points, un bouton. */
+.tutorial {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.tutorial ul,
+.tutorial ol {
+  margin: 0;
+  padding-left: 1.2em;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  line-height: 1.4;
+}
+.tutorial p {
+  margin: 0;
+}
+.tutorial .btn.primary {
+  align-self: stretch;
+  margin-top: 4px;
+}
+/* Schéma du swipe 4 coins : la carte au centre, un geste par coin. */
+.tuto-corners {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  grid-template-rows: auto auto;
+  align-items: center;
+  gap: 6px 12px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  padding: 4px 0;
+}
+.tuto-corners > :nth-child(1) {
+  grid-area: 1 / 1;
+}
+.tuto-corners > :nth-child(3) {
+  grid-area: 1 / 3;
+  text-align: right;
+}
+.tuto-corners > :nth-child(4) {
+  grid-area: 2 / 1;
+}
+.tuto-corners > :nth-child(5) {
+  grid-area: 2 / 3;
+  text-align: right;
+}
+.tuto-card {
+  grid-area: 1 / 2 / 3 / 3;
+  width: 52px;
+  height: 72px;
+  display: grid;
+  place-items: center;
+  font-size: 1.6rem;
+  border-radius: 10px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+}
