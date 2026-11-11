@@ -22,8 +22,8 @@ export function TokenSetting() {
     <section className="card" id="tmdb">
       <h3>🔑 Clé TMDB</h3>
       <p className="muted small">Le « jeton d’accès en lecture » de ton compte themoviedb.org (Paramètres → API). Il reste uniquement dans ce navigateur.</p>
-      {hasBuiltInToken && <p className="small">✓ Une clé est intégrée au site : rien à saisir. Remplis ce champ seulement pour utiliser une autre clé.</p>}
-      <input className="input" type="password" value={token} onChange={(e) => setTokenInput(e.target.value)} placeholder={hasBuiltInToken ? 'Clé intégrée utilisée' : 'eyJhbGciOi…'} autoComplete="off" />
+      {hasBuiltInToken && <p className="small">✓ L’accès à TMDB est intégré au site : rien à saisir. Remplis ce champ seulement pour utiliser ta propre clé.</p>}
+      <input className="input" type="password" value={token} onChange={(e) => setTokenInput(e.target.value)} placeholder={hasBuiltInToken ? 'Accès intégré utilisé' : 'eyJhbGciOi…'} autoComplete="off" />
       <button className="btn primary" onClick={save} disabled={!token.trim()} title="Vérifier la clé auprès de TMDB puis l’enregistrer">
         Enregistrer
       </button>

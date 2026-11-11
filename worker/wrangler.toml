@@ -1,0 +1,12 @@
+# Relais TMDB : configuration du Cloudflare Worker (déployé par .github/workflows/worker.yml).
+# Secret TMDB_TOKEN : copié depuis le secret GitHub du même nom à chaque déploiement.
+name = "rank-it-all-tmdb"
+main = "src/index.js"
+compatibility_date = "2026-10-01"
+
+# Limite de débit par adresse IP et par centre de données Cloudflare : 1 500 demandes par minute
+# (un téléchargement du catalogue en fait environ 900).
+[[ratelimits]]
+name = "LIMITER"
+namespace_id = "1001"
+simple = { limit = 1500, period = 60 }

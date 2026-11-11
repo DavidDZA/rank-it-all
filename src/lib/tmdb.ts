@@ -1,5 +1,5 @@
 import { db, detailsMarks, getDetails, titleKey, type Details, type MediaType, type Provider, type Title } from './db';
-import { getToken } from './settings';
+import { getToken, TMDB_RELAY } from './settings';
 
 const API = 'https://api.themoviedb.org/3';
 
@@ -47,15 +47,19 @@ export async function tmdb<T>(
   params: Record<string, string | number | boolean> = {},
   token = getToken(),
 ): Promise<T> {
-  if (!token) throw new TmdbError('Clé TMDB manquante : renseigne-la dans les réglages.', 401);
-  const url = new URL(API + path);
+  // Sans clé à joindre : le relais TMDB, qui ajoute la sienne.
+  if (!token && !TMDB_RELAY) throw new TmdbError('Clé TMDB manquante : renseigne-la dans les réglages.', 401);
+  const url = new URL((token ? API : TMDB_RELAY) + path);
   url.searchParams.set('language', 'fr-FR');
   for (const [k, v] of Object.entries(params)) url.searchParams.set(k, String(v));
 
   for (let attempt = 0; ; attempt++) {
     let res: Response;
     try {
-      res = await fetch(url, { headers: { Authorization: `Bearer ${token}`, accept: 'application/json' }, signal: AbortSignal.timeout(TIMEOUT_MS) });
+      res = await fetch(url, {
+        headers: token ? { Authorization: `Bearer ${token}`, accept: 'application/json' } : { accept: 'application/json' },
+        signal: AbortSignal.timeout(TIMEOUT_MS),
+      });
     } catch (e) {
       if ((e as Error).name === 'TimeoutError') throw new TmdbError('TMDB ne répond pas : vérifie ta connexion.', 0);
       throw e;

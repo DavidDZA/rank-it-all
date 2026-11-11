@@ -31,13 +31,21 @@ function write(key: string, value: string): void {
   }
 }
 
-/** Clé intégrée au site lors du déploiement (secret GitHub TMDB_TOKEN), vide en local. */
+/**
+ * Accès à TMDB sans clé à saisir : le relais TMDB (Cloudflare Worker, dossier worker/), qui garde la clé secrète.
+ * Son adresse est donnée au déploiement (VITE_TMDB_RELAY). En local, à défaut, une clé dans .env.local
+ * (VITE_TMDB_TOKEN), jamais dans le site publié.
+ */
+export const TMDB_RELAY: string = (import.meta.env?.VITE_TMDB_RELAY ?? '').trim().replace(/\/$/, '');
 const BUILT_IN_TOKEN: string = (import.meta.env?.VITE_TMDB_TOKEN ?? '').trim();
-export const hasBuiltInToken = BUILT_IN_TOKEN !== '';
+export const hasBuiltInToken = TMDB_RELAY !== '' || BUILT_IN_TOKEN !== '';
 
-/** Clé saisie dans les réglages, prioritaire sur la clé intégrée. */
+/** Clé saisie dans les réglages : prioritaire, l'appli appelle alors TMDB directement. */
 export const getUserToken = () => read(TOKEN_KEY)?.trim() || null;
-export const getToken = () => getUserToken() || BUILT_IN_TOKEN || null;
+/** Clé à joindre aux appels directs à TMDB (null : passer par le relais, ou aucun accès). */
+export const getToken = () => getUserToken() || (TMDB_RELAY ? null : BUILT_IN_TOKEN || null);
+/** TMDB est-il joignable (clé personnelle, relais ou clé locale) ? */
+export const hasTmdbAccess = () => !!getUserToken() || hasBuiltInToken;
 export const setToken = (token: string) => write(TOKEN_KEY, token.trim());
 
 // Seuils de votes du catalogue : dans la base (meta « min-votes »), synchronisés avec le compte.

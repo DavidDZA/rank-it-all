@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { getMyProviderFamilies, getMyProviders, getToken, setMyProviderFamilies, setMyProviders } from '../../lib/settings';
+import { getMyProviderFamilies, getMyProviders, hasTmdbAccess, setMyProviderFamilies, setMyProviders } from '../../lib/settings';
 import { fetchProviderOptions, providerLogo } from '../../lib/tmdb';
 import { groupProviders, type ProviderGroup } from '../../lib/providers';
 
@@ -16,7 +16,7 @@ export function MyProviders() {
   const [showAll, setShowAll] = useState(false);
 
   useEffect(() => {
-    if (!getToken()) return;
+    if (!hasTmdbAccess()) return;
     fetchProviderOptions()
       .then((options) => {
         const grouped = groupProviders(options);
@@ -47,8 +47,8 @@ export function MyProviders() {
       <h3>📺 Mes abonnements</h3>
       <p className="muted small">Coche tes plateformes : la wishlist pourra n’afficher que ce qui est dispo chez toi.</p>
       {error && <p className="error small">{error}</p>}
-      {!getToken() && <p className="muted small">Renseigne d’abord ta clé TMDB.</p>}
-      {getToken() && !groups && !error && <p className="muted small">Chargement…</p>}
+      {!hasTmdbAccess() && <p className="muted small">Renseigne d’abord ta clé TMDB.</p>}
+      {hasTmdbAccess() && !groups && !error && <p className="muted small">Chargement…</p>}
       {shown && (
         <div className="provider-picker">
           {shown.map((g) => {

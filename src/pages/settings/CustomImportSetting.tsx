@@ -15,7 +15,7 @@ import {
 } from '../../lib/customImports';
 import { countCustom, importCustom } from '../../lib/sync';
 import { genreOptions } from '../../lib/themes';
-import { getToken } from '../../lib/settings';
+import { hasTmdbAccess } from '../../lib/settings';
 
 const YEAR = new Date().getFullYear();
 
@@ -45,7 +45,7 @@ export function CustomImportSetting() {
     from: asYear(text.from),
     to: asYear(text.to),
   };
-  const ready = hasCriteria(criteria) && !!getToken();
+  const ready = hasCriteria(criteria) && !!hasTmdbAccess();
 
   // Nombre de films correspondants chez TMDB, mis à jour pendant la saisie.
   const key = JSON.stringify({ ...criteria, id: '' });

@@ -3,7 +3,7 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { db, getMeta } from '../lib/db';
 import { keysOfCategory, mediaOf, useCategories, type Category } from '../lib/category';
 import { readRanking } from '../lib/ranking';
-import { getToken } from '../lib/settings';
+import { hasTmdbAccess } from '../lib/settings';
 import { loadActivity, streak, todayCount } from '../lib/activity';
 import { exportData } from '../lib/backup';
 import { BADGES } from '../lib/badges';
@@ -79,7 +79,7 @@ export default function Home() {
     return { movie, tv, anime, wish, today: todayCount(activity), streak: streak(activity), lastSync, lastExport, badges: badges.length };
   });
 
-  const noToken = !getToken();
+  const noToken = !hasTmdbAccess();
   const emptyCatalogue = stats && stats.movie.total + stats.tv.total + stats.anime.total === 0;
   const answered = stats ? stats.movie.answered + stats.tv.answered + stats.anime.answered : 0;
   // Le compte sauvegarde tout (bandeau « Connecte-toi ») : rappel d'export seulement si aucun compte n'est possible.

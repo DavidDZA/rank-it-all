@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db, getMeta, requestPersistentStorage } from '../../lib/db';
-import { DEFAULT_MIN_VOTES, getMinVotes, getShowAnime, getToken, setMinVotes, setShowAnime, type MinVotes } from '../../lib/settings';
+import { DEFAULT_MIN_VOTES, getMinVotes, getShowAnime, hasTmdbAccess, setMinVotes, setShowAnime, type MinVotes } from '../../lib/settings';
 import { OLD_MOVIES_BEFORE, syncCatalogue } from '../../lib/sync';
 import { isAnimeTitle } from '../../lib/category';
 import { syncAndWait } from '../../lib/cloud';
@@ -123,7 +123,7 @@ export function CatalogueSetting() {
       <button
         className="btn primary"
         onClick={sync}
-        disabled={syncing || download.running || !getToken()}
+        disabled={syncing || download.running || !hasTmdbAccess()}
         title="Récupérer les films et séries depuis TMDB (environ 1 minute)"
       >
         {syncing || download.running ? 'Mise à jour en cours…' : info?.lastSync ? 'Mettre à jour le catalogue' : 'Télécharger le catalogue'}

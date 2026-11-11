@@ -1,6 +1,6 @@
 import { useSyncExternalStore } from 'react';
 import { getMeta, requestPersistentStorage } from './db';
-import { getMinVotes, getToken } from './settings';
+import { getMinVotes, hasTmdbAccess } from './settings';
 import { syncCatalogue } from './sync';
 import { syncAndWait, whenCloudReady } from './cloud';
 import { toast } from './fun';
@@ -65,7 +65,7 @@ export async function downloadCatalogue(): Promise<void> {
  * interrompu recommence au lancement suivant). Un seul onglet à la fois.
  */
 export async function startFirstCatalogue(): Promise<void> {
-  const needed = async () => !!getToken() && (await getMeta<number | null>('lastSync', null).catch(() => 0)) === null;
+  const needed = async () => !!hasTmdbAccess() && (await getMeta<number | null>('lastSync', null).catch(() => 0)) === null;
   const run = async () => {
     const go = await needed();
     setState({ checked: true });

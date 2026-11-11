@@ -1,0 +1,87 @@
+// Relais TMDB (Cloudflare Worker) : le site appelle ce relais sans clé ; lui seul connaît la clé TMDB (secret
+// TMDB_TOKEN), transmet la demande à TMDB et garde la réponse en cache, partagée entre tous les utilisateurs.
+// Seuls les chemins utilisés par l'appli sont acceptés, seulement depuis le site, avec une limite de débit
+// par adresse IP. Déployé par .github/workflows/worker.yml.
+
+const TMDB = 'https://api.themoviedb.org/3';
+
+/** Sites autorisés à appeler le relais (le site publié, et le site lancé en local pour le développement). */
+const ALLOWED_ORIGINS = ['https://daviddza.github.io', 'http://localhost:5173', 'http://localhost:4173'];
+
+const HOUR = 3600;
+const DAY = 24 * HOUR;
+
+/** Chemins TMDB utilisés par l'appli (src/lib/tmdb.ts, src/lib/sync.ts), et durée de leur cache. */
+const ROUTES = [
+  [/^\/discover\/(movie|tv)$/, 12 * HOUR], // catalogue : les mêmes pages pour tout le monde
+  [/^\/(movie|tv)\/\d+$/, DAY], // fiches détaillées
+  [/^\/(movie|tv)\/\d+\/recommendations$/, DAY],
+  [/^\/collection\/\d+$/, DAY], // sagas
+  [/^\/person\/\d+\/combined_credits$/, DAY],
+  [/^\/watch\/providers\/(movie|tv)$/, DAY], // plateformes de streaming
+  [/^\/search\/multi$/, HOUR],
+];
+
+export default {
+  async fetch(request, env, ctx) {
+    const origin = request.headers.get('Origin');
+    const allowed = origin !== null && ALLOWED_ORIGINS.includes(origin);
+    const cors = allowed ? { 'Access-Control-Allow-Origin': origin, Vary: 'Origin' } : {};
+
+    if (request.method === 'OPTIONS') {
+      return new Response(null, {
+        status: allowed ? 204 : 403,
+        headers: { ...cors, 'Access-Control-Allow-Methods': 'GET', 'Access-Control-Allow-Headers': 'accept', 'Access-Control-Max-Age': '86400' },
+      });
+    }
+    if (request.method !== 'GET') return error(405, 'Méthode non acceptée', cors);
+    if (!allowed) return error(403, 'Relais réservé à Rank It All', cors);
+
+    const url = new URL(request.url);
+    const route = ROUTES.find(([pattern]) => pattern.test(url.pathname));
+    if (!route) return error(404, 'Chemin non relayé', cors);
+
+    // Limite de débit par adresse IP (un téléchargement du catalogue fait environ 900 demandes en une minute ou deux).
+    if (env.LIMITER) {
+      const { success } = await env.LIMITER.limit({ key: request.headers.get('CF-Connecting-IP') ?? 'inconnue' });
+      if (!success) return error(429, 'Trop de demandes, réessaie dans un instant', { ...cors, 'Retry-After': '10' });
+    }
+
+    // Adresse TMDB, paramètres triés : deux demandes identiques partagent la même entrée du cache.
+    const target = new URL(TMDB + url.pathname);
+    [...url.searchParams.entries()]
+      .filter(([key]) => key !== 'api_key')
+      .sort(([a], [b]) => a.localeCompare(b))
+      .forEach(([key, value]) => target.searchParams.append(key, value));
+    const cacheKey = new Request(target.toString());
+    const cache = caches.default;
+
+    let response = await cache.match(cacheKey);
+    if (!response) {
+      let upstream;
+      try {
+        upstream = await fetch(target, { headers: { Authorization: `Bearer ${env.TMDB_TOKEN}`, accept: 'application/json' } });
+      } catch {
+        return error(502, 'TMDB injoignable', cors);
+      }
+      // Clé refusée par TMDB : problème du relais, pas de l'utilisateur (l'appli dirait « vérifie ta clé »).
+      if (upstream.status === 401) return error(502, 'Le relais TMDB est mal configuré', cors);
+      response = new Response(upstream.body, {
+        status: upstream.status,
+        headers: { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': `public, max-age=${route[1]}` },
+      });
+      if (upstream.ok) ctx.waitUntil(cache.put(cacheKey, response.clone()));
+    }
+
+    const headers = new Headers(response.headers);
+    for (const [key, value] of Object.entries(cors)) headers.set(key, value);
+    return new Response(response.body, { status: response.status, headers });
+  },
+};
+
+function error(status, message, headers) {
+  return new Response(JSON.stringify({ status_message: message }), {
+    status,
+    headers: { ...headers, 'Content-Type': 'application/json; charset=utf-8' },
+  });
+}

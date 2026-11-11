@@ -1,0 +1,38 @@
+name: Relais TMDB
+
+# Déploie le relais TMDB (Cloudflare Worker, dossier worker/) et lui donne la clé TMDB.
+# Secrets : CLOUDFLARE_API_TOKEN (jeton « Edit Cloudflare Workers »), CLOUDFLARE_ACCOUNT_ID, TMDB_TOKEN.
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ['worker/**', '.github/workflows/worker.yml']
+
+permissions:
+  contents: read
+
+concurrency:
+  group: worker
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+
+      - name: Déploiement
+        working-directory: worker
+        env:
+          TMDB_TOKEN: ${{ secrets.TMDB_TOKEN }}
+        run: |
+          [ -n "$CLOUDFLARE_API_TOKEN" ] && [ -n "$CLOUDFLARE_ACCOUNT_ID" ] && [ -n "$TMDB_TOKEN" ] || { echo "::error::Secrets CLOUDFLARE_API_TOKEN, CLOUDFLARE_ACCOUNT_ID ou TMDB_TOKEN manquants"; exit 1; }
+          npx --yes wrangler@4.36.0 deploy
+          printf '%s' "$TMDB_TOKEN" | npx --yes wrangler@4.36.0 secret put TMDB_TOKEN
