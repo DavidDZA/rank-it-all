@@ -57,6 +57,10 @@ sans blocage des mineurs), sécurité des données, suppression de compte et sup
    (texte prêt dans `store/fiche-play-store.md`, § « Message aux testeurs »). Viser 15-20 testeurs.
 6. 14 jours après le 12ᵉ inscrit : demander l'accès à la production (tableau de bord).
 
+**Version 3 (1.0.2)** (11/11) : correctif du blocage sur le logo chez un testeur (voir ARCHITECTURE § 2.1). À importer
+dans la Play Console (*Test fermé → Créer une version → Importer* `rank-it-all.aab` des artefacts du workflow
+« Appli Android »), puis envoyer pour examen. Le compteur des 14 jours n'est pas remis à zéro.
+
 ⚠️ Téléphone professionnel de l'utilisateur : selon la politique de son entreprise, l'installation depuis le
 Play Store peut être limitée (Play Store géré). La PWA reste la solution de repli.
 

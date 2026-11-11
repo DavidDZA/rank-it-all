@@ -59,6 +59,10 @@ version Android n'est utile que pour changer ses réglages (nom, icône, couleur
   `cd android && npm install && npm run generate`, en augmentant `appVersionCode` pour une nouvelle version.
   ⚠️ Laisser `enableSiteSettingsShortcut` à `true` : à `false`, `androidbrowserhelper` 2.7.4 plante au démarrage
   (il désactive `ManageDataLauncherActivity`, alors absente du manifeste — version 1, corrigée en version 2).
+- `generate.mjs` retouche le projet généré (version 3, 1.0.2) : plus d'image de lancement envoyée à Chrome, et
+  `LauncherActivity` ouvre le site dans un onglet Chrome intégré (Custom Tab, avec barre d'adresse) si le plein
+  écran n'a pas démarré au bout de 8 s. `androidbrowserhelper` n'a ni délai ni secours si Chrome ne répond pas
+  pendant le lancement : l'appli restait figée sur le logo chez un testeur (Pixel 10 Pro) dont Chrome marchait.
 - L'écran de lancement (grand logo) reste affiché tant que Chrome n'a rien dessiné de la page : `index.html`
   affiche donc tout de suite un écran « Chargement… » (remplacé par l'appli, ou par un message et « Réessayer »
   au bout de 15 s), et `main.tsx` n'attend pas les reprises de la base plus de 4 s avant d'afficher l'appli
