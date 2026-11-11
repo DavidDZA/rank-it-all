@@ -66,13 +66,38 @@ async function runPool(tasks: (() => Promise<void>)[], concurrency: number) {
   await Promise.all(Array.from({ length: concurrency }, worker));
 }
 
-export type Progress = (message: string) => void;
+/** Progression : message, et part du travail faite (0 à 1) quand on la connaît. */
+export type Progress = (message: string, done?: number) => void;
 
-/** Récupère les titres d'une requête ; `seen` reçoit leurs clés (un titre trouvé par deux requêtes compte une fois). */
-async function fetchQuery(q: Query, onProgress: Progress, seen: Set<string>): Promise<void> {
-  onProgress(`Préparation des ${q.label}…`);
+/** Une requête prête à être téléchargée : ses tranches de dates, et son nombre de pages. */
+interface Prepared {
+  q: Query;
+  ranges: Range[];
+  pages: number;
+}
+
+async function prepare(q: Query, onProgress: Progress): Promise<Prepared> {
+  onProgress(`Préparation des ${q.label}…`, 0);
   const ranges = await splitRanges(q, since(q), until(q));
+  return { q, ranges, pages: ranges.reduce((n, r) => n + Math.min(r.first.total_pages, MAX_PAGES), 0) };
+}
 
+/** Prépare toutes les requêtes, puis les télécharge ; `seen` reçoit les clés des titres (un titre trouvé deux fois compte une fois). */
+async function fetchQueries(queries: Query[], onProgress: Progress, seen: Set<string>): Promise<void> {
+  const prepared: Prepared[] = [];
+  for (const q of queries) prepared.push(await prepare(q, onProgress));
+  const total = Math.max(1, prepared.reduce((n, p) => n + p.pages, 0));
+  let fetched = 0;
+  for (const p of prepared) {
+    await fetchPrepared(p, seen, (count) => {
+      fetched++;
+      onProgress(`${count.toLocaleString('fr-FR')} ${p.q.label} récupérés…`, fetched / total);
+    });
+  }
+}
+
+/** Télécharge les pages d'une requête préparée ; `onPage` reçoit, à chaque page lue, le nombre de titres gardés. */
+async function fetchPrepared({ q, ranges }: Prepared, seen: Set<string>, onPage: (count: number) => void): Promise<void> {
   let buffer: Title[] = [];
   let count = 0;
   const keep = (page: Page) => {
@@ -81,7 +106,6 @@ async function fetchQuery(q: Query, onProgress: Progress, seen: Set<string>): Pr
   const flush = async () => {
     const batch = buffer;
     buffer = [];
-    count += batch.length;
     batch.forEach((t) => seen.add(t.key));
     // Conserve les repères des fiches déjà lues (les fiches elles-mêmes sont rangées à part).
     const existing = await db.titles.bulkGet(batch.map((t) => t.key));
@@ -91,16 +115,21 @@ async function fetchQuery(q: Query, onProgress: Progress, seen: Set<string>): Pr
       if (e?.collectionId !== undefined) t.collectionId = e.collectionId;
     });
     await db.titles.bulkPut(batch);
-    onProgress(`${count.toLocaleString('fr-FR')} ${q.label} récupérés…`);
+  };
+  const read = (page: Page) => {
+    const before = buffer.length;
+    keep(page);
+    count += buffer.length - before;
+    onPage(count);
   };
 
   const tasks: (() => Promise<void>)[] = [];
   for (const range of ranges) {
-    keep(range.first);
+    read(range.first);
     const pages = Math.min(range.first.total_pages, MAX_PAGES);
     for (let p = 2; p <= pages; p++) {
       tasks.push(async () => {
-        keep(await discover(q, range.from, range.to, p));
+        read(await discover(q, range.from, range.to, p));
         if (buffer.length >= 500) await flush();
       });
     }
@@ -161,7 +190,7 @@ export async function importCustom(c: CustomImport, onProgress: Progress): Promi
   const movies = () => db.titles.where('type').equals('movie').count();
   const before = await movies();
   const found = new Set<string>();
-  await fetchQuery(customQuery(c), onProgress, found);
+  await fetchQueries([customQuery(c)], onProgress, found);
   return { found: found.size, added: (await movies()) - before };
 }
 
@@ -188,7 +217,7 @@ async function removeMissing(seen: Set<string>): Promise<number> {
 export async function syncCatalogue(minVotes: MinVotes, onProgress: Progress): Promise<{ movie: number; tv: number; anime: number; removed: number }> {
   const seen = new Set<string>();
   const queries = [...catalogueQueries(minVotes), ...(await getCustomImports()).map(customQuery)];
-  for (const q of queries) await fetchQuery(q, onProgress, seen);
+  await fetchQueries(queries, onProgress, seen);
   const removed = await removeMissing(seen);
   forgetCategories();
   await setMeta('lastSync', Date.now());

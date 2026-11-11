@@ -109,6 +109,14 @@ ceux **vus ou en wishlist** (ajouts manuels compris), qui restent avec leur plac
 jamais triés ou « pas vu / pas envie » partent avec leur réponse, donc aussi sur le compte. Les seuils sont
 synchronisés pour que deux appareils ne s'effacent pas des titres.
 
+**Premier téléchargement automatique** (`catalogueDownload.ts`) : au démarrage, si le catalogue n'a jamais été
+téléchargé sur l'appareil (pas de meta `lastSync` ; un téléchargement interrompu recommence donc au lancement
+suivant), il part tout seul avec les seuils enregistrés (ceux du compte une fois la session lue, sinon les seuils par
+défaut). Un seul onglet à la fois (verrou). Progression dans l'accueil, le swipe (catalogue vide) et Réglages →
+Catalogue (`CatalogueProgress`) ; en cas d'échec, « Réessayer ». `syncCatalogue` prépare d'abord toutes les requêtes
+(nombre de pages connu), d'où une progression en pourcentage. Les réglages fins (seuils, imports sur mesure) restent
+dans Réglages → Catalogue.
+
 **Imports sur mesure** (films seulement, `customImports.ts`, Réglages → Import sur mesure) : une requête de plus
 par import (genre, langue originale, pays de production, années ; 150 votes par défaut), lancée tout de suite
 (`importCustom`) puis relancée par chaque `syncCatalogue`. Retenus dans la meta `custom-imports` (synchronisée) :

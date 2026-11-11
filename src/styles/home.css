@@ -40,6 +40,12 @@
   font-weight: 600;
   box-shadow: 0 8px 24px rgb(255 95 162 / 0.3);
 }
+.banner-btn {
+  display: block;
+  width: 100%;
+  border: 0;
+  text-align: left;
+}
 
 /* Activité du jour (format PC). */
 .activity {

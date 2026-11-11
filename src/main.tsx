@@ -7,6 +7,7 @@ import { startCloud } from './lib/cloud';
 import { migrateMinVotes } from './lib/settings';
 import { migrateDatabaseName } from './lib/db';
 import { splitAnimeRankings } from './lib/ranking';
+import { startFirstCatalogue } from './lib/catalogueDownload';
 import './styles/index.css';
 
 registerSW({ immediate: true });
@@ -27,4 +28,6 @@ Promise.race([migrations, new Promise((resolve) => setTimeout(resolve, STARTUP_W
         <App />
       </StrictMode>,
     );
+    // Catalogue jamais téléchargé sur cet appareil : on le télécharge tout de suite (progression sur l'accueil).
+    migrations.finally(() => startFirstCatalogue());
   });

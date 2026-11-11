@@ -318,6 +318,21 @@ async function runSync(): Promise<void> {
 export const syncNow = () => schedule(0);
 
 /** Synchro immédiate, attendue (avant une mise à jour du catalogue : seuils de votes à jour). Sans compte : rien. */
+/** Attend que la session soit lue au démarrage (au plus `timeout` ms : sans réseau, on n'attend pas plus). */
+export function whenCloudReady(timeout = 5000): Promise<void> {
+  if (state.ready) return Promise.resolve();
+  return new Promise((resolve) => {
+    const done = () => {
+      listeners.delete(check);
+      clearTimeout(timer);
+      resolve();
+    };
+    const check = () => state.ready && done();
+    const timer = setTimeout(done, timeout);
+    listeners.add(check);
+  });
+}
+
 export async function syncAndWait(): Promise<void> {
   if (!state.user) return;
   while (running) await new Promise((r) => setTimeout(r, 200));

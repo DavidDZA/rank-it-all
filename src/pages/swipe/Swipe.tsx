@@ -28,6 +28,8 @@ import {
 import { FilterButton, FilterIcon, FilterSheet } from '../../components/FilterSheet';
 import { ActionButton, CardTag } from './controls';
 import { KNOWN_VOTES, personFilmography } from '../../lib/tmdb';
+import { downloadCatalogue, useCatalogueDownload } from '../../lib/catalogueDownload';
+import { CatalogueProgress } from '../../components/CatalogueProgress';
 
 const FLIP_MS = 350; // durée du retournement de la carte (animation flip-in)
 
@@ -43,6 +45,13 @@ export default function Swipe({ category }: { category: Category }) {
   const answered = useRef(new Set<string>());
   const [loaded, setLoaded] = useState(false);
   const [catalogueVersion, setCatalogueVersion] = useState(0); // relance le chargement après une mise à jour
+  const download = useCatalogueDownload();
+  const downloadSeen = useRef(download.version);
+  useEffect(() => {
+    if (download.version === downloadSeen.current) return;
+    downloadSeen.current = download.version;
+    setCatalogueVersion((v) => v + 1); // téléchargement terminé pendant qu'on est là : catalogue relu
+  }, [download.version]);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [theme, setTheme] = useState<Theme>(() => readPref(themeKey, NO_THEME));
   const [showThemes, setShowThemes] = useState(false);
@@ -366,13 +375,17 @@ export default function Swipe({ category }: { category: Category }) {
       ) : !current ? (
         <div className="empty">
           {catalogue.current.length === 0 ? (
-            <>
-              <span className="big-emoji">📦</span>
-              <p>Le catalogue est vide.</p>
-              <a className="btn primary" href="#/settings">
-                Télécharger le catalogue
-              </a>
-            </>
+            download.running || download.error ? (
+              <CatalogueProgress compact />
+            ) : (
+              <>
+                <span className="big-emoji">📦</span>
+                <p>Le catalogue est vide.</p>
+                <button className="btn primary" onClick={() => downloadCatalogue()} title="Récupérer les films et séries depuis TMDB (environ une minute)">
+                  Télécharger le catalogue
+                </button>
+              </>
+            )
           ) : !isNoTheme(theme) ? (
             <>
               <span className="big-emoji">🔍</span>

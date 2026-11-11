@@ -12,6 +12,8 @@ import { useIsDesktop } from '../lib/hooks';
 import { loadCatalogue } from './swipe/pool';
 import { useCloud } from '../lib/cloud';
 import { cloudEnabled } from '../lib/supabase';
+import { downloadCatalogue, useCatalogueDownload } from '../lib/catalogueDownload';
+import { CatalogueProgress } from '../components/CatalogueProgress';
 
 const fmt = (n: number) => Math.max(0, n).toLocaleString('fr-FR');
 const DAY = 86_400_000;
@@ -41,6 +43,7 @@ export default function Home() {
   const [tagline] = useState(() => pick(TAGLINES));
   const desktop = useIsDesktop();
   const cloud = useCloud();
+  const download = useCatalogueDownload();
   const showAnime = useCategories().includes('anime');
   const stats = useLiveQuery(async () => {
     const byCategory = async (category: Category) => {
@@ -105,10 +108,19 @@ export default function Home() {
         </a>
       </header>
 
-      {(noToken || emptyCatalogue) && (
-        <a className="banner" href={noToken ? '#/settings/tmdb' : '#/settings/catalogue'}>
-          {noToken ? '🔑 Commence par renseigner ta clé TMDB dans les réglages →' : '📦 Télécharge le catalogue des films et séries →'}
+      {noToken ? (
+        <a className="banner" href="#/settings/tmdb">
+          🔑 Commence par renseigner ta clé TMDB dans les réglages →
         </a>
+      ) : download.running || download.error ? (
+        <CatalogueProgress />
+      ) : (
+        emptyCatalogue &&
+        download.checked && (
+          <button className="banner banner-btn" onClick={() => downloadCatalogue()} title="Récupérer les films et séries depuis TMDB (environ une minute)">
+            📦 Télécharger le catalogue des films et séries
+          </button>
+        )
       )}
 
       {cloudEnabled && cloud.ready && !cloud.user && (

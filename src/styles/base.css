@@ -489,3 +489,37 @@ button.link {
   background: linear-gradient(135deg, #ffe08a, #f2b632);
   border-color: transparent;
 }
+
+/* ---------- Téléchargement du catalogue ---------- */
+
+.progress-bar {
+  display: block;
+  height: 8px;
+  border-radius: 99px;
+  background: rgb(255 255 255 / 0.12);
+  overflow: hidden;
+}
+.progress-bar span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--grad);
+  transition: width 0.3s ease;
+}
+.catalogue-progress {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  text-align: left;
+}
+.catalogue-progress p {
+  margin: 0;
+}
+.catalogue-progress .btn {
+  align-self: flex-start;
+}
+.catalogue-progress-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}

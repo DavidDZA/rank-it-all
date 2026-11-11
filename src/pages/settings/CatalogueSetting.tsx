@@ -5,6 +5,8 @@ import { DEFAULT_MIN_VOTES, getMinVotes, getShowAnime, getToken, setMinVotes, se
 import { OLD_MOVIES_BEFORE, syncCatalogue } from '../../lib/sync';
 import { isAnimeTitle } from '../../lib/category';
 import { syncAndWait } from '../../lib/cloud';
+import { useCatalogueDownload } from '../../lib/catalogueDownload';
+import { CatalogueProgress, ProgressBar } from '../../components/CatalogueProgress';
 
 const VOTE_KEYS = Object.keys(DEFAULT_MIN_VOTES) as (keyof MinVotes)[];
 const asText = (v: MinVotes) => Object.fromEntries(VOTE_KEYS.map((k) => [k, String(v[k])])) as Record<keyof MinVotes, string>;
@@ -29,6 +31,8 @@ export function CatalogueSetting() {
   }, [saved && JSON.stringify(saved)]);
   const [syncing, setSyncing] = useState(false);
   const [syncMsg, setSyncMsg] = useState<string | null>(null);
+  const [syncDone, setSyncDone] = useState(0);
+  const download = useCatalogueDownload(); // premier téléchargement, lancé au démarrage
 
   const info = useLiveQuery(async () => ({
     movies: await db.titles.where('type').equals('movie').count(),
@@ -50,6 +54,7 @@ export function CatalogueSetting() {
   const sync = async () => {
     setSyncing(true);
     setSyncMsg('Démarrage…');
+    setSyncDone(0);
     await requestPersistentStorage();
     try {
       // Sans saisie ici : les seuils du compte, à jour (ceux d'un autre appareil ont pu changer).
@@ -58,7 +63,10 @@ export function CatalogueSetting() {
       setVotes(asText(chosen));
       edited.current = false;
       await setMinVotes(chosen);
-      const { movie, tv, anime, removed } = await syncCatalogue(chosen, setSyncMsg);
+      const { movie, tv, anime, removed } = await syncCatalogue(chosen, (message, done) => {
+        setSyncMsg(message);
+        if (done !== undefined) setSyncDone(done);
+      });
       const n = (x: number) => x.toLocaleString('fr-FR');
       setSyncMsg(
         `✓ Terminé : ${n(movie)} films, ${n(tv)} séries et ${n(anime)} animes à jour.` +
@@ -111,9 +119,16 @@ export function CatalogueSetting() {
           🎌 Afficher la catégorie Animes
         </button>
       </div>
-      <button className="btn primary" onClick={sync} disabled={syncing || !getToken()} title="Récupérer les films et séries depuis TMDB (environ 1 minute)">
-        {syncing ? 'Mise à jour en cours…' : info?.lastSync ? 'Mettre à jour le catalogue' : 'Télécharger le catalogue'}
+      <CatalogueProgress compact />
+      <button
+        className="btn primary"
+        onClick={sync}
+        disabled={syncing || download.running || !getToken()}
+        title="Récupérer les films et séries depuis TMDB (environ 1 minute)"
+      >
+        {syncing || download.running ? 'Mise à jour en cours…' : info?.lastSync ? 'Mettre à jour le catalogue' : 'Télécharger le catalogue'}
       </button>
+      {syncing && <ProgressBar done={syncDone} />}
       {syncMsg && <p className="small">{syncMsg}</p>}
       <p className="muted small">Les titres absents du nouveau catalogue sont retirés, sauf ceux que tu as vus ou mis dans ta wishlist : eux restent, avec leur place dans tes classements.</p>
     </section>
