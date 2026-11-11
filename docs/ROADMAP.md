@@ -15,7 +15,7 @@
 >
 > **Reprendre ici** — test fermé en cours : suivre les inscriptions (12 testeurs minimum pendant 14 jours, § 2
 > étapes 5-6), puis demander la production. En attendant : **traduction** (§ 4, décisions à prendre au début de
-> la session), puis musique et jeux vidéo (§ 5).
+> la session), puis musique et jeux vidéo (§ 5). Faire connaître l'appli après la sortie : [PROMOTION.md](PROMOTION.md).
 
 ## 1. Décisions en attente
 
@@ -141,7 +141,8 @@ libres (TMDB, Supabase) — c'est autorisé. Utile aussi si le Play Store est bl
   chaque nuit par GitHub Actions** et publié sur GitHub Pages (un téléchargement au lieu de ≈ 900 requêtes ; un
   fichier par langue avec la traduction).
 - **Viralité** : lien / QR code sur l'image du top 10, carte de compatibilité à partager, demande de note sur le
-  store.
+  store, « Mon année en films » en décembre, import Letterboxd / SensCritique / IMDb / TV Time. Plan complet pour
+  faire connaître l'appli : [PROMOTION.md](PROMOTION.md).
 
 ## 5. Pistes plus lointaines
 
