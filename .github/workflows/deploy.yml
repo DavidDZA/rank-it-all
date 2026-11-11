@@ -28,8 +28,8 @@ jobs:
       - run: npm run build
         env:
           BASE_PATH: /${{ github.event.repository.name }}/
-          # Provisoire : clé dans le site, le temps que l'adresse du relais (worker/) soit stable.
-          VITE_TMDB_TOKEN: ${{ secrets.TMDB_TOKEN }}
+          # TMDB par le relais (worker/) : la clé TMDB n'est plus jamais dans le site.
+          VITE_TMDB_RELAY: https://rank-it-all-tmdb.rankitall.workers.dev
           VITE_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.SUPABASE_PUBLISHABLE_KEY }}
       - uses: actions/upload-pages-artifact@v3
