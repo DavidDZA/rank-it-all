@@ -27,7 +27,7 @@ wishlist et ses classements, par sessions courtes. Gratuite, sans publicité, op
 | Catalogue | API **TMDB** depuis le navigateur (`src/lib/tmdb.ts`, `src/lib/sync.ts`) |
 | Comptes | **Supabase** (auth + PostgreSQL + règles RLS), schéma dans `supabase/schema.sql`, types dans `src/lib/database.types.ts` |
 | Hébergement | **GitHub Pages** (`https://daviddza.github.io/rank-it-all/`), déployé par GitHub Actions à chaque push sur `main`. L'ancienne adresse `/Sort-your-stuffs/` redirige (dépôt `Sort-your-stuffs`, fichiers dans `tools/ancienne-adresse/`, dont un `sw.js` qui retire l'ancienne version installée) |
-| Secrets | GitHub : `TMDB_TOKEN`, `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY` (injectés au build en `VITE_…`). En local : `.env.local` (ignoré par git) |
+| Secrets | GitHub : `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY` (injectés au build en `VITE_…`) ; `TMDB_TOKEN`, `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID` pour le relais TMDB (§ 3.4), jamais dans le site ; Android, sauvegarde : § 2.1, § 4.3. En local : `.env.local` (ignoré par git) |
 | Appli Android | **TWA** (Trusted Web Activity) : le site en plein écran dans une appli Play Store, `io.github.daviddza.rankitall` (voir § 2.1) |
 | Tests | **Vitest** (`tests/`, logique + base en mémoire) ; **Playwright** (`e2e/`, appli construite dans le Chrome installé, formats téléphone et PC) |
 
@@ -197,6 +197,7 @@ Restaurer (dans un projet Supabase neuf, ou le même vidé) :
 ## 5. Tests et vérifications
 
 - `npx tsc -b`, `npm test` (Vitest), `npm run build` avant chaque push.
+- `node worker/test.mjs` : le relais TMDB, avec Cloudflare et TMDB simulés.
 - `npm run e2e` : Playwright sur l'appli construite, dans le Chrome installé, formats téléphone (tactile) et PC.
 - `npm run e2e:live` : sur le vrai projet Supabase (comptes de test créés puis supprimés) — après toute
   modification de la synchro, des amis ou du schéma.

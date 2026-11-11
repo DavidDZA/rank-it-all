@@ -38,9 +38,9 @@ Exclus : documentaires, courts métrages (< 40 min), émissions (télé-réalit�
   `VITE_SUPABASE_PUBLISHABLE_KEY`). Sans elles, l'appli fonctionne sans compte.
 - **Amis** (avec un compte) : ajout par code ou lien d'invitation, puis page « À deux » : wishlist commune,
   tirage du soir, conseils croisés, compatibilité des classements. Chacun choisit ce qu'il partage.
-- La clé TMDB n'est jamais dans le code : elle est injectée au déploiement depuis le secret GitHub `TMDB_TOKEN`
-  (Settings → Secrets and variables → Actions). Une autre clé peut être saisie dans les réglages (prioritaire).
-  En local, sans secret, il faut la saisir dans les réglages.
+- La clé TMDB n'est jamais dans le site : le site appelle un **relais TMDB** (Cloudflare Worker, dossier `worker/`)
+  qui ajoute la clé (secret GitHub `TMDB_TOKEN`). Une clé personnelle peut être saisie dans les réglages
+  (prioritaire, appel direct à TMDB). En local : `VITE_TMDB_TOKEN` dans `.env.local`, ou une clé dans les réglages.
 
 ## Développement
 

@@ -10,6 +10,8 @@ Cloudflare Worker entre l'appli et TMDB : le site l'appelle **sans clé**, le re
 - Cache partagé entre utilisateurs : 12 h pour les pages du catalogue, 24 h pour les fiches, 1 h pour les recherches.
 - Offre gratuite : 100 000 demandes par jour ; un premier téléchargement du catalogue en fait environ 900.
 
+Test (sans Cloudflare ni TMDB, simulés) : `node worker/test.mjs`.
+
 Déploiement automatique à chaque modification de ce dossier (`.github/workflows/worker.yml`), ou à la main :
 *Actions → Relais TMDB → Run workflow*. Secrets GitHub : `CLOUDFLARE_API_TOKEN` (jeton « Edit Cloudflare
 Workers », sans expiration), `CLOUDFLARE_ACCOUNT_ID`, `TMDB_TOKEN` (recopié dans le relais à chaque déploiement :

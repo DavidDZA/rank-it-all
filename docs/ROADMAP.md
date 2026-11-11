@@ -1,19 +1,21 @@
 # Feuille de route — ce qui reste à faire
 
-> État au 08/11/2026. Comment l'appli marche aujourd'hui : [ARCHITECTURE.md](ARCHITECTURE.md).
+> État au 11/11/2026. Comment l'appli marche aujourd'hui : [ARCHITECTURE.md](ARCHITECTURE.md).
 > Fait : comptes et synchro, amis et « À deux », catégorie Animes, seuils français / vieux films, classement à
 > la main, refonte (fiches à part, chargement découpé, types Supabase, tests de bout en bout) ; puis (01-02/11)
 > renommage en **Rank It All** (base locale migrée, ancienne adresse redirigée), filtre « dispo sur mes
 > abonnements » dans les classements, import sur mesure de films, copies de titres allégées sur Supabase (÷ 5),
 > sauvegarde nocturne chiffrée, e-mails par Gmail et règles du mot de passe, bouton Retour, appli Android (TWA)
-> compilée et signée, fiche Play Store prête ; (08/11) appli créée dans la Play Console, **version 2 (1.0.1) en
-> test interne, vérifiée sur le téléphone** (plein écran, connexion Google, données), empreinte de la clé Google
-> dans `assetlinks.json` ; fiche du Store et tous les formulaires « Contenu de l'appli » remplis (réponses dans
-> `store/fiche-play-store.md`) ; groupe Google des testeurs créé.
+> compilée et signée, fiche Play Store prête ; (08/11) appli créée dans la Play Console, version 2 en test
+> interne, fiche du Store et formulaires « Contenu de l'appli » remplis (`store/fiche-play-store.md`) ; (10-11/11)
+> compte de démonstration, **test fermé validé et ouvert aux testeurs**, écran « Chargement… » immédiat,
+> catalogue téléchargé tout seul à la première ouverture (barre de progression), astuces à la première visite de
+> chaque écran, **version 3 (1.0.2)** contre le blocage sur le logo (envoyée pour examen), **relais TMDB**
+> (Cloudflare, plus de clé dans le site ; clé régénérée).
 >
-> **Reprendre ici** — test fermé **envoyé pour examen le 10/11** ; ensuite étapes 5-6 du § 2 « Reprise ». Puis, pendant les 14 jours :
-> traduction (fiche du Store multilingue à la sortie) et relais TMDB sur Cloudflare (§ 4), obligatoire avant la
-> production ; puis musique et jeux vidéo (§ 5).
+> **Reprendre ici** — test fermé en cours : suivre les inscriptions (12 testeurs minimum pendant 14 jours, § 2
+> étapes 5-6), puis demander la production. En attendant : **traduction** (§ 4, décisions à prendre au début de
+> la session), puis musique et jeux vidéo (§ 5).
 
 ## 1. Décisions en attente
 
@@ -113,6 +115,15 @@ libres (TMDB, Supabase) — c'est autorisé. Utile aussi si le Play Store est bl
 ---
 
 ## 4. Petites améliorations proposées (non lancées)
+
+- **Traduction** (prochaine session) : environ 1 100 lignes de texte français dans une quarantaine de fichiers.
+  Proposition : un dictionnaire par langue, le français en référence, typé pour que la compilation échoue s'il
+  manque une traduction ; langue et pays détectés depuis le téléphone, modifiables dans les réglages. Au-delà des
+  textes : langue des titres et résumés TMDB (`language: 'fr-FR'` dans `tmdb.ts` ; changer de langue demande une
+  mise à jour du catalogue), **pays** des plateformes de streaming (`watch_region: 'FR'`, `results.FR`), seuils
+  « titres en français » à généraliser (langue / pays de l'utilisateur), fiche du Play Store et page de
+  confidentialité. **À décider** : les langues à la sortie (recommandé : français + anglais, d'autres ensuite) et
+  le pays (recommandé : détecté depuis le téléphone, modifiable).
 
 - **Code ami** : nouvel essai automatique si le code tiré existe déjà (risque infime aujourd'hui : l'inscription
   échouerait) — quelques lignes dans `schema.sql`.
