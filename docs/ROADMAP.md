@@ -59,7 +59,7 @@ sans blocage des mineurs), sécurité des données, suppression de compte et sup
 
 **Version 3 (1.0.2)** (11/11) : correctif du blocage sur le logo chez un testeur (voir ARCHITECTURE § 2.1). À importer
 dans la Play Console (*Test fermé → Créer une version → Importer* `rank-it-all.aab` des artefacts du workflow
-« Appli Android »), puis envoyer pour examen. Le compteur des 14 jours n'est pas remis à zéro.
+« Appli Android »), puis envoyer pour examen — fait le 11/11. Inscriptions des testeurs en cours.
 
 ⚠️ Téléphone professionnel de l'utilisateur : selon la politique de son entreprise, l'installation depuis le
 Play Store peut être limitée (Play Store géré). La PWA reste la solution de repli.
