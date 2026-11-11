@@ -130,6 +130,14 @@ par import (genre, langue originale, pays de production, années ; 150 votes par
 (`importCustom`) puis relancée par chaque `syncCatalogue`. Retenus dans la meta `custom-imports` (synchronisée) :
 supprimer un import laisse partir ses films à la prochaine mise à jour, sauf ceux vus ou en wishlist.
 
+### 3.4 Accès à TMDB
+
+Le site n'a **aucune clé TMDB** : il appelle le **relais TMDB** (Cloudflare Worker, `worker/`, voir son README),
+adresse donnée au déploiement (`VITE_TMDB_RELAY`). Le relais ajoute la clé (secret `TMDB_TOKEN`), n'accepte que le
+site et les chemins utilisés, limite le débit par IP et garde les réponses en cache. Une clé saisie dans Réglages →
+Clé TMDB reste prioritaire : l'appli appelle alors TMDB directement. En local, sans relais, `VITE_TMDB_TOKEN` dans
+`.env.local`. Les affiches (`image.tmdb.org`) ne demandent pas de clé.
+
 ## 4. Compte et amis (Supabase)
 
 ### 4.1 Synchro (`cloud.ts`, `cloudMerge.ts`)

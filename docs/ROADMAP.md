@@ -120,7 +120,7 @@ libres (TMDB, Supabase) — c'est autorisé. Utile aussi si le Play Store est bl
 - **Statistiques d'usage** : table « sessions » dans Supabase (temps passé par compte), ou mesure d'audience sans
   cookie (GoatCounter, Umami) ; dans les deux cas, mettre à jour la page de confidentialité. En attendant, des
   requêtes SQL sur `auth.users`, `answers` et l'activité synchronisée donnent l'essentiel.
-- **Relais TMDB** pour ne plus exposer la clé dans le site — à faire avant la production sur le Play Store.
+- ~~**Relais TMDB**~~ — fait le 11/11 (`worker/`, ARCHITECTURE § 3.4). Reste : clé TMDB régénérée (l'ancienne était lisible dans le site).
   Recommandation (02/11) : **Cloudflare Worker** gratuit (100 000 requêtes/jour, pas de limite de trafic), clé en
   secret, n'accepte que les demandes du site, limite le débit par appareil, cache partagé des réponses identiques
   (pages du catalogue, fiches). Tous les appels passent par `tmdb()` (`src/lib/tmdb.ts`) : seule l'adresse change ;
