@@ -5,6 +5,7 @@ import { changeStatus } from '../lib/ranking';
 import { KNOWN_VOTES, personFilmography, search, searchPeople, type Person, type PersonRole } from '../lib/tmdb';
 import { PersonAvatar, SeenButtons, TitleRow, TopBar, TypeFilter } from '../components/common';
 import { Tutorial } from '../components/Tutorial';
+import { tutorialSeen } from '../lib/tutorial';
 
 type Mode = 'title' | PersonRole;
 
@@ -32,6 +33,8 @@ const DEPARTMENTS: Record<string, string> = {
 
 /** Ajout manuel : par titre, ou par réalisateur / acteur (on choisit la personne, puis sa filmographie). */
 export default function AddManual() {
+  // Première visite : pas de focus dans la recherche, le clavier du téléphone cacherait l'astuce.
+  const [focusSearch] = useState(() => tutorialSeen('add'));
   const [mode, setMode] = useState<Mode>('title');
   const [query, setQuery] = useState('');
   const [titles, setTitles] = useState<Title[]>([]);
@@ -121,7 +124,7 @@ export default function AddManual() {
           setPerson(null);
         }}
       />
-      <input className="input" type="search" placeholder={PLACEHOLDER[mode]} value={query} onChange={(e) => setQuery(e.target.value)} autoFocus />
+      <input className="input" type="search" placeholder={PLACEHOLDER[mode]} value={query} onChange={(e) => setQuery(e.target.value)} autoFocus={focusSearch} />
       {loading && <p className="muted center">Recherche…</p>}
       {error && <p className="error">{error}</p>}
 
