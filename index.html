@@ -7,9 +7,70 @@
     <link rel="icon" type="image/svg+xml" href="icons/favicon.svg" />
     <link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
     <title>Rank It All</title>
+    <style>
+      /* Écran de chargement, affiché avant l'appli : la page se dessine tout de suite (l'écran de lancement de
+         l'appli Android disparaît alors) et un message remplace l'attente si l'appli ne démarre pas. */
+      html,
+      body {
+        margin: 0;
+        background: #100d1f;
+        color: #f6f4ff;
+        font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+      }
+      #boot {
+        min-height: 100vh;
+        min-height: 100dvh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 16px;
+        padding: 24px;
+        box-sizing: border-box;
+        text-align: center;
+      }
+      #boot img {
+        width: 72px;
+        height: 72px;
+      }
+      #boot p {
+        margin: 0;
+        color: #aaa4ca;
+        max-width: 22rem;
+        line-height: 1.4;
+      }
+      #boot button {
+        font: inherit;
+        color: #f6f4ff;
+        background: linear-gradient(135deg, #ff5fa2, #ff9f43);
+        border: 0;
+        border-radius: 999px;
+        padding: 10px 20px;
+      }
+    </style>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <div id="boot">
+        <img src="icons/favicon.svg" alt="" />
+        <p id="boot-text">Chargement…</p>
+      </div>
+    </div>
+    <script>
+      // L'appli remplace #boot dès qu'elle s'affiche. Toujours là au bout de 15 s : elle n'a pas démarré.
+      setTimeout(function () {
+        var boot = document.getElementById('boot');
+        if (!boot) return;
+        document.getElementById('boot-text').textContent =
+          'L’appli ne démarre pas. Vérifie ta connexion et que Chrome est à jour, puis réessaie.';
+        var again = document.createElement('button');
+        again.textContent = 'Réessayer';
+        again.onclick = function () {
+          location.reload();
+        };
+        boot.appendChild(again);
+      }, 15000);
+    </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

@@ -59,6 +59,10 @@ version Android n'est utile que pour changer ses réglages (nom, icône, couleur
   `cd android && npm install && npm run generate`, en augmentant `appVersionCode` pour une nouvelle version.
   ⚠️ Laisser `enableSiteSettingsShortcut` à `true` : à `false`, `androidbrowserhelper` 2.7.4 plante au démarrage
   (il désactive `ManageDataLauncherActivity`, alors absente du manifeste — version 1, corrigée en version 2).
+- L'écran de lancement (grand logo) reste affiché tant que Chrome n'a rien dessiné de la page : `index.html`
+  affiche donc tout de suite un écran « Chargement… » (remplacé par l'appli, ou par un message et « Réessayer »
+  au bout de 15 s), et `main.tsx` n'attend pas les reprises de la base plus de 4 s avant d'afficher l'appli
+  (11/11/2026, appli figée sur le logo chez un testeur sur Pixel 10 Pro).
 - `.github/workflows/android.yml` compile et signe (`rank-it-all.aab` pour la Play Console, `rank-it-all.apk`
   pour tester) ; rien à installer sur le PC. Secrets `ANDROID_KEYSTORE_BASE64` / `ANDROID_KEYSTORE_PASSWORD` :
   la clé de dépôt (`upload-key.p12`, alias `upload`), gardée hors du dépôt ; Google re-signe avec sa clé
