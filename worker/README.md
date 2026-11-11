@@ -14,3 +14,5 @@ Déploiement automatique à chaque modification de ce dossier (`.github/workflow
 *Actions → Relais TMDB → Run workflow*. Secrets GitHub : `CLOUDFLARE_API_TOKEN` (jeton « Edit Cloudflare
 Workers », sans expiration), `CLOUDFLARE_ACCOUNT_ID`, `TMDB_TOKEN` (recopié dans le relais à chaque déploiement :
 après avoir changé la clé TMDB, relancer ce déploiement).
+
+Clé TMDB régénérée le 11/11/2026 (l'ancienne était lisible dans le site avant le relais).
