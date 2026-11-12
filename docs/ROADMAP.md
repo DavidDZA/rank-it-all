@@ -11,15 +11,16 @@
 > compte de démonstration, **test fermé validé et ouvert aux testeurs**, écran « Chargement… » immédiat,
 > catalogue téléchargé tout seul à la première ouverture (barre de progression), astuces à la première visite de
 > chaque écran, **version 3 (1.0.2)** contre le blocage sur le logo (envoyée pour examen), **relais TMDB**
-> (Cloudflare, plus de clé dans le site ; clé régénérée) ; (12/11) premiers retours des testeurs : fiches sans
-> réalisateur, acteurs, plateformes ni bande-annonce sur les appareils déjà utilisés, et recherche par personne
-> refusée par le relais — corrigés, avec des tests ; nouveautés ajoutées au catalogue au démarrage (une fois par jour) ; lenteurs corrigées (file des demandes TMDB,
-> fiches enregistrées par lots, listes sans relecture continue, refus du relais plus gardés 24 h, « Annuler » des duels),
-> tests de perf (ARCHITECTURE § 3.5 et § 5).
+> (Cloudflare, plus de clé dans le site ; clé régénérée) ; (12/11) **12 testeurs inscrits**, premiers retours corrigés :
+> fiches sans réalisateur, acteurs, plateformes ni bande-annonce (ancienne clé TMDB refusée, fiches vides), recherche
+> par personne refusée par le relais, lenteurs (classement figé, « Annuler » des duels, stats lentes : ARCHITECTURE
+> § 3.5) ; nouveautés ajoutées au catalogue au démarrage (une fois par jour) ; tests : sauvegarde, stats, démarrage,
+> tous les parcours de bout en bout, « À deux » et synchro avec Supabase simulé, tests de perf (ARCHITECTURE § 5).
 >
-> **Reprendre ici** — test fermé en cours : suivre les inscriptions (12 testeurs minimum pendant 14 jours, § 2
-> étapes 5-6), puis demander la production. En attendant : **traduction** (§ 4, décisions à prendre au début de
-> la session), puis musique et jeux vidéo (§ 5). Faire connaître l'appli après la sortie : [PROMOTION.md](PROMOTION.md).
+> **Reprendre ici** — test fermé en cours depuis le 11/11 (12 testeurs inscrits le 12/11) : attendre les 14 jours
+> (§ 2 étapes 5-6), puis demander la production. D'abord : demander à l'utilisateur si l'appli est fluide sur son
+> téléphone depuis les correctifs du 12/11 au soir, et s'il a d'autres retours de testeurs. Ensuite : **traduction**
+> (§ 4, décisions à prendre au début de la session), puis musique et jeux vidéo (§ 5). Faire connaître l'appli après la sortie : [PROMOTION.md](PROMOTION.md).
 
 ## 1. Décisions en attente
 
