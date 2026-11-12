@@ -214,7 +214,7 @@ describe('relais TMDB : clé personnelle', () => {
 
   it('clé essayée dans les réglages et refusée : signalée, rien d’oublié', async () => {
     setToken('cle-valide');
-    await expect(tmdb('/authentication', {}, 'mauvaise-cle')).rejects.toMatchObject({ status: 401 });
+    await expect(tmdb('/authentication', {}, { token: 'mauvaise-cle' })).rejects.toMatchObject({ status: 401 });
     expect(getUserToken()).toBe('cle-valide');
   });
 });

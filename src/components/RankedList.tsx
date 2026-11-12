@@ -1,16 +1,38 @@
-import { useEffect, useState, type ReactNode } from 'react';
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { closestCenter, DndContext, KeyboardSensor, PointerSensor, useSensor, useSensors, type DragEndEvent } from '@dnd-kit/core';
 import { SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
 import { CSS } from '@dnd-kit/utilities';
-import { db, withDetails, type Title } from '../lib/db';
+import type { Title } from '../lib/db';
 import { moveInRanking, promote, readRanking, unrankedKeys, type Scope } from '../lib/ranking';
-import { matchesSearch } from '../lib/hooks';
+import { matchesSearch, titlesOf, useTitleMap } from '../lib/hooks';
 import { toast } from '../lib/fun';
 import { SearchBox, TitleRow } from './common';
 
 const MEDALS = ['🥇', '🥈', '🥉'];
+
+/** Lignes dessinées d'abord, puis par paquets à l'approche du bas de la liste (600 lignes d'un coup : 1 à 2 s). */
+export const FIRST_ROWS = 60;
+const MORE_ROWS = 100;
+
+/**
+ * Nombre de lignes à dessiner, qui grandit quand le repère (à placer après la dernière ligne) approche de l'écran.
+ * Revient au début quand `reset` change (recherche, filtre).
+ */
+function useGrowingLimit(reset: unknown): [number, (el: HTMLElement | null) => void] {
+  const [limit, setLimit] = useState(FIRST_ROWS);
+  const observer = useRef<IntersectionObserver | null>(null);
+  useEffect(() => setLimit(FIRST_ROWS), [reset]);
+  useEffect(() => () => observer.current?.disconnect(), []);
+  const sentinel = (el: HTMLElement | null) => {
+    observer.current?.disconnect();
+    if (!el || typeof IntersectionObserver === 'undefined') return;
+    observer.current = new IntersectionObserver((entries) => entries.some((e) => e.isIntersecting) && setLimit((l) => l + MORE_ROWS), { rootMargin: '1200px 0px' });
+    observer.current.observe(el);
+  };
+  return [limit, sentinel];
+}
 
 /**
  * Classement numéroté, suivi des titres pas encore classés ; recherche et filtre optionnel.
@@ -32,16 +54,20 @@ export function RankedList({
   const [query, setQuery] = useState('');
   // Ordre affiché tout de suite après un déplacement, le temps que la base le renvoie.
   const [optimistic, setOptimistic] = useState<string[] | null>(null);
-  const data = useLiveQuery(async () => {
+  // Lecture vivante des seules clés (classement, réponses) ; titres et fiches (pour les filtres sur les plateformes)
+  // relus à part, sans être relancés à chaque fiche enregistrée (voir useTitleMap).
+  const lists = useLiveQuery(async () => {
     const ranking = await readRanking(scope);
-    const unranked = await unrankedKeys(scope, ranking);
-    const [r, u] = await Promise.all([db.titles.bulkGet(ranking), db.titles.bulkGet(unranked)]);
-    const ok = (t: Title | undefined): t is Title => !!t;
-    // Fiches jointes : les filtres peuvent porter sur les plateformes (wishlist « dispo chez moi »).
-    const [ranked, rest] = await Promise.all([withDetails(r.filter(ok)), withDetails(u.filter(ok))]);
-    return { ranked, unranked: rest.sort((a, b) => a.title.localeCompare(b.title, 'fr')) };
+    return { ranking, unranked: await unrankedKeys(scope, ranking) };
   }, [scope.category, scope.list]);
+  const titles = useTitleMap(lists && [...lists.ranking, ...lists.unranked]);
+  const data = useMemo(
+    () =>
+      lists && titles && { ranked: titlesOf(lists.ranking, titles), unranked: titlesOf(lists.unranked, titles).sort((a, b) => a.title.localeCompare(b.title, 'fr')) },
+    [lists, titles],
+  );
   useEffect(() => setOptimistic(null), [data]);
+  const [limit, sentinel] = useGrowingLimit(`${query}|${!!filter}`);
 
   const sensors = useSensors(useSensor(PointerSensor), useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }));
 
@@ -99,7 +125,11 @@ export function RankedList({
     );
   };
 
-  const rows = ranked.map(({ t, rank, overall }) =>
+  const shownRanked = ranked.slice(0, limit);
+  const shownUnranked = unranked.slice(0, Math.max(0, limit - ranked.length));
+  const more = shownRanked.length + shownUnranked.length < ranked.length + unranked.length;
+
+  const rows = shownRanked.map(({ t, rank, overall }) =>
     canMove ? (
       <SortableRow key={t.key} title={t} badge={rankBadge(t, rank, overall)} below={below?.(t)}>
         {actions(t, true)}
@@ -119,18 +149,18 @@ export function RankedList({
       {!ranked.length && !unranked.length && <p className="muted center">Aucun titre ne correspond.</p>}
       {canMove ? (
         <DndContext sensors={sensors} collisionDetection={closestCenter} modifiers={[restrictToVerticalAxis]} onDragEnd={onDragEnd}>
-          <SortableContext items={ranked.map(({ t }) => t.key)} strategy={verticalListSortingStrategy}>
+          <SortableContext items={shownRanked.map(({ t }) => t.key)} strategy={verticalListSortingStrategy}>
             <ol className="list">{rows}</ol>
           </SortableContext>
         </DndContext>
       ) : (
         <ol className="list">{rows}</ol>
       )}
-      {unranked.length > 0 && (
+      {shownUnranked.length > 0 && (
         <>
           <h3 className="section-title">Non classés ({unranked.length})</h3>
           <ul className="list">
-            {unranked.map((t) => (
+            {shownUnranked.map((t) => (
               <TitleRow key={t.key} title={t} below={below?.(t)}>
                 {actions(t, false)}
               </TitleRow>
@@ -138,6 +168,7 @@ export function RankedList({
           </ul>
         </>
       )}
+      {more && <div ref={sentinel} className="list-more" aria-hidden />}
     </>
   );
 }

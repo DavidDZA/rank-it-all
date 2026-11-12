@@ -13,7 +13,9 @@
 > chaque écran, **version 3 (1.0.2)** contre le blocage sur le logo (envoyée pour examen), **relais TMDB**
 > (Cloudflare, plus de clé dans le site ; clé régénérée) ; (12/11) premiers retours des testeurs : fiches sans
 > réalisateur, acteurs, plateformes ni bande-annonce sur les appareils déjà utilisés, et recherche par personne
-> refusée par le relais — corrigés, avec des tests ; nouveautés ajoutées au catalogue au démarrage (une fois par jour).
+> refusée par le relais — corrigés, avec des tests ; nouveautés ajoutées au catalogue au démarrage (une fois par jour) ; lenteurs corrigées (file des demandes TMDB,
+> fiches enregistrées par lots, listes sans relecture continue, refus du relais plus gardés 24 h, « Annuler » des duels),
+> tests de perf (ARCHITECTURE § 3.5 et § 5).
 >
 > **Reprendre ici** — test fermé en cours : suivre les inscriptions (12 testeurs minimum pendant 14 jours, § 2
 > étapes 5-6), puis demander la production. En attendant : **traduction** (§ 4, décisions à prendre au début de

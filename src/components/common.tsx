@@ -34,7 +34,7 @@ export function Poster({ title, size = 'w342', className = '' }: { title: Title;
   const src = posterUrl(title.posterPath, size);
   return (
     <div className={`poster ${className}`}>
-      {src ? <img src={src} alt="" draggable={false} loading="lazy" /> : <span className="poster-fallback">{title.title}</span>}
+      {src ? <img src={src} alt="" draggable={false} loading="lazy" decoding="async" /> : <span className="poster-fallback">{title.title}</span>}
     </div>
   );
 }
@@ -55,12 +55,12 @@ export function TitleText({ title, showType = false, credits = false }: { title:
 }
 
 /** Fiche détaillée à jour du titre (depuis la base), chargée depuis TMDB si besoin. */
-export function useDetails(title: Title, maxAge = Infinity) {
+export function useDetails(title: Title, maxAge = Infinity, background = false) {
   const stored = useLiveQuery(() => getDetails(title.key).then((d) => d ?? null), [title.key]);
   const [fetched, setFetched] = useState<Title['details'] | null>(null);
   useEffect(() => {
     let alive = true;
-    ensureDetails(title, maxAge).then((d) => alive && setFetched(d));
+    ensureDetails(title, maxAge, background).then((d) => alive && setFetched(d));
     return () => {
       alive = false;
     };
@@ -97,7 +97,7 @@ function CreditsLines({ title }: { title: Title }) {
 
 /** Logos des plateformes d'abonnement où le titre est disponible en France. */
 export function ProviderLine({ title, maxAge }: { title: Title; maxAge?: number }) {
-  const d = useDetails(title, maxAge);
+  const d = useDetails(title, maxAge, true); // une ligne de liste parmi d'autres : après la fiche ouverte
   if (!d) return null;
   const mine = loadMyProviders();
   const { flatrate, rent, buy } = d.providers;

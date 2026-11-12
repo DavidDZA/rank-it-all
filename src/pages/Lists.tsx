@@ -1,9 +1,9 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { clearStatus, db, type Answer, type Title } from '../lib/db';
 import { categoryOf, categoryOptions, useCategories, type Category } from '../lib/category';
 import { changeStatus } from '../lib/ranking';
-import { matchesSearch } from '../lib/hooks';
+import { matchesSearch, useTitleMap } from '../lib/hooks';
 import { SearchBox, SeenButtons, TitleRow, TopBar, TypeFilter } from '../components/common';
 import { Tutorial } from '../components/Tutorial';
 
@@ -20,13 +20,18 @@ export default function Lists() {
   const [limit, setLimit] = useState(PAGE);
   const categories = useCategories();
 
-  const items = useLiveQuery(async () => {
-    const answers = await db.answers.where('status').equals(list).reverse().sortBy('updatedAt');
-    const titles = await db.titles.bulkGet(answers.map((a) => a.key));
-    return answers
-      .map((a, i) => ({ a, t: titles[i] }))
-      .filter((x): x is { a: Answer; t: Title } => !!x.t && (filter === 'all' || categoryOf(x.t) === filter));
-  }, [list, filter]);
+  const answers = useLiveQuery(() => db.answers.where('status').equals(list).reverse().sortBy('updatedAt'), [list]);
+  const keys = useMemo(() => answers?.map((a) => a.key), [answers]);
+  const titles = useTitleMap(keys); // sans relecture à chaque fiche enregistrée (voir useTitleMap)
+  const items = useMemo(
+    () =>
+      answers &&
+      titles &&
+      answers
+        .map((a) => ({ a, t: titles.get(a.key) }))
+        .filter((x): x is { a: Answer; t: Title } => !!x.t && (filter === 'all' || categoryOf(x.t) === filter)),
+    [answers, titles, filter],
+  );
 
   const shown = items?.filter(({ t }) => matchesSearch(t, query)) ?? [];
   const reset = () => setLimit(PAGE);

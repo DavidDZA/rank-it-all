@@ -10,7 +10,7 @@ export function TokenSetting() {
   const save = async () => {
     setMsg('Vérification…');
     try {
-      await tmdb('/authentication', {}, token.trim());
+      await tmdb('/authentication', {}, { token: token.trim() });
       setToken(token);
       setMsg('✓ Clé valide et enregistrée.');
     } catch (e) {

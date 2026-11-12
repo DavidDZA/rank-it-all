@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { titlesOf, useTitleMap } from '../lib/hooks';
 import { useLiveQuery } from 'dexie-react-hooks';
-import { db, withDetails, type Title } from '../lib/db';
+import { db, type Title } from '../lib/db';
 import { CATEGORY_LABEL, capitalize, keysOfCategory, mediaOf, type Category } from '../lib/category';
 import { changeStatus, readRanking, unrank, type Scope } from '../lib/ranking';
 import { matchesTheme, missingFilterInfo, themeFilter, themeLabel } from '../lib/themes';
@@ -33,15 +34,14 @@ export default function Rank({ category }: { category: Category }) {
   const listLabel = [filter && label, byMine && '📺 Dispo sur mes abonnements'].filter(Boolean).join(' · ');
 
   // Titres vus de ce type : pour compter ce que gardent les filtres.
-  const seen = useLiveQuery(async () => {
-    const keys = await keysOfCategory(category, await db.answers.where('[type+status]').equals([media, 'seen']).primaryKeys());
-    return withDetails((await db.titles.bulkGet(keys)).filter((t): t is Title => !!t));
-  }, [category]);
+  const seenKeys = useLiveQuery(async () => keysOfCategory(category, await db.answers.where('[type+status]').equals([media, 'seen']).primaryKeys()), [category]);
+  const seenMap = useTitleMap(seenKeys);
+  const seen = useMemo(() => seenKeys && seenMap && titlesOf(seenKeys, seenMap), [seenKeys, seenMap]);
 
   // Titres sans genre / langue (catalogue d'avant le 17/10) : complétés en arrière-plan pour les filtres.
   const pending = (seen ?? []).filter(missingFilterInfo);
   useEffect(() => {
-    if (pending.length) prefetchDetails(pending, 0);
+    if (pending.length) prefetchDetails(pending); // fiches absentes ou anciennes seulement (pas toutes, à chaque visite)
   }, [pending.length > 0]);
 
   // Plateformes à jour (moins d'une semaine) quand on filtre sur ses abonnements.

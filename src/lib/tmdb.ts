@@ -1,4 +1,4 @@
-import { db, detailsMarks, getDetails, titleKey, type Details, type MediaType, type Provider, type Title } from './db';
+import { db, DETAILS_SAVED, detailsMarks, getDetails, titleKey, type Details, type MediaType, type Provider, type Title } from './db';
 import { forgetToken, getToken, TMDB_RELAY } from './settings';
 
 const API = 'https://api.themoviedb.org/3';
@@ -42,35 +42,86 @@ export interface Page {
 /** Au-delà, une requête TMDB est abandonnée (réseau qui ne répond plus). */
 const TIMEOUT_MS = 20_000;
 
-/** `token` : une clé à essayer (réglages) ; par défaut, celle de l'appareil ou, à défaut, le relais. */
-export async function tmdb<T>(path: string, params: Record<string, string | number | boolean> = {}, tokenToTry?: string | null): Promise<T> {
-  const token = tokenToTry === undefined ? getToken() : tokenToTry;
+// ---------- File d'attente des demandes ----------
+// Toutes les demandes à TMDB (ou au relais) passent par une seule file : au plus MAX_IN_FLIGHT à la fois, celles de
+// l'écran (fiche ouverte, recherche, carte du swipe) avant celles d'arrière-plan (catalogue, fiches à compléter).
+// Sans elle, une liste de 300 titres lançait 300 demandes d'un coup : le relais les refusait (limite de débit), et
+// chaque refus était réessayé, ce qui gardait la limite saturée.
+
+export const MAX_IN_FLIGHT = 6;
+/** Pause commune après un refus « trop de demandes », si le serveur ne dit pas combien de temps attendre. */
+const DEFAULT_PAUSE_MS = 2000;
+const MAX_ATTEMPTS = 6;
+
+let inFlight = 0;
+const urgentQueue: (() => void)[] = [];
+const backgroundQueue: (() => void)[] = [];
+let pausedUntil = 0;
+
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+/** Attend une place dans la file ; renvoie de quoi la libérer. */
+async function takeSlot(background: boolean): Promise<() => void> {
+  if (inFlight >= MAX_IN_FLIGHT) await new Promise<void>((resolve) => (background ? backgroundQueue : urgentQueue).push(resolve));
+  else inFlight++;
+  // Une pause en cours (refus du serveur) s'applique à tout le monde.
+  while (Date.now() < pausedUntil) await sleep(pausedUntil - Date.now());
+  let released = false;
+  return () => {
+    if (released) return;
+    released = true;
+    const next = urgentQueue.shift() ?? backgroundQueue.shift();
+    if (next) next(); // la place passe directement au suivant
+    else inFlight--;
+  };
+}
+
+/** État de la file (pour les tests). */
+export const queueState = () => ({ inFlight, waiting: urgentQueue.length + backgroundQueue.length, pausedUntil });
+
+export interface TmdbOptions {
+  /** Une clé à essayer (réglages) ; par défaut, celle de l'appareil ou, à défaut, le relais. `null` : le relais. */
+  token?: string | null;
+  /** Demande d'arrière-plan : passe après celles de l'écran. */
+  background?: boolean;
+}
+
+export async function tmdb<T>(path: string, params: Record<string, string | number | boolean> = {}, options: TmdbOptions = {}): Promise<T> {
+  const token = options.token === undefined ? getToken() : options.token;
   // Sans clé à joindre : le relais TMDB, qui ajoute la sienne.
   if (!token && !TMDB_RELAY) throw new TmdbError('Clé TMDB manquante : renseigne-la dans les réglages.', 401);
   const url = new URL((token ? API : TMDB_RELAY) + path);
   url.searchParams.set('language', 'fr-FR');
   for (const [k, v] of Object.entries(params)) url.searchParams.set(k, String(v));
 
-  for (let attempt = 0; ; attempt++) {
+  for (let attempt = 1; ; attempt++) {
+    const release = await takeSlot(!!options.background);
     let res: Response;
     try {
       res = await fetch(url, {
         headers: token ? { Authorization: `Bearer ${token}`, accept: 'application/json' } : { accept: 'application/json' },
         signal: AbortSignal.timeout(TIMEOUT_MS),
+        // Nouvel essai : pas la réponse gardée par le navigateur (le relais a marqué des refus « à garder 24 h »
+        // jusqu'au 12/11 : sans ça, ils seraient resservis tels quels).
+        ...(attempt > 1 ? { cache: 'reload' as const } : {}),
       });
     } catch (e) {
+      release();
       if ((e as Error).name === 'TimeoutError') throw new TmdbError('TMDB ne répond pas : vérifie ta connexion.', 0);
       throw e;
     }
-    if (res.status === 429 && attempt < 5) {
-      await new Promise((r) => setTimeout(r, 1000 * (attempt + 1)));
+    release();
+    if (res.status === 429 && attempt < MAX_ATTEMPTS) {
+      // Trop de demandes : toute la file attend (le temps indiqué par le serveur), puis cette demande repart.
+      const wait = Number(res.headers.get('Retry-After')) * 1000 || DEFAULT_PAUSE_MS * attempt;
+      pausedUntil = Math.max(pausedUntil, Date.now() + wait);
       continue;
     }
     // Clé personnelle refusée (régénérée ou supprimée chez TMDB) alors que le relais existe : elle est oubliée et
     // le relais prend le relais. Sinon, plus rien ne venait de TMDB (fiches, plateformes, recherches) sans le dire.
-    if (res.status === 401 && tokenToTry === undefined && token && TMDB_RELAY) {
+    if (res.status === 401 && options.token === undefined && token && TMDB_RELAY) {
       forgetToken();
-      return tmdb<T>(path, params, null);
+      return tmdb<T>(path, params, { ...options, token: null });
     }
     if (res.status === 401) throw new TmdbError('Clé TMDB refusée : vérifie le jeton dans les réglages.', 401);
     if (!res.ok) throw new TmdbError(`Erreur TMDB (${res.status})`, res.status);
@@ -187,13 +238,13 @@ export function parseDetails(type: MediaType, res: DetailsResponse): Details {
   };
 }
 
-const pending = new Map<string, Promise<Details | null>>();
+/** Fiches en cours de téléchargement (une seule demande par titre), et si c'est pour l'arrière-plan. */
+const pending = new Map<string, { promise: Promise<Details | null>; background: boolean }>();
+/** Échecs récents (hors ligne, refus) : pas redemandés en arrière-plan avant RETRY_AFTER_FAILURE_MS. */
+const failedAt = new Map<string, number>();
+const RETRY_AFTER_FAILURE_MS = 2 * 60_000;
 export const WEEK = 7 * 86_400_000;
 
-/**
- * Fiche détaillée (casting, durée, saga, plateformes, bande-annonce…), mise en cache dans la base.
- * `maxAge` force un rafraîchissement des fiches trop anciennes (utile pour les plateformes).
- */
 /**
  * Fiche à récupérer à nouveau : absente, d'avant le 17/10 (sans genres, langue ni premiers rôles), ou incomplète
  * (réponse sans casting ni plateformes : réalisateur, acteurs, plateformes et bande-annonce manquaient pour de bon).
@@ -201,52 +252,105 @@ export const WEEK = 7 * 86_400_000;
 export const detailsOutdated = (d?: Details) =>
   !d || d.genreIds === undefined || d.topCast === undefined || (!d.complete && !d.directors.length && !d.topCast.length);
 
-export function ensureDetails(title: Title, maxAge = Infinity): Promise<Details | null> {
-  const fresh = (d?: Details) => !detailsOutdated(d) && Date.now() - d!.fetchedAt < maxAge;
-  if (fresh(title.details)) return Promise.resolve(title.details!);
-  let p = pending.get(title.key);
-  if (!p) {
-    p = (async () => {
-      try {
-        const saved = await getDetails(title.key);
-        if (fresh(saved)) return saved!;
-        const res = await tmdb<DetailsResponse>(`/${title.type}/${title.tmdbId}`, {
-          append_to_response: 'credits,videos,watch/providers',
-          include_video_language: 'fr,en',
-        });
-        const details = parseDetails(title.type, res);
-        // Réponse sans casting ni plateformes : pas enregistrée (elle ne remplace pas une fiche plus complète), et
-        // redemandée au prochain affichage.
-        if (!details.complete) return saved && !detailsOutdated(saved) ? saved : details;
-        await db.details.put({ ...details, key: title.key });
-        // Repères sur le titre, et infos qui lui manquaient (catalogue téléchargé avant qu'on les enregistre).
-        const stored = await db.titles.get(title.key);
-        const patch: Partial<Title> = detailsMarks(title.type, details);
-        if (!stored?.genreIds?.length && details.genreIds?.length) patch.genreIds = details.genreIds;
-        if (!stored?.originalLanguage && details.originalLanguage) patch.originalLanguage = details.originalLanguage;
-        if (stored?.rating === undefined && details.rating) patch.rating = details.rating;
-        if (stored) await db.titles.update(title.key, patch);
-        return details;
-      } catch {
-        return null; // hors ligne ou erreur : on réessaiera au prochain affichage
-      } finally {
-        pending.delete(title.key);
-      }
-    })();
-    pending.set(title.key, p);
-  }
-  return p;
+// ---------- Enregistrement groupé des fiches ----------
+// Chaque écriture relance les lectures de la base affichées à l'écran (classement, wishlist…) : 300 fiches
+// enregistrées une à une, c'étaient 300 relectures et 300 redessins de la liste. Les fiches arrivées à quelques
+// instants d'intervalle sont enregistrées ensemble, en une seule écriture.
+export const SAVE_BATCH_MS = 200;
+const toSave = new Map<string, { title: Title; details: Details }>();
+let saveTimer: ReturnType<typeof setTimeout> | undefined;
+let saveWaiters: (() => void)[] = [];
+
+function saveDetails(title: Title, details: Details): Promise<void> {
+  toSave.set(title.key, { title, details });
+  return new Promise((resolve) => {
+    saveWaiters.push(resolve);
+    saveTimer ??= setTimeout(flushDetails, SAVE_BATCH_MS);
+  });
 }
 
-/** Charge les fiches manquantes ou trop anciennes, quelques-unes à la fois. */
-export async function prefetchDetails(titles: Title[], maxAge = Infinity, concurrency = 4): Promise<void> {
+async function flushDetails(): Promise<void> {
+  saveTimer = undefined;
+  const batch = [...toSave.values()];
+  const waiters = saveWaiters;
+  toSave.clear();
+  saveWaiters = [];
+  try {
+    await db.transaction('rw', db.details, db.titles, async () => {
+      await db.details.bulkPut(batch.map(({ title, details }) => ({ ...details, key: title.key })));
+      // Repères sur le titre, et infos qui lui manquaient (catalogue téléchargé avant qu'on les enregistre).
+      const stored = await db.titles.bulkGet(batch.map(({ title }) => title.key));
+      const updates = batch.flatMap(({ title, details }, i) => {
+        const t = stored[i];
+        if (!t) return [];
+        const changes: Partial<Title> = detailsMarks(title.type, details);
+        if (!t.genreIds?.length && details.genreIds?.length) changes.genreIds = details.genreIds;
+        if (!t.originalLanguage && details.originalLanguage) changes.originalLanguage = details.originalLanguage;
+        if (t.rating === undefined && details.rating) changes.rating = details.rating;
+        return [{ key: title.key, changes }];
+      });
+      if (updates.length) await db.titles.bulkUpdate(updates);
+    });
+    if (typeof dispatchEvent === 'function') dispatchEvent(new Event(DETAILS_SAVED)); // les listes affichées se relisent
+  } catch {
+    // Base indisponible : les fiches seront redemandées au prochain affichage.
+  } finally {
+    waiters.forEach((w) => w());
+  }
+}
+
+/**
+ * Fiche détaillée (casting, durée, saga, plateformes, bande-annonce…), mise en cache dans la base.
+ * `maxAge` force un rafraîchissement des fiches trop anciennes (utile pour les plateformes) ; `background` : la
+ * demande passe après celles de l'écran (listes, fiches à compléter).
+ */
+export function ensureDetails(title: Title, maxAge = Infinity, background = false): Promise<Details | null> {
+  const fresh = (d?: Details) => !detailsOutdated(d) && Date.now() - d!.fetchedAt < maxAge;
+  if (fresh(title.details)) return Promise.resolve(title.details!);
+  const current = pending.get(title.key);
+  // Déjà demandée : on attend la même réponse, sauf une demande d'arrière-plan devenue urgente (fiche ouverte).
+  if (current && (background || !current.background)) return current.promise;
+  const entry = { background } as { promise: Promise<Details | null>; background: boolean };
+  entry.promise = (async () => {
+    try {
+      const saved = await getDetails(title.key);
+      if (fresh(saved)) return saved!;
+      const res = await tmdb<DetailsResponse>(
+        `/${title.type}/${title.tmdbId}`,
+        { append_to_response: 'credits,videos,watch/providers', include_video_language: 'fr,en' },
+        { background },
+      );
+      const details = parseDetails(title.type, res);
+      failedAt.delete(title.key);
+      // Réponse sans casting ni plateformes : pas enregistrée (elle ne remplace pas une fiche plus complète), et
+      // redemandée au prochain affichage.
+      if (!details.complete) return saved && !detailsOutdated(saved) ? saved : details;
+      await saveDetails(title, details);
+      return details;
+    } catch {
+      failedAt.set(title.key, Date.now());
+      return null; // hors ligne ou erreur : on réessaiera au prochain affichage
+    } finally {
+      if (pending.get(title.key) === entry) pending.delete(title.key);
+    }
+  })();
+  pending.set(title.key, entry);
+  return entry.promise;
+}
+
+/**
+ * Charge en arrière-plan les fiches manquantes ou trop anciennes (la file des demandes en limite le nombre).
+ * Celles qui viennent d'échouer attendent un peu : un écran qui se redessine ne les redemande pas en boucle.
+ */
+export async function prefetchDetails(titles: Title[], maxAge = Infinity, onProgress?: (remaining: number) => void): Promise<void> {
   const saved = await db.details.bulkGet(titles.map((t) => t.key));
-  const todo = titles.filter((_, i) => detailsOutdated(saved[i]) || Date.now() - saved[i]!.fetchedAt >= maxAge);
-  let next = 0;
-  const worker = async () => {
-    while (next < todo.length) await ensureDetails(todo[next++], maxAge);
-  };
-  await Promise.all(Array.from({ length: concurrency }, worker));
+  const now = Date.now();
+  const todo = titles.filter(
+    (t, i) => (detailsOutdated(saved[i]) || now - saved[i]!.fetchedAt >= maxAge) && !(now - (failedAt.get(t.key) ?? 0) < RETRY_AFTER_FAILURE_MS),
+  );
+  let remaining = todo.length;
+  onProgress?.(remaining);
+  await Promise.all(todo.map((t) => ensureDetails(t, maxAge, true).finally(() => onProgress?.(--remaining))));
 }
 
 export interface Saga {

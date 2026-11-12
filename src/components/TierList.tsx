@@ -1,23 +1,22 @@
 import { useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
-import { db, withDetails, type Title } from '../lib/db';
+import type { Title } from '../lib/db';
 import type { Category } from '../lib/category';
 import { readRanking } from '../lib/ranking';
 import { tierize } from '../lib/tiers';
 import { shareTierList } from '../lib/share';
 import { toast } from '../lib/fun';
-import { useLongPress } from '../lib/hooks';
+import { titlesOf, useLongPress, useTitleMap } from '../lib/hooks';
 import { Poster } from './common';
 import { openFiche } from './Fiche';
 
 /** Classement en paliers S → D, d'après la position de chaque titre. */
 export function TierList({ category, filter = null, filterLabel }: { category: Category; filter?: ((t: Title) => boolean) | null; filterLabel?: string }) {
   const [sharing, setSharing] = useState(false);
-  const titles = useLiveQuery(async () => {
-    const keys = await readRanking({ category: category, list: 'seen' });
-    // Fiches jointes : les filtres peuvent porter sur les plateformes (« dispo sur mes abonnements »).
-    return withDetails((await db.titles.bulkGet(keys)).filter((t): t is Title => !!t));
-  }, [category]);
+  const keys = useLiveQuery(() => readRanking({ category: category, list: 'seen' }), [category]);
+  // Fiches jointes : les filtres peuvent porter sur les plateformes (« dispo sur mes abonnements »).
+  const map = useTitleMap(keys);
+  const titles = keys && map && titlesOf(keys, map);
   // Avec des filtres, les paliers sont recalculés sur la sélection (« ma tier list des comédies »).
   const tiers = titles && tierize(filter ? titles.filter(filter) : titles);
 

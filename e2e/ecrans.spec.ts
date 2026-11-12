@@ -55,6 +55,7 @@ test('tier list : S à D selon la place au classement (10 / 20 / 30 / 25 / 15 %)
   await tab(page, 'Tier list');
   const row = (label: string) => page.locator('.tier-row', { has: page.locator('.tier-label', { hasText: new RegExp(`^${label}$`) }) }).locator('.tier-poster');
   const titles = async (label: string) => (await row(label).evaluateAll((els) => els.map((e) => e.getAttribute('title')))).map((t) => t!.replace(/ \(\d{4}\)$/, ''));
+  await expect(page.locator('.tier-poster')).toHaveCount(10);
   expect(await titles('S')).toEqual(['Le Parrain']);
   expect(await titles('A')).toEqual(['Parasite', 'Inception']);
   expect(await titles('B')).toEqual(['Drive', 'Her', 'Arrival']);

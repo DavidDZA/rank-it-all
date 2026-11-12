@@ -36,7 +36,7 @@ function discover(q: Query, from: number, to: number, page: number) {
     page,
     ...(q.type === 'movie' ? { 'with_runtime.gte': 40 } : {}),
     ...q.extra,
-  });
+  }, { background: true }); // après les demandes de l'écran (fiche ouverte, recherche)
 }
 
 interface Range {
@@ -83,21 +83,25 @@ async function prepare(q: Query, onProgress: Progress): Promise<Prepared> {
 }
 
 /** Prépare toutes les requêtes, puis les télécharge ; `seen` reçoit les clés des titres (un titre trouvé deux fois compte une fois). */
-async function fetchQueries(queries: Query[], onProgress: Progress, seen: Set<string>): Promise<void> {
+async function fetchQueries(queries: Query[], onProgress: Progress, seen: Set<string>, onlyNew = false): Promise<void> {
   const prepared: Prepared[] = [];
   for (const q of queries) prepared.push(await prepare(q, onProgress));
   const total = Math.max(1, prepared.reduce((n, p) => n + p.pages, 0));
   let fetched = 0;
   for (const p of prepared) {
-    await fetchPrepared(p, seen, (count) => {
+    await fetchPrepared(p, seen, onlyNew, (count) => {
       fetched++;
       onProgress(`${count.toLocaleString('fr-FR')} ${p.q.label} récupérés…`, fetched / total);
     });
   }
 }
 
-/** Télécharge les pages d'une requête préparée ; `onPage` reçoit, à chaque page lue, le nombre de titres gardés. */
-async function fetchPrepared({ q, ranges }: Prepared, seen: Set<string>, onPage: (count: number) => void): Promise<void> {
+/**
+ * Télécharge les pages d'une requête préparée ; `onPage` reçoit, à chaque page lue, le nombre de titres gardés.
+ * `onlyNew` : seuls les titres absents de la base sont enregistrés (réécrire les autres relancerait les lectures
+ * de la base affichées à l'écran, pour rien).
+ */
+async function fetchPrepared({ q, ranges }: Prepared, seen: Set<string>, onlyNew: boolean, onPage: (count: number) => void): Promise<void> {
   let buffer: Title[] = [];
   let count = 0;
   const keep = (page: Page) => {
@@ -114,7 +118,7 @@ async function fetchPrepared({ q, ranges }: Prepared, seen: Set<string>, onPage:
       if (e?.detailsAt !== undefined) t.detailsAt = e.detailsAt;
       if (e?.collectionId !== undefined) t.collectionId = e.collectionId;
     });
-    await db.titles.bulkPut(batch);
+    await db.titles.bulkPut(onlyNew ? batch.filter((_, i) => !existing[i]) : batch);
   };
   const read = (page: Page) => {
     const before = buffer.length;
@@ -256,7 +260,7 @@ export function recentQueries(queries: Query[], from: number): Query[] {
 export async function addNewTitles(minVotes: MinVotes, now = Date.now()): Promise<number> {
   const before = await db.titles.count();
   const queries = recentQueries([...catalogueQueries(minVotes), ...(await getCustomImports()).map(customQuery)], now - NEW_TITLES_WINDOW);
-  await fetchQueries(queries, () => undefined, new Set());
+  await fetchQueries(queries, () => undefined, new Set(), true);
   const added = (await db.titles.count()) - before;
   const previous = (await db.meta.get(NEW_TITLES_META))?.value as NewTitlesCheck | undefined;
   await db.meta.put({ key: NEW_TITLES_META, value: { checkedAt: now, addedAt: added ? now : (previous?.addedAt ?? 0) } satisfies NewTitlesCheck });

@@ -6,6 +6,10 @@ let calls = [];
 globalThis.fetch = async (url, init) => {
   calls.push({ url: String(url), auth: init.headers.Authorization });
   if (String(url).includes('/movie/401')) return new Response('{}', { status: 401 });
+  if (String(url).includes('/movie/404')) return new Response('{"status_code":34}', { status: 404 });
+  // /movie/429 : refusé la première fois seulement ; /movie/4290 : refusé à chaque fois.
+  if (String(url).includes('/movie/4290') || (String(url).includes('/movie/429') && calls.filter((c) => c.url.includes('/movie/429')).length === 1))
+    return new Response('{"status_code":25,"status_message":"Too many requests."}', { status: 429 });
   return new Response(JSON.stringify({ ok: true, url: String(url) }), { status: 200 });
 };
 const pending = [];
@@ -36,6 +40,19 @@ r = await req('/search/person?query=nolan&language=fr-FR');
 check('recherche par personne relayée (200)', r.status === 200);
 r = await req('/movie/550?language=fr-FR&append_to_response=credits%2Cvideos%2Cwatch%2Fproviders&include_video_language=fr%2Cen');
 check('fiche : append_to_response transmis intact', new URL(calls.at(-1).url).searchParams.get('append_to_response') === 'credits,videos,watch/providers');
+// Refus de TMDB : jamais gardés (ni par le relais, ni par le navigateur).
+allowedHits = -100; // ces demandes ne comptent pas dans la limite simulée
+r = await req('/movie/404');
+check('404 de TMDB transmis, pas à garder', r.status === 404 && r.headers.get('Cache-Control') === 'no-store');
+let before = calls.length;
+r = await req('/movie/429');
+check('429 de TMDB : réessayé une fois par le relais', r.status === 200 && calls.length - before === 2);
+before = calls.length;
+r = await req('/movie/4290');
+check('429 persistant : transmis, pas à garder, avec Retry-After', r.status === 429 && r.headers.get('Cache-Control') === 'no-store' && r.headers.get('Retry-After') === '2');
+r = await req('/movie/4290');
+check('429 pas resservi par le cache du relais', calls.length - before === 4);
+check('réponse correcte : à garder', (await req('/movie/550')).headers.get('Cache-Control') === 'public, max-age=86400');
 allowedHits = 2; // limite simulée de 4 : comme si seules les 2 premières demandes avaient compté
 r = await req('/account');
 check('chemin non relayé (404)', r.status === 404);

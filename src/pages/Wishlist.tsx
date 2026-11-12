@@ -1,11 +1,11 @@
-import { useEffect, useState, type ReactNode } from 'react';
+import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
-import { db, withDetails, type Title } from '../lib/db';
+import { db, type Title } from '../lib/db';
 import { categoryOf, categoryOptions, mediaOf, useCategories, type Category } from '../lib/category';
 import { changeStatus, scopeId, unrank, type Scope } from '../lib/ranking';
 import { prefetchDetails, WEEK } from '../lib/tmdb';
 import { loadMyProviders, mineFilter } from '../lib/providers';
-import { matchesSearch } from '../lib/hooks';
+import { matchesSearch, titlesOf, useTitleMap } from '../lib/hooks';
 import { matchesTheme, missingFilterInfo, themeFilter, themeLabel } from '../lib/themes';
 import { MineChip, ProviderLine, SearchBox, SeenButtons, TitleRow, TopBar, TypeFilter } from '../components/common';
 import { FilterButton, FilterSheet, FilterStrip, useSavedFilter } from '../components/FilterSheet';
@@ -24,10 +24,9 @@ export default function Wishlist() {
   const [savedTheme, setTheme] = useSavedFilter('wish-filter');
   const categories = useCategories();
   const mine = loadMyProviders();
-  const wishes = useLiveQuery(async () => {
-    const keys = await db.answers.where('status').equals('wish').primaryKeys();
-    return withDetails((await db.titles.bulkGet(keys)).filter((t): t is Title => !!t));
-  });
+  const wishKeys = useLiveQuery(() => db.answers.where('status').equals('wish').primaryKeys());
+  const wishMap = useTitleMap(wishKeys);
+  const wishes = useMemo(() => wishKeys && wishMap && titlesOf(wishKeys, wishMap), [wishKeys, wishMap]);
 
   // Plateformes à jour (moins d'une semaine) pour toute la wishlist.
   useEffect(() => {
@@ -132,11 +131,9 @@ function WishActions({ title }: { title: Title }) {
 /** Toutes catégories mélangées, du plus récent ajout au plus ancien. */
 function AllWishes({ filter, below }: { filter: ((t: Title) => boolean) | null; below: (t: Title) => ReactNode }) {
   const [query, setQuery] = useState('');
-  const items = useLiveQuery(async () => {
-    const answers = await db.answers.where('status').equals('wish').reverse().sortBy('updatedAt');
-    const titles = await db.titles.bulkGet(answers.map((a) => a.key));
-    return withDetails(titles.filter((t): t is Title => !!t)); // plateformes, pour le filtre « dispo »
-  });
+  const keys = useLiveQuery(async () => (await db.answers.where('status').equals('wish').reverse().sortBy('updatedAt')).map((a) => a.key));
+  const map = useTitleMap(keys); // fiches jointes : plateformes, pour le filtre « dispo »
+  const items = useMemo(() => keys && map && titlesOf(keys, map), [keys, map]);
 
   if (!items) return <p className="muted center">Chargement…</p>;
   if (!items.length) return <p className="muted center">Rien dans la wishlist pour l’instant.</p>;

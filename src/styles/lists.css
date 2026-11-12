@@ -205,3 +205,8 @@ button.rank-num {
   box-shadow: 0 10px 30px rgb(0 0 0 / 0.45);
   background: var(--surface-solid);
 }
+
+/* Repère en bas d'une longue liste : la suite est dessinée quand il approche de l'écran (RankedList). */
+.list-more {
+  height: 1px;
+}

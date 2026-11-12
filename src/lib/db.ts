@@ -172,6 +172,9 @@ db.titles.hook('updating', (changes) => ('details' in changes ? { details: undef
 
 const withoutKey = ({ key: _key, ...d }: DetailsRow): Details => d;
 
+/** Événement envoyé (sur window) après l'enregistrement d'un lot de fiches (voir useTitleMap). */
+export const DETAILS_SAVED = 'details-saved';
+
 /** Joint aux titres leur fiche détaillée enregistrée (pour les filtres, stats, plateformes…). */
 export async function withDetails(titles: Title[]): Promise<Title[]> {
   const rows = await db.details.bulkGet(titles.map((t) => t.key));

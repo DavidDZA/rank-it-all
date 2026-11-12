@@ -72,6 +72,7 @@ export function Duel({
   const skipped = useRef(new Set<string>());
   const undoStack = useRef<Snapshot[]>([]);
   const busy = useRef(false);
+  const pickTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const placedCount = useRef(0);
   const verifyOnly = useRef(false); // « Affiner mon classement » : uniquement des vérifications
 
@@ -242,13 +243,30 @@ export function Duel({
   };
 
   const undo = async () => {
+    // Choix touché il y a moins de 0,3 s (animation en cours) : c'est lui qu'on annule, avant qu'il compte.
+    if (pickTimer.current) {
+      clearTimeout(pickTimer.current);
+      pickTimer.current = undefined;
+      setPicked(null);
+      return;
+    }
+    // Un choix encore en cours d'enregistrement : on attend qu'il finisse (avant, « Annuler » était ignoré, et le
+    // coup précédent perdu : l'écran semblait figé).
+    while (busy.current) await new Promise((r) => setTimeout(r, 30));
     const prev = undoStack.current.pop();
-    if (!prev || busy.current) return;
-    if (st && prev.ranking.length < st.ranking.length) setPlaced((n) => Math.max(0, n - 1));
-    await saveRanking(scope, prev.ranking);
-    await saveInsert(scope, prev.ins);
-    if (prev.verify !== null) await showVerify(prev.ranking, prev.verify);
-    else if (prev.ins) await show(prev.ranking, prev.ins);
+    if (!prev) return;
+    busy.current = true;
+    try {
+      if (st && prev.ranking.length < st.ranking.length) setPlaced((n) => Math.max(0, n - 1));
+      recordActivity(-1);
+      // L'écran d'abord (le duel précédent tout de suite), l'enregistrement ensuite.
+      if (prev.verify !== null) await showVerify(prev.ranking, prev.verify);
+      else if (prev.ins) await show(prev.ranking, prev.ins);
+      await saveRanking(scope, prev.ranking);
+      await saveInsert(scope, prev.ins);
+    } finally {
+      busy.current = false;
+    }
   };
 
   const skip = async () => {
@@ -272,7 +290,10 @@ export function Duel({
     if (!st || picked || busy.current) return;
     setPicked(t.key);
     burst(scope.list === 'seen' ? ['⭐', '👑'] : ['💖', '✨'], centerOf(el), 8);
-    setTimeout(() => choose(t.key === st.candidate!.key ? 'candidate' : 'opponent'), 320);
+    pickTimer.current = setTimeout(() => {
+      pickTimer.current = undefined;
+      choose(t.key === st.candidate!.key ? 'candidate' : 'opponent');
+    }, 320);
   };
 
   // Raccourcis clavier (PC) : ← / → choisir, ↓ égalité, Retour arrière annuler.
@@ -338,7 +359,7 @@ export function Duel({
         ))}
       </div>
       <div className="row center">
-        <button className="btn" onClick={undo} disabled={!undoStack.current.length} title="Revenir sur le dernier choix (Retour arrière)">
+        <button className="btn" onClick={undo} disabled={!undoStack.current.length && !picked} title="Revenir sur le dernier choix (Retour arrière)">
           ↶ Annuler
         </button>
         <button className="btn" onClick={() => choose('tie')} title={verifying ? 'Les deux se valent : on ne change rien (↓)' : 'Impossible de départager : les placer côte à côte (↓)'}>

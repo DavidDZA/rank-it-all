@@ -6,6 +6,8 @@
 import { ROUTES } from './routes.js';
 
 const TMDB = 'https://api.themoviedb.org/3';
+/** Pause avant de redemander à TMDB après un refus « trop de demandes ». */
+const RETRY_PAUSE_MS = 1000;
 
 /** Sites autorisés à appeler le relais (le site publié, et le site lancé en local pour le développement). */
 const ALLOWED_ORIGINS = ['https://daviddza.github.io', 'http://localhost:5173', 'http://localhost:4173'];
@@ -48,16 +50,24 @@ export default {
     if (!response) {
       let upstream;
       try {
-        upstream = await fetch(target, { headers: { Authorization: `Bearer ${env.TMDB_TOKEN}`, accept: 'application/json' } });
+        const ask = () => fetch(target, { headers: { Authorization: `Bearer ${env.TMDB_TOKEN}`, accept: 'application/json' } });
+        upstream = await ask();
+        // TMDB limite le débit par adresse, et celles de Cloudflare sont partagées : un refus passager est réessayé
+        // une fois, après une courte pause, avant d'être transmis à l'appli.
+        if (upstream.status === 429) {
+          await new Promise((r) => setTimeout(r, RETRY_PAUSE_MS));
+          upstream = await ask();
+        }
       } catch {
         return error(502, 'TMDB injoignable', cors);
       }
       // Clé refusée par TMDB : problème du relais, pas de l'utilisateur (l'appli dirait « vérifie ta clé »).
       if (upstream.status === 401) return error(502, 'Le relais TMDB est mal configuré', cors);
-      response = new Response(upstream.body, {
-        status: upstream.status,
-        headers: { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': `public, max-age=${route[1]}` },
-      });
+      // Seules les bonnes réponses se gardent. Un refus de TMDB (trop de demandes, 404…) marqué « à garder 24 h »
+      // était resservi par le navigateur pendant 24 h, sans redemander : la fiche ne revenait jamais (12/11).
+      const headers = { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': upstream.ok ? `public, max-age=${route[1]}` : 'no-store' };
+      if (upstream.status === 429) headers['Retry-After'] = upstream.headers.get('Retry-After') ?? '2';
+      response = new Response(upstream.body, { status: upstream.status, headers });
       if (upstream.ok) ctx.waitUntil(cache.put(cacheKey, response.clone()));
     }
 

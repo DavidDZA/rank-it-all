@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState } from 'react';
-import type { Title } from './db';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { db, DETAILS_SAVED, withDetails, type Title } from './db';
 
 /** Appui long (0,5 s) sans déplacement ; le clic qui suit est annulé. */
 export function useLongPress(onLongPress: () => void, ms = 500) {
@@ -101,3 +101,57 @@ export function useCloseOnBack(onClose: () => void): void {
     };
   }, []);
 }
+
+/** Relecture des titres affichés, au plus à ce rythme, quand des fiches arrivent en arrière-plan. */
+export const TITLES_REFRESH_MS = 2000;
+
+/**
+ * Titres (fiches jointes) des clés données, par clé. Relus quand la liste des clés change, et au plus toutes les
+ * TITLES_REFRESH_MS quand des fiches sont enregistrées.
+ *
+ * À la place d'une lecture « vivante » (useLiveQuery) des titres et des fiches : relancée à chaque fiche
+ * enregistrée, une liste de 600 titres se relisait sans cesse pendant le téléchargement des fiches, et n'avait
+ * jamais le temps de s'afficher (« Chargement… » pendant plus d'une minute sur téléphone, 12/11).
+ * Pendant une relecture, la version précédente reste affichée.
+ */
+export function useTitleMap(keys: string[] | undefined): Map<string, Title> | undefined {
+  // Les mêmes titres dans un autre ordre (déplacement, duel) : rien à relire.
+  const signature = useMemo(() => keys && [...keys].sort().join('|'), [keys]);
+  const [map, setMap] = useState<Map<string, Title>>();
+  const [tick, setTick] = useState(0);
+
+  useEffect(() => {
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    let last = 0;
+    const onSaved = () => {
+      if (timer) return;
+      timer = setTimeout(() => {
+        timer = undefined;
+        last = Date.now();
+        setTick((t) => t + 1);
+      }, Math.max(0, last + TITLES_REFRESH_MS - Date.now()));
+    };
+    addEventListener(DETAILS_SAVED, onSaved);
+    return () => {
+      removeEventListener(DETAILS_SAVED, onSaved);
+      clearTimeout(timer);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!keys) return;
+    let alive = true;
+    (async () => {
+      const titles = await withDetails((await db.titles.bulkGet(keys)).filter((t): t is Title => !!t));
+      if (alive) setMap(new Map(titles.map((t) => [t.key, t])));
+    })();
+    return () => {
+      alive = false;
+    };
+  }, [signature, tick]);
+
+  return keys ? map : undefined;
+}
+
+/** Les titres des clés, dans leur ordre (ceux absents de la base sont sautés). */
+export const titlesOf = (keys: string[], map: Map<string, Title>): Title[] => keys.map((k) => map.get(k)).filter((t): t is Title => !!t);

@@ -1,6 +1,7 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { titlesOf, useTitleMap } from '../lib/hooks';
 import { useLiveQuery } from 'dexie-react-hooks';
-import { db, withDetails, type Title } from '../lib/db';
+import { db, type Title } from '../lib/db';
 import { categoryOf, useCategories } from '../lib/category';
 import { readRanking } from '../lib/ranking';
 import { prefetchDetails, WEEK } from '../lib/tmdb';
@@ -23,14 +24,15 @@ export default function Tonight() {
   const mine = loadMyProviders();
   const categories = useCategories();
 
-  const data = useLiveQuery(async () => {
+  const lists = useLiveQuery(async () => {
     const keys = await db.answers.where('status').equals('wish').primaryKeys();
-    const titles = await withDetails((await db.titles.bulkGet(keys)).filter((t): t is Title => !!t));
     const [movie, tv, anime] = await Promise.all(
       (['movie', 'tv', 'anime'] as const).map((category) => readRanking({ category, list: 'wish' })),
     );
-    return { titles, ranks: { movie, tv, anime } };
+    return { keys, ranks: { movie, tv, anime } };
   });
+  const map = useTitleMap(lists?.keys); // fiches jointes : plateformes et durées, pour les filtres
+  const data = useMemo(() => lists && map && { titles: titlesOf(lists.keys, map), ranks: lists.ranks }, [lists, map]);
 
   // Plateformes et durées à jour pour filtrer.
   useEffect(() => {

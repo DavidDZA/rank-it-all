@@ -152,6 +152,28 @@ par le relais sont dans `worker/src/routes.js` : tout nouvel appel TMDB doit y �
 le vérifie ; `/search/person` manquait, recherche par réalisateur ou acteur en panne du 11 au 12/11). En local, sans relais, `VITE_TMDB_TOKEN` dans
 `.env.local`. Les affiches (`image.tmdb.org`) ne demandent pas de clé.
 
+### 3.5 Performances (12/11/2026)
+
+Règles tirées des lenteurs du 12/11 (classement « Chargement… » plus d'une minute sur téléphone pendant l'arrivée des
+fiches, fiches qui ne revenaient pas, « Annuler » sans effet dans les duels) :
+
+- **Une seule file pour TMDB** (`tmdb()`, `tmdb.ts`) : au plus `MAX_IN_FLIGHT` (6) demandes à la fois ; celles de
+  l'écran (fiche ouverte, recherche, carte du swipe) passent avant celles d'arrière-plan (`background` : catalogue,
+  `prefetchDetails`, logos des listes). Un refus 429 met toute la file en pause (`Retry-After`), au lieu que chaque
+  demande réessaie de son côté ; les nouveaux essais contournent la mémoire du navigateur (`cache: 'reload'`).
+- **Relais** : seules les bonnes réponses sont marquées « à garder » ; un refus de TMDB est `no-store` (avant : gardé
+  24 h par le navigateur, la fiche ne revenait jamais). Un 429 de TMDB est réessayé une fois après 1 s (les adresses
+  de Cloudflare sont partagées).
+- **Fiches enregistrées par lots** (`saveDetails`, toutes les `SAVE_BATCH_MS`) : une écriture par lot, puis
+  l'événement `DETAILS_SAVED`. Les échecs récents ne sont pas redemandés en arrière-plan avant 2 min.
+- **Pas de lecture vivante des titres et des fiches dans les listes** : `useLiveQuery` ne lit que les clés
+  (classement, réponses), et `useTitleMap` (`hooks.ts`) lit les titres et fiches à part, au plus toutes les 2 s quand
+  des fiches arrivent. Une lecture vivante de 600 titres relancée à chaque écriture ne finissait jamais. Utilisé par le
+  classement, la tier list, la wishlist, « Ce soir », Mes listes et la page de classement.
+- **Longues listes dessinées par paquets** (`RankedList` : 60 lignes, puis 100 de plus à l'approche du bas).
+- **Nouveautés du démarrage** : seuls les titres absents de la base sont écrits.
+- **Stats** : recalculées toutes les 3 s pendant le complément des fiches, avec un compteur qui descend.
+
 ## 4. Compte et amis (Supabase)
 
 ### 4.1 Synchro (`cloud.ts`, `cloudMerge.ts`)
@@ -224,6 +246,17 @@ Restaurer (dans un projet Supabase neuf, ou le même vidé) :
   sauvegarde exportée puis réimportée (`parcours.spec.ts`), stats et badges, tier list, partage en image (partage du
   téléphone simulé, ou téléchargement), filtres du swipe (`ecrans.spec.ts`). Outils communs dans `e2e/helpers.ts`
   (`seed`, `readAnswers`, `readMeta`, `mockTmdbApi`).
+- **Performances** : `tests/perf.test.ts` (file des demandes, pause commune sur 429, nouvel essai sans la mémoire du
+  navigateur, écritures groupées, échecs pas redemandés en boucle ; budgets de temps des calculs sur 14 000 titres :
+  stats, filtres, tirage, « À deux », tier list, synchro) et `e2e/perf.spec.ts` (classement de 600 titres, classement
+  pendant l'arrivée de 300 fiches, au plus 6 demandes à la fois, TMDB limité à 40/s, duels et « Annuler », stats
+  progressives, gros catalogue). Budgets larges : ils attrapent une régression nette. Sur la version du 12/11 au
+  matin, 6 des 8 tests de bout en bout échouent.
+- **Mesurer finement** (à refaire après un changement qui touche les listes ou TMDB) : compiler avec
+  `VITE_TMDB_RELAY` (le relais accepte `localhost:4173`), servir `dist` sur le port 4173, puis dans Playwright :
+  profil persistant avec le vrai catalogue (≈ 14 000 titres) et des centaines de vus, `serviceWorkers: 'block'` (sinon
+  le service worker ressert une ancienne version), processeur ralenti 4 fois (`Emulation.setCPUThrottlingRate`, pour
+  un téléphone), et une copie du profil pour repartir des mêmes données à chaque mesure.
 - **Supabase simulé** (`e2e/fakeSupabase.ts`) : session ouverte, profils, amitiés, réponses et classements, sans
   aucune demande au vrai projet (une demande non prévue est notée et fait échouer le test). Il sert à « À deux »
   (son top, wishlist commune, conseils, compatibilité, partage refusé : `duo.spec.ts`) et à la synchro (réponses

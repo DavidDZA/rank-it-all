@@ -6,6 +6,9 @@ import { BADGES } from '../lib/badges';
 import { prefetchDetails } from '../lib/tmdb';
 import { TopBar, TypeFilter } from '../components/common';
 
+/** Pendant le complément des fiches, les stats sont recalculées à ce rythme. */
+const STATS_REFRESH_MS = 3000;
+
 export default function StatsPage() {
   const [stats, setStats] = useState<Stats | null>(null);
   const [unlocked, setUnlocked] = useState<Set<string>>(new Set());
@@ -20,13 +23,16 @@ export default function StatsPage() {
     return s;
   };
 
-  // Complète en arrière-plan les fiches manquantes (durée, réalisateur…), puis recalcule.
+  // Complète en arrière-plan les fiches manquantes (durée, réalisateur…), en recalculant au fur et à mesure : avant,
+  // les stats n'étaient mises à jour qu'une fois toutes les fiches arrivées (des minutes, pour des centaines).
   useEffect(() => {
     let alive = true;
+    let timer: ReturnType<typeof setInterval> | undefined;
     refresh().then(async (s) => {
       if (!alive || !s.missingDetails.length) return;
-      setCompleting(s.missingDetails.length);
-      await prefetchDetails(s.missingDetails);
+      timer = setInterval(() => alive && refresh(), STATS_REFRESH_MS);
+      await prefetchDetails(s.missingDetails, Infinity, (n) => alive && setCompleting(n));
+      clearInterval(timer);
       if (alive) {
         setCompleting(0);
         refresh();
@@ -34,6 +40,7 @@ export default function StatsPage() {
     });
     return () => {
       alive = false;
+      clearInterval(timer);
     };
   }, []);
 
