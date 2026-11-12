@@ -1,6 +1,6 @@
 # Feuille de route — ce qui reste à faire
 
-> État au 11/11/2026. Comment l'appli marche aujourd'hui : [ARCHITECTURE.md](ARCHITECTURE.md).
+> État au 12/11/2026. Comment l'appli marche aujourd'hui : [ARCHITECTURE.md](ARCHITECTURE.md).
 > Fait : comptes et synchro, amis et « À deux », catégorie Animes, seuils français / vieux films, classement à
 > la main, refonte (fiches à part, chargement découpé, types Supabase, tests de bout en bout) ; puis (01-02/11)
 > renommage en **Rank It All** (base locale migrée, ancienne adresse redirigée), filtre « dispo sur mes
@@ -11,7 +11,9 @@
 > compte de démonstration, **test fermé validé et ouvert aux testeurs**, écran « Chargement… » immédiat,
 > catalogue téléchargé tout seul à la première ouverture (barre de progression), astuces à la première visite de
 > chaque écran, **version 3 (1.0.2)** contre le blocage sur le logo (envoyée pour examen), **relais TMDB**
-> (Cloudflare, plus de clé dans le site ; clé régénérée).
+> (Cloudflare, plus de clé dans le site ; clé régénérée) ; (12/11) premiers retours des testeurs : fiches sans
+> réalisateur, acteurs, plateformes ni bande-annonce sur les appareils déjà utilisés, et recherche par personne
+> refusée par le relais — corrigés, avec des tests ; nouveautés ajoutées au catalogue au démarrage (une fois par jour).
 >
 > **Reprendre ici** — test fermé en cours : suivre les inscriptions (12 testeurs minimum pendant 14 jours, § 2
 > étapes 5-6), puis demander la production. En attendant : **traduction** (§ 4, décisions à prendre au début de

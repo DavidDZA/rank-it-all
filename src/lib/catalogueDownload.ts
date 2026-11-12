@@ -1,7 +1,7 @@
 import { useSyncExternalStore } from 'react';
 import { getMeta, requestPersistentStorage } from './db';
 import { getMinVotes, hasTmdbAccess } from './settings';
-import { syncCatalogue } from './sync';
+import { addNewTitles, NEW_TITLES_EVERY, NEW_TITLES_META, syncCatalogue, type NewTitlesCheck } from './sync';
 import { syncAndWait, whenCloudReady } from './cloud';
 import { toast } from './fun';
 
@@ -61,15 +61,38 @@ export async function downloadCatalogue(): Promise<void> {
 }
 
 /**
+ * Nouveautés au catalogue (titres récents qui passent désormais un seuil), au plus une fois par jour, sans bruit :
+ * un message seulement si des titres ont été ajoutés. Hors ligne ou en erreur : réessayé au lancement suivant.
+ */
+export async function checkNewTitles(): Promise<number> {
+  if (state.running) return 0;
+  const last = await getMeta<NewTitlesCheck | null>(NEW_TITLES_META, null);
+  if (last && Date.now() - last.checkedAt < NEW_TITLES_EVERY) return 0;
+  try {
+    await whenCloudReady();
+    const added = await addNewTitles(await getMinVotes());
+    if (added) {
+      setState({ version: state.version + 1 });
+      toast(`🆕 ${n(added)} nouveauté${added > 1 ? 's' : ''} au catalogue !`);
+    }
+    return added;
+  } catch {
+    return 0;
+  }
+}
+
+/**
  * Au démarrage : premier téléchargement si le catalogue n'a jamais été téléchargé sur cet appareil (un téléchargement
- * interrompu recommence au lancement suivant). Un seul onglet à la fois.
+ * interrompu recommence au lancement suivant), sinon recherche des nouveautés. Un seul onglet à la fois.
  */
 export async function startFirstCatalogue(): Promise<void> {
-  const needed = async () => !!hasTmdbAccess() && (await getMeta<number | null>('lastSync', null).catch(() => 0)) === null;
+  const lastSync = async () => getMeta<number | null>('lastSync', null).catch(() => 0);
   const run = async () => {
-    const go = await needed();
+    if (!hasTmdbAccess()) return setState({ checked: true });
+    const first = (await lastSync()) === null;
     setState({ checked: true });
-    if (go) await downloadCatalogue();
+    if (first) await downloadCatalogue();
+    else await checkNewTitles();
   };
   const locks = typeof navigator !== 'undefined' ? navigator.locks : undefined;
   if (!locks) return run();

@@ -1,6 +1,7 @@
 import { db, getMeta, type Title } from '../../lib/db';
 import { categoryOf, mediaOf, type Category } from '../../lib/category';
 import { ensureDetails, fetchSaga, posterUrl } from '../../lib/tmdb';
+import { NEW_TITLES_META, type NewTitlesCheck } from '../../lib/sync';
 
 /**
  * Tirage aléatoire pondéré par le nombre de votes TMDB : les titres connus sortent
@@ -45,15 +46,17 @@ export function prefetch(title: Title) {
 
 // Catalogue gardé en mémoire d'une visite du swipe à l'autre (sa lecture prend du temps sur un gros
 // catalogue), préchargé depuis l'accueil ; relu après une mise à jour du catalogue.
-const catalogues = new Map<Category, { lastSync: number | null; titles: Promise<Title[]> }>();
+const catalogues = new Map<Category, { version: string; titles: Promise<Title[]> }>();
 
 /** Titres du catalogue de cette catégorie (le tableau gardé en mémoire : les ajouts du swipe y restent). */
 export async function loadCatalogue(type: Category): Promise<Title[]> {
-  const lastSync = await getMeta<number | null>('lastSync', null);
+  // Relu après une mise à jour complète, ou des nouveautés ajoutées au démarrage.
+  const [lastSync, newTitles] = await Promise.all([getMeta<number | null>('lastSync', null), getMeta<NewTitlesCheck | null>(NEW_TITLES_META, null)]);
+  const version = `${lastSync}:${newTitles?.addedAt ?? 0}`;
   let cached = catalogues.get(type);
-  if (!cached || cached.lastSync !== lastSync) {
+  if (!cached || cached.version !== version) {
     const titles = db.titles.where('type').equals(mediaOf(type)).toArray();
-    cached = { lastSync, titles: type === 'movie' ? titles : titles.then((list) => list.filter((t) => categoryOf(t) === type)) };
+    cached = { version, titles: type === 'movie' ? titles : titles.then((list) => list.filter((t) => categoryOf(t) === type)) };
     cached.titles.catch(() => catalogues.delete(type));
     catalogues.set(type, cached);
   }

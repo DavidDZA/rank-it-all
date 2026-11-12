@@ -11,7 +11,7 @@ const DAY = 86_400_000;
 const iso = (t: number) => new Date(t).toISOString().slice(0, 10);
 
 /** Une requête /discover : un type, un seuil de votes, et des filtres TMDB en plus (langue, période). */
-interface Query {
+export interface Query {
   type: MediaType;
   minVotes: number;
   label: string; // pour la progression : « films », « films en français »…
@@ -221,9 +221,45 @@ export async function syncCatalogue(minVotes: MinVotes, onProgress: Progress): P
   const removed = await removeMissing(seen);
   forgetCategories();
   await setMeta('lastSync', Date.now());
+  await db.meta.put({ key: NEW_TITLES_META, value: { checkedAt: Date.now(), addedAt: Date.now() } satisfies NewTitlesCheck });
   // Décompte par catégorie, sur les titres gardés.
   const series = await db.titles.where('type').equals('tv').toArray();
   const anime = series.filter(isAnimeTitle).length;
   const movie = [...seen].filter((k) => k.startsWith('movie:')).length;
   return { movie, tv: series.length - anime, anime, removed };
+}
+
+// ---------- Nouveautés (au démarrage) ----------
+
+/** Les nouveautés sont cherchées parmi les titres sortis depuis ce temps (ceux qui viennent de passer un seuil). */
+export const NEW_TITLES_WINDOW = 2 * 365 * DAY;
+/** Au plus une recherche de nouveautés par jour. */
+export const NEW_TITLES_EVERY = DAY;
+
+/** Meta propre à l'appareil : dernière recherche de nouveautés, et dernière fois qu'elle a ajouté des titres. */
+export const NEW_TITLES_META = 'new-titles';
+export interface NewTitlesCheck {
+  checkedAt: number;
+  addedAt: number;
+}
+
+/** Les requêtes du catalogue, réduites aux titres sortis depuis `from` (celles qui s'arrêtent avant sont retirées). */
+export function recentQueries(queries: Query[], from: number): Query[] {
+  return queries.filter((q) => until(q) >= from).map((q) => ({ ...q, since: Math.max(since(q), from) }));
+}
+
+/**
+ * Ajoute au catalogue les titres récents qui passent désormais un seuil (mêmes requêtes que le catalogue, sur les
+ * deux dernières années : quelques dizaines de demandes au lieu de 900). Ne supprime rien : c'est le rôle de la mise
+ * à jour complète. Renvoie le nombre de titres ajoutés.
+ */
+export async function addNewTitles(minVotes: MinVotes, now = Date.now()): Promise<number> {
+  const before = await db.titles.count();
+  const queries = recentQueries([...catalogueQueries(minVotes), ...(await getCustomImports()).map(customQuery)], now - NEW_TITLES_WINDOW);
+  await fetchQueries(queries, () => undefined, new Set());
+  const added = (await db.titles.count()) - before;
+  const previous = (await db.meta.get(NEW_TITLES_META))?.value as NewTitlesCheck | undefined;
+  await db.meta.put({ key: NEW_TITLES_META, value: { checkedAt: now, addedAt: added ? now : (previous?.addedAt ?? 0) } satisfies NewTitlesCheck });
+  if (added) forgetCategories();
+  return added;
 }

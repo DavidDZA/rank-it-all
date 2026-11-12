@@ -1,4 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
+import { seed } from './helpers';
 
 test.describe('accueil', () => {
   test('une ligne par catégorie : swiper à gauche, classer à droite', async ({ page }) => {
@@ -45,6 +46,23 @@ test.describe('accueil', () => {
     await expect(progress).toHaveCount(0);
     await expect(page.locator('.tile', { hasText: 'Swiper les films' })).toContainText('60 à découvrir');
     // Pas de second téléchargement au lancement suivant.
+    let calls = 0;
+    page.on('request', (r) => r.url().includes('api.themoviedb.org') && calls++);
+    await page.reload();
+    await expect(page.locator('.tile', { hasText: 'Swiper les films' })).toContainText('60 à découvrir');
+    await page.waitForTimeout(1000);
+    expect(calls).toBe(0);
+  });
+
+  test('catalogue déjà téléchargé : nouveautés ajoutées au démarrage, une fois par jour', async ({ page }) => {
+    await mockTmdb(page);
+    await page.goto('/');
+    await page.evaluate(() => localStorage.setItem('tmdb-token', 'jeton-de-test'));
+    // Catalogue téléchargé (vide), nouveautés jamais cherchées.
+    await seed(page, { meta: { lastSync: Date.now(), 'new-titles': { checkedAt: 0, addedAt: 0 } } });
+    await expect(page.getByText(/nouveautés au catalogue/)).toBeVisible({ timeout: 20_000 });
+    await expect(page.locator('.tile', { hasText: 'Swiper les films' })).toContainText('60 à découvrir');
+    await expect(page.locator('.catalogue-progress')).toHaveCount(0); // en arrière-plan, sans barre de progression
     let calls = 0;
     page.on('request', (r) => r.url().includes('api.themoviedb.org') && calls++);
     await page.reload();

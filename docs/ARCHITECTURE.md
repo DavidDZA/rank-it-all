@@ -1,6 +1,6 @@
 # Architecture — comment marche Rank It All
 
-> **À lire en premier par toute nouvelle session de travail.** État au 02/11/2026. Ce qui reste à faire est dans
+> **À lire en premier par toute nouvelle session de travail.** État au 12/11/2026. Ce qui reste à faire est dans
 > [ROADMAP.md](ROADMAP.md).
 
 ## 1. L'appli
@@ -89,6 +89,10 @@ version Android n'est utile que pour changer ses réglages (nom, icône, couleur
   détaillées** : elles sont dans `details` (même clé), jointes à la lecture par `withDetails` là où il en faut
   (wishlist, ce soir, stats, classement, à deux). Le titre garde deux repères : `detailsAt` (fiche à jour) et
   `collectionId` (saga). Garde-fou : un hook Dexie empêche d'enregistrer une fiche dans un titre.
+  Une fiche porte `complete` quand la réponse de TMDB contenait casting et plateformes (`append_to_response`) ; une
+  réponse sans eux n'est pas enregistrée. Une fiche d'avant le 12/11 sans aucun nom (ni réalisateur ni acteur) est
+  redemandée à son prochain affichage (`detailsOutdated`, `tmdb.ts`) : des appareils avaient gardé des fiches vides,
+  donc sans réalisateur, acteurs, plateformes ni bande-annonce, jamais rafraîchies.
 - `answers` : une réponse par titre (`seen` / `unseen` / `wish`, avis `good` / `meh`, `updatedAt`).
 - `meta` : classements `ranking:<catégorie>` et `ranking:wish:<catégorie>`, placement en cours `insert:…`,
   `activity`, `badges`, `boosts:movie|tv`, `saga:<id>`, `min-votes`, `show-anime`, `custom-imports`, `lastSync`, `lastExport`.
@@ -125,6 +129,13 @@ Catalogue (`CatalogueProgress`) ; en cas d'échec, « Réessayer ». `syncCatalo
 (nombre de pages connu), d'où une progression en pourcentage. Les réglages fins (seuils, imports sur mesure) restent
 dans Réglages → Catalogue.
 
+**Nouveautés au démarrage** (`addNewTitles`, `checkNewTitles`) : quand le catalogue est déjà téléchargé, au plus une
+fois par jour (meta `new-titles`, propre à l'appareil), les mêmes requêtes que le catalogue sont relancées sur les
+sorties des deux dernières années (quelques dizaines de demandes au lieu de 900), en arrière-plan. Elles ajoutent
+les titres qui viennent de passer un seuil, sans rien supprimer (c'est le rôle de la mise à jour complète, toujours
+rappelée sur l'accueil au bout de 30 jours) ; un message seulement s'il y a des ajouts. Le swipe relit alors son
+catalogue. Une mise à jour complète compte comme recherche de nouveautés.
+
 **Imports sur mesure** (films seulement, `customImports.ts`, Réglages → Import sur mesure) : une requête de plus
 par import (genre, langue originale, pays de production, années ; 150 votes par défaut), lancée tout de suite
 (`importCustom`) puis relancée par chaque `syncCatalogue`. Retenus dans la meta `custom-imports` (synchronisée) :
@@ -135,7 +146,10 @@ supprimer un import laisse partir ses films à la prochaine mise à jour, sauf c
 Le site n'a **aucune clé TMDB** : il appelle le **relais TMDB** (Cloudflare Worker, `worker/`, voir son README),
 adresse donnée au déploiement (`VITE_TMDB_RELAY`). Le relais ajoute la clé (secret `TMDB_TOKEN`), n'accepte que le
 site et les chemins utilisés, limite le débit par IP et garde les réponses en cache. Une clé saisie dans Réglages →
-Clé TMDB reste prioritaire : l'appli appelle alors TMDB directement. En local, sans relais, `VITE_TMDB_TOKEN` dans
+Clé TMDB reste prioritaire : l'appli appelle alors TMDB directement ; si TMDB la refuse (clé régénérée, par exemple
+l'ancienne clé du site, régénérée le 11/11), elle est oubliée et l'appli repasse par le relais. Les chemins acceptés
+par le relais sont dans `worker/src/routes.js` : tout nouvel appel TMDB doit y être ajouté (`tests/relais.test.ts`
+le vérifie ; `/search/person` manquait, recherche par réalisateur ou acteur en panne du 11 au 12/11). En local, sans relais, `VITE_TMDB_TOKEN` dans
 `.env.local`. Les affiches (`image.tmdb.org`) ne demandent pas de clé.
 
 ## 4. Compte et amis (Supabase)
@@ -197,7 +211,9 @@ Restaurer (dans un projet Supabase neuf, ou le même vidé) :
 ## 5. Tests et vérifications
 
 - `npx tsc -b`, `npm test` (Vitest), `npm run build` avant chaque push.
-- `node worker/test.mjs` : le relais TMDB, avec Cloudflare et TMDB simulés.
+- `node worker/test.mjs` : le relais TMDB, avec Cloudflare et TMDB simulés. `tests/relais.test.ts` (Vitest) branche
+  l'appli sur le code du relais : chaque appel TMDB du code est accepté, la fiche revient complète (réalisateur,
+  acteurs, plateformes, bande-annonce), fiches vides redemandées, clé personnelle refusée remplacée par le relais.
 - `npm run e2e` : Playwright sur l'appli construite, dans le Chrome installé, formats téléphone (tactile) et PC.
 - `npm run e2e:live` : sur le vrai projet Supabase (comptes de test créés puis supprimés) — après toute
   modification de la synchro, des amis ou du schéma.

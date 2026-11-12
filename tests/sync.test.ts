@@ -2,7 +2,7 @@ import 'fake-indexeddb/auto';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { db, getMeta, setStatus } from '../src/lib/db';
 import { readRanking, saveRanking } from '../src/lib/ranking';
-import { importCustom, syncCatalogue } from '../src/lib/sync';
+import { addNewTitles, catalogueQueries, importCustom, NEW_TITLES_META, recentQueries, syncCatalogue } from '../src/lib/sync';
 import { newCustomImport, setCustomImports } from '../src/lib/customImports';
 import { DEFAULT_MIN_VOTES, type MinVotes } from '../src/lib/settings';
 import { makeTitle } from './helpers';
@@ -119,5 +119,37 @@ describe('import sur mesure (films)', () => {
     await setCustomImports([]);
     await syncCatalogue(votes({}), () => {});
     expect(await db.titles.where('type').equals('movie').primaryKeys()).toEqual(['movie:1']);
+  });
+});
+
+describe('nouveautés au démarrage', () => {
+  const NOW = Date.UTC(2016, 0, 1); // fenêtre de deux ans : sorties de 2014 à 2016
+
+  it('ajoute les titres récents qui passent un seuil, sans rien supprimer', async () => {
+    await db.titles.put(makeTitle(99)); // hors de tout seuil : une mise à jour complète l'enlèverait
+    const added = await addNewTitles(votes({ movie: 100 }), NOW);
+    // Films 2 et 3 (2015) ; pas le film 1 (2010), déjà au catalogue s'il passe le seuil.
+    expect(added).toBe(2);
+    expect((await db.titles.toCollection().primaryKeys()).sort()).toEqual(['movie:2', 'movie:3', 'movie:99']);
+    expect(await getMeta(NEW_TITLES_META, null)).toEqual({ checkedAt: NOW, addedAt: NOW });
+  });
+
+  it('rien de nouveau : la date d’ajout ne bouge pas (le swipe ne relit pas le catalogue)', async () => {
+    await addNewTitles(votes({ movie: 100 }), NOW);
+    expect(await addNewTitles(votes({ movie: 100 }), NOW + 1000)).toBe(0);
+    expect(await getMeta(NEW_TITLES_META, null)).toEqual({ checkedAt: NOW + 1000, addedAt: NOW });
+  });
+
+  it('ne garde des requêtes que les sorties récentes (sans la requête des films d’avant 1980)', () => {
+    const queries = recentQueries(catalogueQueries(DEFAULT_MIN_VOTES), NOW);
+    expect(queries.map((q) => q.label)).not.toContain('films d’avant 1980');
+    expect(queries).toHaveLength(catalogueQueries(DEFAULT_MIN_VOTES).length - 1);
+    expect(queries.every((q) => q.since === NOW)).toBe(true);
+  });
+
+  it('une mise à jour complète compte comme recherche de nouveautés', async () => {
+    await syncCatalogue(votes({}), () => {});
+    const check = await getMeta<{ checkedAt: number } | null>(NEW_TITLES_META, null);
+    expect(Date.now() - check!.checkedAt).toBeLessThan(5000);
   });
 });
