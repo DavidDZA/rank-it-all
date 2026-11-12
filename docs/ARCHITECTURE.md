@@ -221,8 +221,14 @@ Restaurer (dans un projet Supabase neuf, ou le même vidé) :
   Parcours couverts : swipe (4 coins et 2 directions, boutons, vrais gestes, clavier, annuler / passer :
   `swipe.spec.ts`), fiche et ajout manuel avec TMDB simulé (réalisateur, acteurs, bande-annonce, plateformes, fiche
   vide complétée, recherche par titre et par réalisateur : `fiche.spec.ts`), duels, Mes listes, « Ce soir ? »,
-  sauvegarde exportée puis réimportée (`parcours.spec.ts`). Outils communs dans `e2e/helpers.ts` (`seed`,
-  `readAnswers`, `readMeta`, `mockTmdbApi`).
+  sauvegarde exportée puis réimportée (`parcours.spec.ts`), stats et badges, tier list, partage en image (partage du
+  téléphone simulé, ou téléchargement), filtres du swipe (`ecrans.spec.ts`). Outils communs dans `e2e/helpers.ts`
+  (`seed`, `readAnswers`, `readMeta`, `mockTmdbApi`).
+- **Supabase simulé** (`e2e/fakeSupabase.ts`) : session ouverte, profils, amitiés, réponses et classements, sans
+  aucune demande au vrai projet (une demande non prévue est notée et fait échouer le test). Il sert à « À deux »
+  (son top, wishlist commune, conseils, compatibilité, partage refusé : `duo.spec.ts`) et à la synchro (réponses
+  venues d'un autre appareil, envoi avec la copie allégée : `synchro.spec.ts`). À compléter si l'appli appelle une
+  nouvelle table ou fonction.
 - `npm run e2e:live` : sur le vrai projet Supabase (comptes de test créés puis supprimés) — après toute
   modification de la synchro, des amis ou du schéma.
 
