@@ -114,3 +114,53 @@ export async function dragRow(page: Page, from: number, to: number, touch: boole
   }
   await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
 }
+
+/** Réponses enregistrées dans la base locale : clé → « statut » ou « statut:avis ». */
+export function readAnswers(page: Page): Promise<Record<string, string>> {
+  return page.evaluate(
+    () =>
+      new Promise<Record<string, string>>((resolve, reject) => {
+        const req = indexedDB.open('rank-it-all');
+        req.onsuccess = () => {
+          const all = req.result.transaction('answers').objectStore('answers').getAll();
+          all.onsuccess = () => {
+            req.result.close();
+            resolve(Object.fromEntries(all.result.map((a: { key: string; status: string; tier?: string }) => [a.key, a.tier ? `${a.status}:${a.tier}` : a.status])));
+          };
+          all.onerror = () => reject(all.error);
+        };
+        req.onerror = () => reject(req.error);
+      }),
+  );
+}
+
+/** Une valeur de la table meta (classements, activité…). */
+export function readMeta<T>(page: Page, key: string): Promise<T | undefined> {
+  return page.evaluate(
+    (k) =>
+      new Promise<T | undefined>((resolve, reject) => {
+        const req = indexedDB.open('rank-it-all');
+        req.onsuccess = () => {
+          const row = req.result.transaction('meta').objectStore('meta').get(k);
+          row.onsuccess = () => {
+            req.result.close();
+            resolve(row.result?.value);
+          };
+          row.onerror = () => reject(row.error);
+        };
+        req.onerror = () => reject(req.error);
+      }),
+    key,
+  );
+}
+
+/**
+ * TMDB simulé (appels directs, avec une clé de test dans les réglages) : `routes` donne la réponse de chaque chemin
+ * (« /movie/550 », « /search/multi »…) ; les autres chemins répondent 404.
+ */
+export async function mockTmdbApi(page: Page, routes: Record<string, unknown>): Promise<void> {
+  await page.route('https://api.themoviedb.org/3/**', (route) => {
+    const path = new URL(route.request().url()).pathname.replace(/^\/3/, '');
+    return path in routes ? route.fulfill({ json: routes[path] }) : route.fulfill({ status: 404, json: {} });
+  });
+}

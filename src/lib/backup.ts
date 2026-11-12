@@ -4,7 +4,7 @@ import { db, detailsMarks, isUserMeta, setMeta, type Answer, type Meta, type Tit
 /** Sauvegardes faites quand l'appli s'appelait « Sort my stuffs » : toujours importables. */
 const APP_IDS = ['rank-it-all', 'sort-my-stuffs'];
 
-interface Backup {
+export interface Backup {
   app: 'rank-it-all' | 'sort-my-stuffs';
   version: 1;
   exportedAt: string;
@@ -13,13 +13,17 @@ interface Backup {
   meta: Meta[];
 }
 
-/** Exporte les réponses, les classements et les titres concernés (pas besoin du catalogue pour restaurer). */
-export async function exportData(): Promise<void> {
+/** La sauvegarde : réponses, classements et titres concernés (pas besoin du catalogue pour restaurer). */
+export async function buildBackup(): Promise<Backup> {
   const answers = await db.answers.toArray();
   const titles = (await db.titles.bulkGet(answers.map((a) => a.key))).filter((t): t is Title => !!t);
   const meta = (await db.meta.toArray()).filter((m) => isUserMeta(m.key));
-  const backup: Backup = { app: 'rank-it-all', version: 1, exportedAt: new Date().toISOString(), titles, answers, meta };
+  return { app: 'rank-it-all', version: 1, exportedAt: new Date().toISOString(), titles, answers, meta };
+}
 
+/** Télécharge la sauvegarde dans un fichier JSON. */
+export async function exportData(): Promise<void> {
+  const backup = await buildBackup();
   const blob = new Blob([JSON.stringify(backup)], { type: 'application/json' });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);

@@ -214,7 +214,15 @@ Restaurer (dans un projet Supabase neuf, ou le même vidé) :
 - `node worker/test.mjs` : le relais TMDB, avec Cloudflare et TMDB simulés. `tests/relais.test.ts` (Vitest) branche
   l'appli sur le code du relais : chaque appel TMDB du code est accepté, la fiche revient complète (réalisateur,
   acteurs, plateformes, bande-annonce), fiches vides redemandées, clé personnelle refusée remplacée par le relais.
+- Vitest couvre aussi la sauvegarde (aller-retour, anciennes sauvegardes « Sort my stuffs », fichier refusé :
+  `backup.test.ts`), les stats et badges (`stats.test.ts`), la décision du démarrage (premier téléchargement ou
+  nouveautés, au plus une fois par jour : `demarrage.test.ts`).
 - `npm run e2e` : Playwright sur l'appli construite, dans le Chrome installé, formats téléphone (tactile) et PC.
+  Parcours couverts : swipe (4 coins et 2 directions, boutons, vrais gestes, clavier, annuler / passer :
+  `swipe.spec.ts`), fiche et ajout manuel avec TMDB simulé (réalisateur, acteurs, bande-annonce, plateformes, fiche
+  vide complétée, recherche par titre et par réalisateur : `fiche.spec.ts`), duels, Mes listes, « Ce soir ? »,
+  sauvegarde exportée puis réimportée (`parcours.spec.ts`). Outils communs dans `e2e/helpers.ts` (`seed`,
+  `readAnswers`, `readMeta`, `mockTmdbApi`).
 - `npm run e2e:live` : sur le vrai projet Supabase (comptes de test créés puis supprimés) — après toute
   modification de la synchro, des amis ou du schéma.
 
