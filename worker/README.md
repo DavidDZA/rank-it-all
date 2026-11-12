@@ -5,7 +5,9 @@ Cloudflare Worker entre l'appli et TMDB : le site l'appelle **sans clé**, le re
 
 - Adresse : `https://rank-it-all-tmdb.rankitall.workers.dev` (compte Cloudflare de l'utilisateur, sous-domaine
   `rankitall`).
-- N'accepte que les demandes venant du site (`ALLOWED_ORIGINS`) et les chemins utilisés par l'appli (`ROUTES`).
+- N'accepte que les demandes venant du site (`ALLOWED_ORIGINS`) et les chemins utilisés par l'appli (`ROUTES`,
+  dans `src/routes.js`). **Tout nouvel appel TMDB de l'appli doit y être ajouté** : `npm test` (`tests/relais.test.ts`)
+  échoue sinon.
 - Limite de débit : 1 500 demandes par minute et par adresse IP (`wrangler.toml`).
 - Cache partagé entre utilisateurs : 12 h pour les pages du catalogue, 24 h pour les fiches, 1 h pour les recherches.
 - Offre gratuite : 100 000 demandes par jour ; un premier téléchargement du catalogue en fait environ 900.

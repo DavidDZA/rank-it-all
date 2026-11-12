@@ -54,6 +54,11 @@ export interface Details {
   collection?: { id: number; name: string } | null; // saga
   trailer?: string | null; // clé YouTube
   providers: { flatrate: Provider[]; rent: Provider[]; buy: Provider[]; link: string | null }; // France
+  /**
+   * La réponse de TMDB contenait bien casting et plateformes. Absent des fiches d'avant le 12/11 : une de celles-là
+   * sans aucun nom (ni réalisateur, ni acteur) est récupérée à nouveau (voir detailsOutdated).
+   */
+  complete?: boolean;
 }
 
 export interface Answer {

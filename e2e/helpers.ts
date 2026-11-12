@@ -47,6 +47,7 @@ export const details = (key: string, providers: string[] = []) => ({
   collection: null,
   trailer: null,
   providers: { flatrate: providers.map((name, i) => ({ id: 100 + i, name, logo: null })), rent: [], buy: [], link: null },
+  complete: true,
 });
 
 /** Ouvre l'appli (qui crée sa base), y écrit les données de test, puis recharge la page `hash`. */

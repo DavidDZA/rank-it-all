@@ -32,6 +32,11 @@ r = await req('/discover/movie', 'https://pirate.example');
 check('autre site refusé (403)', r.status === 403);
 r = await req('/discover/movie', null);
 check('sans Origin refusé (403)', r.status === 403);
+r = await req('/search/person?query=nolan&language=fr-FR');
+check('recherche par personne relayée (200)', r.status === 200);
+r = await req('/movie/550?language=fr-FR&append_to_response=credits%2Cvideos%2Cwatch%2Fproviders&include_video_language=fr%2Cen');
+check('fiche : append_to_response transmis intact', new URL(calls.at(-1).url).searchParams.get('append_to_response') === 'credits,videos,watch/providers');
+allowedHits = 2; // limite simulée de 4 : comme si seules les 2 premières demandes avaient compté
 r = await req('/account');
 check('chemin non relayé (404)', r.status === 404);
 r = await req('/discover/movie', 'https://daviddza.github.io', 'POST');

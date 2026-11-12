@@ -1,5 +1,5 @@
 import { db, detailsMarks, getDetails, titleKey, type Details, type MediaType, type Provider, type Title } from './db';
-import { getToken, TMDB_RELAY } from './settings';
+import { forgetToken, getToken, TMDB_RELAY } from './settings';
 
 const API = 'https://api.themoviedb.org/3';
 
@@ -42,11 +42,9 @@ export interface Page {
 /** Au-delà, une requête TMDB est abandonnée (réseau qui ne répond plus). */
 const TIMEOUT_MS = 20_000;
 
-export async function tmdb<T>(
-  path: string,
-  params: Record<string, string | number | boolean> = {},
-  token = getToken(),
-): Promise<T> {
+/** `token` : une clé à essayer (réglages) ; par défaut, celle de l'appareil ou, à défaut, le relais. */
+export async function tmdb<T>(path: string, params: Record<string, string | number | boolean> = {}, tokenToTry?: string | null): Promise<T> {
+  const token = tokenToTry === undefined ? getToken() : tokenToTry;
   // Sans clé à joindre : le relais TMDB, qui ajoute la sienne.
   if (!token && !TMDB_RELAY) throw new TmdbError('Clé TMDB manquante : renseigne-la dans les réglages.', 401);
   const url = new URL((token ? API : TMDB_RELAY) + path);
@@ -67,6 +65,12 @@ export async function tmdb<T>(
     if (res.status === 429 && attempt < 5) {
       await new Promise((r) => setTimeout(r, 1000 * (attempt + 1)));
       continue;
+    }
+    // Clé personnelle refusée (régénérée ou supprimée chez TMDB) alors que le relais existe : elle est oubliée et
+    // le relais prend le relais. Sinon, plus rien ne venait de TMDB (fiches, plateformes, recherches) sans le dire.
+    if (res.status === 401 && tokenToTry === undefined && token && TMDB_RELAY) {
+      forgetToken();
+      return tmdb<T>(path, params, null);
     }
     if (res.status === 401) throw new TmdbError('Clé TMDB refusée : vérifie le jeton dans les réglages.', 401);
     if (!res.ok) throw new TmdbError(`Erreur TMDB (${res.status})`, res.status);
@@ -179,6 +183,7 @@ export function parseDetails(type: MediaType, res: DetailsResponse): Details {
     collection: res.belongs_to_collection ? { id: res.belongs_to_collection.id, name: res.belongs_to_collection.name } : null,
     trailer: pickTrailer(res.videos?.results),
     providers: { flatrate: toProviders(fr?.flatrate), rent: toProviders(fr?.rent), buy: toProviders(fr?.buy), link: fr?.link ?? null },
+    complete: !!res.credits && !!res['watch/providers'],
   };
 }
 
@@ -189,8 +194,12 @@ export const WEEK = 7 * 86_400_000;
  * Fiche détaillée (casting, durée, saga, plateformes, bande-annonce…), mise en cache dans la base.
  * `maxAge` force un rafraîchissement des fiches trop anciennes (utile pour les plateformes).
  */
-/** Fiche à récupérer à nouveau : absente, ou d'avant le 17/10 (sans genres, langue ni premiers rôles). */
-export const detailsOutdated = (d?: Details) => !d || d.genreIds === undefined || d.topCast === undefined;
+/**
+ * Fiche à récupérer à nouveau : absente, d'avant le 17/10 (sans genres, langue ni premiers rôles), ou incomplète
+ * (réponse sans casting ni plateformes : réalisateur, acteurs, plateformes et bande-annonce manquaient pour de bon).
+ */
+export const detailsOutdated = (d?: Details) =>
+  !d || d.genreIds === undefined || d.topCast === undefined || (!d.complete && !d.directors.length && !d.topCast.length);
 
 export function ensureDetails(title: Title, maxAge = Infinity): Promise<Details | null> {
   const fresh = (d?: Details) => !detailsOutdated(d) && Date.now() - d!.fetchedAt < maxAge;
@@ -206,6 +215,9 @@ export function ensureDetails(title: Title, maxAge = Infinity): Promise<Details 
           include_video_language: 'fr,en',
         });
         const details = parseDetails(title.type, res);
+        // Réponse sans casting ni plateformes : pas enregistrée (elle ne remplace pas une fiche plus complète), et
+        // redemandée au prochain affichage.
+        if (!details.complete) return saved && !detailsOutdated(saved) ? saved : details;
         await db.details.put({ ...details, key: title.key });
         // Repères sur le titre, et infos qui lui manquaient (catalogue téléchargé avant qu'on les enregistre).
         const stored = await db.titles.get(title.key);

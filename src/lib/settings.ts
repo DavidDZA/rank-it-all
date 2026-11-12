@@ -47,6 +47,13 @@ export const getToken = () => getUserToken() || (TMDB_RELAY ? null : BUILT_IN_TO
 /** TMDB est-il joignable (clé personnelle, relais ou clé locale) ? */
 export const hasTmdbAccess = () => !!getUserToken() || hasBuiltInToken;
 export const setToken = (token: string) => write(TOKEN_KEY, token.trim());
+export function forgetToken(): void {
+  try {
+    localStorage.removeItem(TOKEN_KEY);
+  } catch {
+    // Stockage indisponible : rien n'était retenu.
+  }
+}
 
 // Seuils de votes du catalogue : dans la base (meta « min-votes »), synchronisés avec le compte.
 // Deux appareils avec des seuils différents s'effaceraient l'un l'autre des titres à chaque mise à jour.

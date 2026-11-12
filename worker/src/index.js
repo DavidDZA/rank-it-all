@@ -3,24 +3,12 @@
 // Seuls les chemins utilisés par l'appli sont acceptés, seulement depuis le site, avec une limite de débit
 // par adresse IP. Déployé par .github/workflows/worker.yml.
 
+import { ROUTES } from './routes.js';
+
 const TMDB = 'https://api.themoviedb.org/3';
 
 /** Sites autorisés à appeler le relais (le site publié, et le site lancé en local pour le développement). */
 const ALLOWED_ORIGINS = ['https://daviddza.github.io', 'http://localhost:5173', 'http://localhost:4173'];
-
-const HOUR = 3600;
-const DAY = 24 * HOUR;
-
-/** Chemins TMDB utilisés par l'appli (src/lib/tmdb.ts, src/lib/sync.ts), et durée de leur cache. */
-const ROUTES = [
-  [/^\/discover\/(movie|tv)$/, 12 * HOUR], // catalogue : les mêmes pages pour tout le monde
-  [/^\/(movie|tv)\/\d+$/, DAY], // fiches détaillées
-  [/^\/(movie|tv)\/\d+\/recommendations$/, DAY],
-  [/^\/collection\/\d+$/, DAY], // sagas
-  [/^\/person\/\d+\/combined_credits$/, DAY],
-  [/^\/watch\/providers\/(movie|tv)$/, DAY], // plateformes de streaming
-  [/^\/search\/multi$/, HOUR],
-];
 
 export default {
   async fetch(request, env, ctx) {
