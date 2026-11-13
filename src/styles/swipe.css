@@ -122,20 +122,21 @@ body.rate-phase .swipe-card:not(.card-behind) {
   object-fit: cover;
 }
 
-/* En haut à gauche de l'affiche : la saga du film, et le bouton pour écarter toute la saga. */
-.card-tags {
+/* Affiche de la carte du dessus, avec de quoi placer un bouton en bas (même taille que l'affiche seule). */
+.card-poster-wrap {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* En haut à gauche de l'affiche : la saga du film. */
+.card-tag {
   position: absolute;
-  z-index: 1;
   top: 16px;
   left: 16px;
   max-width: calc(100% - 110px);
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 6px;
-}
-.card-tag {
-  max-width: 100%;
   padding: 3px 10px;
   border-radius: 999px;
   background: rgb(16 13 31 / 0.82);
@@ -147,19 +148,30 @@ body.rate-phase .swipe-card:not(.card-behind) {
   text-overflow: ellipsis;
   pointer-events: none;
 }
+/* « Pas envie de la saga » : un vrai bouton, plein, en bas de l'affiche (de la couleur de « Pas vu »). */
 .saga-drop {
-  max-width: 100%;
-  padding: 5px 12px;
+  position: absolute;
+  left: 50%;
+  bottom: 14px;
+  transform: translateX(-50%);
+  max-width: calc(100% - 24px);
+  padding: 11px 20px;
+  border: 2px solid rgb(255 255 255 / 0.9);
   border-radius: 999px;
-  border: 1px solid rgb(255 95 109 / 0.6);
-  background: rgb(16 13 31 / 0.88);
-  color: var(--red);
-  font-size: 0.8rem;
-  font-weight: 600;
+  background: linear-gradient(135deg, #ff7a85, var(--red));
+  color: #fff;
+  font-family: var(--display);
+  font-size: 1.05rem;
+  font-weight: 700;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  box-shadow: 0 6px 20px rgb(0 0 0 / 0.55);
   cursor: pointer;
+  transition: transform 0.12s;
+}
+.saga-drop:active {
+  transform: translateX(-50%) scale(0.95);
 }
 
 /* ---------- Tampons (couleur : tone-*, position : direction visée) ---------- */

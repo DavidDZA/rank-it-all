@@ -27,7 +27,7 @@ import {
   type SagaTag,
 } from './pool';
 import { FilterButton, FilterIcon, FilterSheet } from '../../components/FilterSheet';
-import { ActionButton, CardTag } from './controls';
+import { ActionButton, CardTag, SagaDropButton } from './controls';
 import { KNOWN_VOTES, personFilmography } from '../../lib/tmdb';
 import { downloadCatalogue, useCatalogueDownload } from '../../lib/catalogueDownload';
 import { CatalogueProgress } from '../../components/CatalogueProgress';
@@ -451,8 +451,11 @@ export default function Swipe({ category }: { category: Category }) {
               className={phase !== 'seen' ? 'flip-in' : ''}
               onTap={() => openFiche(current)}
             >
-              <Poster title={current} size="w500" className="card-poster" />
-              <CardTag saga={saga} left={sagaLeft.length} onDrop={canDropSaga ? dropSaga : undefined} />
+              <div className="card-poster-wrap">
+                <Poster title={current} size="w500" className="card-poster" />
+                {canDropSaga && <SagaDropButton left={sagaLeft.length} onDrop={dropSaga} />}
+              </div>
+              <CardTag saga={saga} />
               <RatingBadge title={current} />
               <TitleText title={current} credits />
             </SwipeCard>

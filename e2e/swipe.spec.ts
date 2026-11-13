@@ -195,6 +195,12 @@ test.describe('saga', () => {
     await openSaga(page);
     const before = await readAnswers(page);
     await expect(dropButton(page)).toHaveText('💤 Pas envie de la saga (3)');
+    // Sur l'affiche, en bas et centré (pas en dessous).
+    const poster = (await page.locator('.swipe-card:not(.card-behind) .card-poster').boundingBox())!;
+    const button = (await dropButton(page).boundingBox())!;
+    expect(button.y).toBeGreaterThan(poster.y + poster.height / 2);
+    expect(button.y + button.height).toBeLessThanOrEqual(poster.y + poster.height);
+    expect(Math.abs(button.x + button.width / 2 - (poster.x + poster.width / 2))).toBeLessThan(2);
     await dropButton(page).click();
     await expect(page.getByText('Saga Alien : 3 films écartés')).toBeVisible();
     await expect.poll(() => readAnswers(page)).toEqual({ ...before, 'movie:101': 'unseen', 'movie:102': 'unseen', 'movie:103': 'unseen' });
