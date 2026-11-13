@@ -162,11 +162,17 @@ body.rate-phase .swipe-card:not(.card-behind) {
   color: #fff;
   font-family: var(--display);
   font-size: 1.05rem;
-  font-weight: 700;
+  font-weight: 500;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  text-shadow: 0 1px 3px rgb(0 0 0 / 0.5);
+  /* Contour noir autour du texte blanc : lisible même sur une affiche claire (le fond est transparent). */
+  text-shadow:
+    -1px -1px 0 #000,
+    1px -1px 0 #000,
+    -1px 1px 0 #000,
+    1px 1px 0 #000,
+    0 0 4px rgb(0 0 0 / 0.9);
   box-shadow: 0 4px 14px rgb(0 0 0 / 0.45);
   cursor: pointer;
   transition: transform 0.12s, opacity 0.15s;
