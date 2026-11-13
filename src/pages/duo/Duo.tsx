@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
+import { T } from '../../i18n';
 import { db, withDetails, type Title } from '../../lib/db';
-import { CATEGORY_LABEL, categoryOf, categoryOptions, useCategories, type Category } from '../../lib/category';
+import { categoryOf, categoryOptions, useCategories, type Category } from '../../lib/category';
 import { useCloud } from '../../lib/cloud';
 import { listFriends, loadFriendData, loadMySide } from '../../lib/friends';
 import { TopBar, TypeFilter } from '../../components/common';
@@ -26,7 +27,7 @@ export default function Duo({ friendId }: { friendId: string }) {
     try {
       const [friends, them, me] = await Promise.all([listFriends(), loadFriendData(friendId, fresh), loadMySide()]);
       const friend = friends.find((f) => f.id === friendId);
-      if (!friend) throw new Error('Cette personne ne fait pas (ou plus) partie de tes amis.');
+      if (!friend) throw new Error(T.duo.notFriend);
       // Mes titres locaux (avec fiches) d'abord, sinon les copies jointes aux réponses de l'ami.
       const keys = [...new Set([...them.answers.keys(), ...me.answers.keys()])];
       const titles = new Map(them.titles);
@@ -57,40 +58,40 @@ export default function Duo({ friendId }: { friendId: string }) {
   return (
     <main className="page">
       <Tutorial id="duo" />
-      <TopBar title={`👥 Toi & ${pseudo}`} />
+      <TopBar title={T.duo.title(pseudo)} />
       {!cloud.ready ? (
-        <p className="muted center">Chargement…</p>
+        <p className="muted center">{T.common.loading}</p>
       ) : !cloud.user ? (
         <p className="center">
           <a className="btn primary" href="#/friends">
-            Se connecter
+            {T.home.signIn}
           </a>
         </p>
       ) : error ? (
         <div className="empty">
           <p>✕ {error}</p>
           <a className="btn" href="#/friends">
-            ← Mes amis
+            {T.duo.backToFriends}
           </a>
         </div>
       ) : !data ? (
-        <p className="muted center">Chargement des données de ton ami…</p>
+        <p className="muted center">{T.duo.loadingFriend}</p>
       ) : (
         <>
           <TypeFilter<Tab>
             value={tab}
             options={[
-              ['top', '🏆 Son top', 'Tout son classement, et ce qu’il ou elle a vu sans le classer'],
-              ['wish', '💖 En commun', 'Les titres que vous voulez voir tous les deux'],
-              ['tonight', '🍿 Ce soir', 'Tirer au sort un titre de votre wishlist commune'],
-              ['advice', '💡 Conseils', 'Ce que l’autre a aimé et que vous n’avez pas vu'],
-              ['match', '🎯 Compatibilité', 'Vos classements se ressemblent-ils ?'],
+              ['top', T.duo.tabs.top, T.duo.tabs.topTip],
+              ['wish', T.duo.tabs.common, T.duo.tabs.commonTip],
+              ['tonight', T.duo.tabs.tonight, T.duo.rollTip],
+              ['advice', T.duo.tabs.advice, T.duo.tabs.adviceTip],
+              ['match', T.duo.tabs.match, T.duo.tabs.matchTip],
             ]}
             onChange={setTab}
           />
           <TypeFilter<Category>
             value={category}
-            options={categoryOptions(categories, (c) => `Les ${CATEGORY_LABEL[c].plural}`)}
+            options={categoryOptions(categories, (c) => T.duo.categoryTip[c])}
             onChange={setCategory}
           />
           {tab === 'top' && <FriendTop key={category} data={data} category={category} onWish={refreshMe} />}
@@ -99,8 +100,8 @@ export default function Duo({ friendId }: { friendId: string }) {
           {tab === 'advice' && <AdviceLists data={data} category={category} onWish={refreshMe} />}
           {tab === 'match' && <MatchView data={data} category={category} />}
           <p className="muted tiny center">
-            <button className="link" onClick={() => load(true)} title="Recharger les dernières données de ton ami">
-              Actualiser
+            <button className="link" onClick={() => load(true)} title={T.duo.refreshTip}>
+              {T.duo.refresh}
             </button>
           </p>
         </>

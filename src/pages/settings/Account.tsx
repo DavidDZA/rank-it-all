@@ -1,4 +1,5 @@
 import { useEffect, useState, type FormEvent } from 'react';
+import { T } from '../../i18n';
 import {
   cancelRecovery,
   deleteAccount,
@@ -23,7 +24,7 @@ export function Account() {
   if (!cloudEnabled) return null;
   return (
     <section className="card">
-      <h3>☁️ Compte</h3>
+      <h3>{T.accountPage.title}</h3>
       {!cloud.ready ? (
         <p className="muted small">…</p>
       ) : cloud.user && cloud.recovery ? (
@@ -63,11 +64,11 @@ function SignedOut() {
     e.preventDefault();
     if (mode === 'signin') run(() => signIn(email, password));
     else if (mode === 'signup')
-      run(async () => ((await signUp(email, password, pseudo)) ? null : '✓ Compte créé : confirme ton adresse avec le lien reçu par e-mail, puis connecte-toi.'));
+      run(async () => ((await signUp(email, password, pseudo)) ? null : T.accountPage.created));
     else
       run(async () => {
         await sendPasswordReset(email);
-        return '✓ Si un compte existe avec cette adresse, un e-mail pour choisir un nouveau mot de passe vient d’être envoyé (pense à regarder dans les indésirables).';
+        return T.accountPage.resetSent;
       });
   };
 
@@ -79,32 +80,31 @@ function SignedOut() {
   return (
     <>
       <p className="muted small">
-        Optionnel : retrouve tes titres, ta wishlist et tes classements sur tous tes appareils (PC, téléphone), sans
-        sauvegarde à faire. Ce que tu as déjà trié sur cet appareil est ajouté au compte.
+        {T.accountPage.intro}
       </p>
-      <button className="btn provider" onClick={() => run(signInWithGoogle)} disabled={busy} title="Se connecter ou créer un compte avec Google">
-        <GoogleLogo /> Continuer avec Google
+      <button className="btn provider" onClick={() => run(signInWithGoogle)} disabled={busy} title={T.accountPage.googleTip}>
+        <GoogleLogo /> {T.accountPage.google}
       </button>
-      <p className="auth-divider muted small">ou avec ton e-mail</p>
+      <p className="auth-divider muted small">{T.accountPage.orEmail}</p>
       <form className="auth-form" onSubmit={submit}>
         {mode === 'signup' && (
-          <input className="input" value={pseudo} onChange={(e) => setPseudo(e.target.value)} placeholder="Pseudo" maxLength={40} required autoComplete="nickname" />
+          <input className="input" value={pseudo} onChange={(e) => setPseudo(e.target.value)} placeholder={T.accountPage.pseudo} maxLength={40} required autoComplete="nickname" />
         )}
-        <input className="input" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="E-mail" required autoComplete="email" />
+        <input className="input" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder={T.accountPage.email} required autoComplete="email" />
         {mode !== 'reset' && (
           <input
             className="input"
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            placeholder="Mot de passe"
+            placeholder={T.accountPage.password}
             required
             autoComplete={mode === 'signup' ? 'new-password' : 'current-password'}
           />
         )}
         {mode === 'signup' && <PasswordRules password={password} />}
         <button className="btn primary" type="submit" disabled={busy || (mode === 'signup' && !passwordOk(password))}>
-          {mode === 'signin' ? 'Se connecter' : mode === 'signup' ? 'Créer mon compte' : 'Recevoir le lien'}
+          {mode === 'signin' ? T.home.signIn : mode === 'signup' ? T.accountPage.createMine : T.accountPage.getLink}
         </button>
       </form>
       {msg && <p className="small">{msg}</p>}
@@ -112,15 +112,15 @@ function SignedOut() {
         {mode === 'signin' ? (
           <>
             <button className="link" onClick={() => switchTo('signup')}>
-              Créer un compte
+              {T.accountPage.create}
             </button>
             <button className="link" onClick={() => switchTo('reset')}>
-              Mot de passe oublié ?
+              {T.accountPage.forgot}
             </button>
           </>
         ) : (
           <button className="link" onClick={() => switchTo('signin')}>
-            ← J’ai déjà un compte
+            {T.accountPage.haveAccount}
           </button>
         )}
       </p>
@@ -147,7 +147,7 @@ function SignedIn({ cloud }: { cloud: CloudState }) {
   const savePseudo = async () => {
     try {
       await updatePseudo(pseudo);
-      setPseudoMsg('✓ Pseudo enregistré.');
+      setPseudoMsg(T.accountPage.pseudoSaved);
     } catch (e) {
       setPseudoMsg(`✕ ${(e as Error).message}`);
     }
@@ -164,7 +164,7 @@ function SignedIn({ cloud }: { cloud: CloudState }) {
   const remove = async () => {
     if (
       !confirm(
-        'Supprimer ton compte ? Ton profil, tes réponses et tes classements seront définitivement effacés du serveur.\n\nLes données de cet appareil sont gardées (tu pourras les effacer dans la zone dangereuse).',
+        T.accountPage.confirmDelete,
       )
     )
       return;
@@ -180,29 +180,36 @@ function SignedIn({ cloud }: { cloud: CloudState }) {
   return (
     <>
       <p className="small">
-        Connecté{cloud.pseudo ? <> en tant que <strong>{cloud.pseudo}</strong></> : ''}
+        {T.accountPage.connected}
+        {cloud.pseudo ? (
+          <>
+            {T.accountPage.as} <strong>{cloud.pseudo}</strong>
+          </>
+        ) : (
+          ''
+        )}
         {cloud.user!.email && <span className="muted"> · {cloud.user!.email}</span>}
-        {via && <span className="muted"> · via {via}</span>}
+        {via && <span className="muted">{T.accountPage.via(via)}</span>}
       </p>
       <p className="small">
-        {cloud.syncing ? '🔄 Synchronisation…' : cloud.error ? `✕ ${cloud.error}` : cloud.lastSync ? `✓ À jour · ${ago(cloud.lastSync)}` : '🔄 En attente de synchronisation…'}
+        {cloud.syncing ? T.accountPage.syncing : cloud.error ? `✕ ${cloud.error}` : cloud.lastSync ? T.accountPage.upToDate(ago(cloud.lastSync)) : T.accountPage.waiting}
       </p>
       <div className="row">
-        <a className="btn small primary" href="#/friends" title="Ajouter des amis, comparer vos wishlists et vos classements">
-          👥 Mes amis
+        <a className="btn small primary" href="#/friends" title={T.accountPage.friendsTip}>
+          {T.accountPage.friends}
         </a>
-        <button className="btn small" onClick={syncNow} disabled={cloud.syncing} title="Envoyer et recevoir les dernières modifications maintenant">
-          Synchroniser maintenant
+        <button className="btn small" onClick={syncNow} disabled={cloud.syncing} title={T.accountPage.syncTip}>
+          {T.accountPage.sync}
         </button>
       </div>
 
       <label className="field">
-        Pseudo
+        {T.accountPage.pseudo}
         <div className="row">
           <input className="input" value={pseudo} onChange={(e) => setPseudo(e.target.value)} maxLength={40} autoComplete="nickname" />
           {pseudo.trim() && pseudo.trim() !== cloud.pseudo && (
-            <button className="btn small" onClick={savePseudo} title="Enregistrer le nouveau pseudo">
-              Enregistrer
+            <button className="btn small" onClick={savePseudo} title={T.accountPage.savePseudoTip}>
+              {T.token.save}
             </button>
           )}
         </div>
@@ -211,26 +218,26 @@ function SignedIn({ cloud }: { cloud: CloudState }) {
 
       {leaving ? (
         <div className="auth-leave">
-          <p className="small">Garder tes données sur cet appareil ? Elles restent de toute façon sur ton compte.</p>
+          <p className="small">{T.accountPage.keepData}</p>
           <div className="row">
-            <button className="btn small" onClick={() => leave(false)} title="Se déconnecter en gardant les données sur cet appareil">
-              Les garder
+            <button className="btn small" onClick={() => leave(false)} title={T.accountPage.keepTip}>
+              {T.accountPage.keep}
             </button>
-            <button className="btn small" onClick={() => leave(true)} title="Se déconnecter et effacer les données de cet appareil">
-              Les effacer de cet appareil
+            <button className="btn small" onClick={() => leave(true)} title={T.accountPage.eraseTip}>
+              {T.accountPage.erase}
             </button>
             <button className="btn small" onClick={() => setLeaving(false)}>
-              Annuler
+              {T.common.cancel}
             </button>
           </div>
         </div>
       ) : (
         <div className="row">
-          <button className="btn" onClick={() => setLeaving(true)} title="Se déconnecter de ce compte sur cet appareil">
-            Se déconnecter
+          <button className="btn" onClick={() => setLeaving(true)} title={T.accountPage.signOutTip}>
+            {T.accountPage.signOut}
           </button>
-          <button className="btn small link-danger" onClick={remove} title="Supprimer définitivement ton compte et ses données du serveur">
-            Supprimer mon compte
+          <button className="btn small link-danger" onClick={remove} title={T.accountPage.deleteTip}>
+            {T.accountPage.delete}
           </button>
         </div>
       )}
@@ -252,15 +259,15 @@ function NewPassword() {
   };
   return (
     <form className="auth-form" onSubmit={submit}>
-      <p className="small">Choisis ton nouveau mot de passe.</p>
-      <input className="input" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Nouveau mot de passe" required autoComplete="new-password" />
+      <p className="small">{T.accountPage.newPassword}</p>
+      <input className="input" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder={T.accountPage.newPasswordPlaceholder} required autoComplete="new-password" />
       <PasswordRules password={password} />
       <div className="row">
         <button className="btn primary" type="submit" disabled={!passwordOk(password)}>
-          Enregistrer
+          {T.token.save}
         </button>
         <button className="btn" type="button" onClick={cancelRecovery}>
-          Plus tard
+          {T.accountPage.later}
         </button>
       </div>
       {msg && <p className="small">{msg}</p>}
@@ -286,9 +293,9 @@ function PasswordRules({ password }: { password: string }) {
 
 function ago(t: number): string {
   const min = Math.floor((Date.now() - t) / 60_000);
-  if (min < 1) return 'à l’instant';
-  if (min < 60) return `il y a ${min} min`;
-  return `il y a ${Math.floor(min / 60)} h`;
+  if (min < 1) return T.accountPage.justNow;
+  if (min < 60) return T.accountPage.minutesAgo(min);
+  return T.accountPage.hoursAgo(Math.floor(min / 60));
 }
 
 function GoogleLogo() {

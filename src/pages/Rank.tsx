@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState } from 'react';
+import { num, T } from '../i18n';
 import { titlesOf, useTitleMap } from '../lib/hooks';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db, type Title } from '../lib/db';
-import { CATEGORY_LABEL, capitalize, keysOfCategory, mediaOf, type Category } from '../lib/category';
+import { keysOfCategory, mediaOf, type Category } from '../lib/category';
 import { changeStatus, readRanking, unrank, type Scope } from '../lib/ranking';
 import { matchesTheme, missingFilterInfo, themeFilter, themeLabel } from '../lib/themes';
 import { prefetchDetails, WEEK } from '../lib/tmdb';
@@ -31,7 +32,7 @@ export default function Rank({ category }: { category: Category }) {
   // « Dispo sur mes abonnements » : ce qu'on peut revoir (classement et tier list, pas les duels).
   const byMine = view === 'duel' ? null : mineFilter(onlyMine, loadMyProviders());
   const listFilter = filter || byMine ? (t: Title) => (!filter || filter(t)) && (!byMine || byMine(t)) : null;
-  const listLabel = [filter && label, byMine && '📺 Dispo sur mes abonnements'].filter(Boolean).join(' · ');
+  const listLabel = [filter && label, byMine && T.card.onMyProviders].filter(Boolean).join(' · ');
 
   // Titres vus de ce type : pour compter ce que gardent les filtres.
   const seenKeys = useLiveQuery(async () => keysOfCategory(category, await db.answers.where('[type+status]').equals([media, 'seen']).primaryKeys()), [category]);
@@ -50,7 +51,7 @@ export default function Rank({ category }: { category: Category }) {
   }, [!!byMine, seen?.length]);
 
   const toWishlist = async (t: Title) => {
-    if (confirm(`Remettre « ${t.title} » dans la wishlist ? Il sera retiré des titres vus et du classement.`)) {
+    if (confirm(T.rankPage.confirmWish(t.title))) {
       await changeStatus(t, 'wish');
     }
   };
@@ -59,7 +60,7 @@ export default function Rank({ category }: { category: Category }) {
     const all = (await db.titles.bulkGet(await readRanking(scope))).filter((t): t is Title => !!t);
     const titles = (listFilter ? all.filter(listFilter) : all).slice(0, 10);
     if (!titles.length) {
-      toast('Classe au moins un titre pour partager ton top !');
+      toast(T.rankPage.nothingToShare);
       return;
     }
     setSharing(true);
@@ -76,20 +77,20 @@ export default function Rank({ category }: { category: Category }) {
     <main className="page wide">
       <Tutorial id="rank" />
       <TopBar
-        title={`${{ movie: '🏆', tv: '🥇', anime: '🏯' }[category]} ${capitalize(CATEGORY_LABEL[category].plural)}`}
+        title={T.rankPage.title(category)}
         right={<FilterButton active={!!filter} label={label} onClick={() => setShowFilters(true)} />}
       />
       {filter && <FilterStrip label={label} onClick={() => setShowFilters(true)} />}
       <TypeFilter<View>
         value={view}
         options={[
-          ['duel', 'Duels', 'Classer en choisissant entre deux titres'],
-          ['list', 'Mon classement', 'Voir et modifier le classement'],
-          ['tiers', 'Tier list', 'Ton classement en paliers S, A, B, C, D'],
+          ['duel', T.rankPage.duels, T.rankPage.duelsTip],
+          ['list', T.rankPage.ranking, T.rankPage.rankingTip],
+          ['tiers', T.rankPage.tiers, T.rankPage.tiersTip],
         ]}
         onChange={setView}
       />
-      {view !== 'duel' && <MineChip value={onlyMine} onChange={setOnlyMine} title="N’afficher que les titres disponibles sur tes abonnements, pour voir ce que tu peux revoir" />}
+      {view !== 'duel' && <MineChip value={onlyMine} onChange={setOnlyMine} title={T.rankPage.mineTip} />}
       {view === 'tiers' ? (
         <TierList category={category} filter={listFilter} filterLabel={listLabel} />
       ) : view === 'duel' ? (
@@ -97,33 +98,33 @@ export default function Rank({ category }: { category: Category }) {
           key={JSON.stringify(theme)}
           scope={scope}
           filter={filter}
-          question="Lequel préfères-tu ?"
-          emptyText="Aucun titre vu pour l’instant. Swipe ou ajoute des titres vus."
+          question={T.rankPage.question}
+          emptyText={T.rankPage.emptyDuel}
         />
       ) : (
         <>
-          <button className="btn primary" onClick={share} disabled={sharing} title="Créer une image de ton top 10 (filtré) à partager">
-            {sharing ? 'Création de l’image…' : '📤 Partager mon top 10'}
+          <button className="btn primary" onClick={share} disabled={sharing} title={T.rankPage.shareTip}>
+            {sharing ? T.tiers.creating : T.rankPage.share}
           </button>
           <RankedList
             scope={scope}
             filter={listFilter}
             below={byMine ? (t) => <ProviderLine title={t} maxAge={WEEK} /> : undefined}
-            empty="Aucun titre vu pour l’instant."
+            empty={T.rankPage.empty}
             actions={(t, ranked) => (
               <>
                 {ranked && (
-                  <button className="btn small" onClick={() => unrank(scope, t.key)} title="Retirer du classement pour le replacer avec de nouveaux duels" aria-label="Reclasser">
+                  <button className="btn small" onClick={() => unrank(scope, t.key)} title={T.rankPage.rerankTip} aria-label={T.rankPage.rerank}>
                     ↺
                   </button>
                 )}
-                <button className="btn small" onClick={() => toWishlist(t)} title="Remettre dans la wishlist (pas vu finalement)" aria-label="Remettre en wishlist">
+                <button className="btn small" onClick={() => toWishlist(t)} title={T.rankPage.toWishTip} aria-label={T.rankPage.toWish}>
                   ♥
                 </button>
               </>
             )}
           />
-          {byMine && <p className="muted tiny center">Disponibilités : JustWatch</p>}
+          {byMine && <p className="muted tiny center">{T.fiche.justwatch}</p>}
         </>
       )}
 
@@ -132,7 +133,7 @@ export default function Rank({ category }: { category: Category }) {
           type={media}
           initial={theme}
           count={(t) => (seen ?? []).filter((x) => matchesTheme(x, t)).length}
-          applyLabel={(n) => `Appliquer (${n.toLocaleString('fr-FR')} vus)`}
+          applyLabel={(n) => T.rankPage.apply(num(n))}
           hasCatalogueData={(seen ?? []).some((t) => t.rating !== undefined || t.details?.rating)}
           pendingInfo={pending.length}
           onApply={(t) => {

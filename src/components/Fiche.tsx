@@ -6,6 +6,7 @@ import { changeStatus } from '../lib/ranking';
 import { providerLogo, WEEK } from '../lib/tmdb';
 import { groupProviders, isMineGroup, loadMyProviders } from '../lib/providers';
 import { Poster, SeenButtons, Sheet, useDetails } from './common';
+import { num, REGION, regionName, T } from '../i18n';
 
 /** Ouvre la fiche complète d'un titre (voir <FicheHost /> dans App). */
 export function openFiche(title: Title): void {
@@ -26,7 +27,7 @@ export function FicheHost() {
   return <Fiche key={title.key} title={title} onClose={() => setTitle(null)} />;
 }
 
-const STATUS_LABEL: Record<Status, string> = { seen: '✓ Vu', wish: '💖 Wishlist', unseen: '🙈 Pas vu' };
+const STATUS_LABEL: Record<Status, string> = T.fiche.status;
 
 function Fiche({ title, onClose }: { title: Title; onClose: () => void }) {
   const d = useDetails(title, WEEK);
@@ -36,14 +37,14 @@ function Fiche({ title, onClose }: { title: Title; onClose: () => void }) {
   const facts = [
     CATEGORY_LABEL[categoryOf(title)].badge,
     title.year,
-    title.type === 'movie' && d?.runtime ? `${Math.floor(d.runtime / 60)} h ${String(d.runtime % 60).padStart(2, '0')}` : null,
-    title.type === 'tv' && d?.seasons ? `${d.seasons} saison${d.seasons > 1 ? 's' : ''}` : null,
-    title.type === 'tv' && d?.episodes ? `${d.episodes} épisodes` : null,
-    d?.rating ? `⭐ ${d.rating.toLocaleString('fr-FR')}/10` : null,
+    title.type === 'movie' && d?.runtime ? T.fiche.runtime(Math.floor(d.runtime / 60), String(d.runtime % 60).padStart(2, '0')) : null,
+    title.type === 'tv' && d?.seasons ? T.fiche.seasons(d.seasons) : null,
+    title.type === 'tv' && d?.episodes ? T.fiche.episodes(d.episodes) : null,
+    d?.rating ? `⭐ ${num(d.rating)}/10` : null,
   ].filter(Boolean);
 
   return (
-    <Sheet onClose={onClose} label={`Fiche de ${title.title}`}>
+    <Sheet onClose={onClose} label={T.fiche.label(title.title)}>
       <div className="fiche-head">
         <Poster title={title} size="w342" className="fiche-poster" />
         <div className="fiche-info">
@@ -62,7 +63,7 @@ function Fiche({ title, onClose }: { title: Title; onClose: () => void }) {
           {status && (
             <div className={`fiche-status status-${status}`}>
               {STATUS_LABEL[status]}
-              {status === 'seen' && answer?.tier && (answer.tier === 'good' ? ' · 👍 bien' : ' · 😐 bof')}
+              {status === 'seen' && answer?.tier && (answer.tier === 'good' ? T.fiche.good : T.fiche.meh)}
             </div>
           )}
         </div>
@@ -72,48 +73,48 @@ function Fiche({ title, onClose }: { title: Title; onClose: () => void }) {
         <div className="fiche-credits">
           {d.directors.length > 0 && (
             <div>
-              <span className="muted">{title.type === 'movie' ? 'Réalisation' : 'Création'} :</span> {d.directors.join(', ')}
+              <span className="muted">{title.type === 'movie' ? T.fiche.director : T.fiche.creator}</span> {d.directors.join(', ')}
             </div>
           )}
           {d.cast.length > 0 && (
             <div>
-              <span className="muted">Avec :</span> {d.cast.join(', ')}
+              <span className="muted">{T.fiche.cast}</span> {d.cast.join(', ')}
             </div>
           )}
           {d.collection && (
             <div>
-              <span className="muted">Saga :</span> {d.collection.name}
+              <span className="muted">{T.fiche.saga}</span> {d.collection.name}
             </div>
           )}
         </div>
       )}
 
-      <p className="fiche-overview">{title.overview || 'Pas de résumé disponible.'}</p>
+      <p className="fiche-overview">{title.overview || T.common.noOverview}</p>
 
       {d?.trailer && (
-        <a className="btn primary trailer" href={`https://www.youtube.com/watch?v=${d.trailer}`} target="_blank" rel="noreferrer" title="Ouvrir la bande-annonce sur YouTube">
-          ▶ Bande-annonce
+        <a className="btn primary trailer" href={`https://www.youtube.com/watch?v=${d.trailer}`} target="_blank" rel="noreferrer" title={T.fiche.trailerTip}>
+          {T.fiche.trailer}
         </a>
       )}
 
       <section className="fiche-section">
-        <h3>📺 Où regarder</h3>
+        <h3>{T.fiche.where}</h3>
         {!d ? (
-          <p className="muted small">Chargement…</p>
+          <p className="muted small">{T.common.loading}</p>
         ) : (
           <>
-            <ProviderGroup label="Abonnement" list={d.providers.flatrate} />
-            <ProviderGroup label="Location" list={d.providers.rent} />
-            <ProviderGroup label="Achat" list={d.providers.buy} />
+            <ProviderGroup label={T.fiche.flatrate} list={d.providers.flatrate} />
+            <ProviderGroup label={T.fiche.rent} list={d.providers.rent} />
+            <ProviderGroup label={T.fiche.buy} list={d.providers.buy} />
             {!d.providers.flatrate.length && !d.providers.rent.length && !d.providers.buy.length && (
-              <p className="muted small">Pas disponible en France pour l’instant.</p>
+              <p className="muted small">{T.fiche.unavailable(regionName(REGION))}</p>
             )}
             {d.providers.link && (
-              <a className="small link" href={d.providers.link} target="_blank" rel="noreferrer" title="Voir toutes les offres sur TMDB">
-                Voir toutes les offres →
+              <a className="small link" href={d.providers.link} target="_blank" rel="noreferrer" title={T.fiche.allOffersTip}>
+                {T.fiche.allOffers}
               </a>
             )}
-            <p className="muted tiny">Disponibilités : JustWatch</p>
+            <p className="muted tiny">{T.fiche.justwatch}</p>
           </>
         )}
       </section>
@@ -126,7 +127,7 @@ function Fiche({ title, onClose }: { title: Title; onClose: () => void }) {
             className={`btn ${status === s ? 'primary' : ''}`}
             onClick={() => changeStatus(title, s)}
             disabled={status === s}
-            title={s === 'wish' ? 'Ajouter à la wishlist' : 'Marquer comme pas vu'}
+            title={s === 'wish' ? T.fiche.wishTip : T.fiche.unseenTip}
           >
             {STATUS_LABEL[s]}
           </button>

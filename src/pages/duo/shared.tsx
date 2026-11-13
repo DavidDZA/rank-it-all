@@ -1,4 +1,5 @@
 import type { Title } from '../../lib/db';
+import { T } from '../../i18n';
 import type { Category } from '../../lib/category';
 import type { Friend, FriendData } from '../../lib/friends';
 import type { Side } from '../../lib/together';
@@ -15,15 +16,15 @@ export interface Loaded {
   catOf: (key: string) => Category | undefined;
 }
 
-export const nth = (n: number | undefined) => (n ? `n°${n}` : 'non priorisé');
+export const nth = (n: number | undefined) => (n ? T.duo.nth(n) : T.duo.notPrioritized);
 
 export function NeedsSharing({ pseudo, what }: { pseudo: string; what: string }) {
-  return <p className="muted center small">{pseudo} ne partage pas {what}. Il ou elle peut l’activer dans sa page Amis.</p>;
+  return <p className="muted center small">{T.duo.notShared(pseudo, what)}</p>;
 }
 
 /** Ajoute un titre (vu chez l'ami) à ma wishlist. */
 export async function addToWishlist(t: Title, onDone: () => void): Promise<void> {
   await changeStatus(t, 'wish');
-  toast(`💖 « ${t.title} » ajouté à ta wishlist`);
+  toast(T.duo.wished(t.title));
   onDone();
 }

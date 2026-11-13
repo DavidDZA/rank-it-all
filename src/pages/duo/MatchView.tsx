@@ -1,25 +1,26 @@
 import { useMemo } from 'react';
-import { CATEGORY_LABEL, type Category } from '../../lib/category';
+import { T } from '../../i18n';
+import { type Category } from '../../lib/category';
 import { compatibility } from '../../lib/together';
 import { TitleRow } from '../../components/common';
 import { NeedsSharing, type Loaded } from './shared';
 
 function verdict(p: number): string {
-  if (p >= 80) return 'Âmes sœurs cinéphiles 💞';
-  if (p >= 65) return 'Goûts très proches';
-  if (p >= 55) return 'Pas mal de points communs';
-  if (p >= 45) return 'Goûts indépendants';
-  return 'Goûts opposés : de beaux débats en perspective !';
+  if (p >= 80) return T.duo.verdict[0];
+  if (p >= 65) return T.duo.verdict[1];
+  if (p >= 55) return T.duo.verdict[2];
+  if (p >= 45) return T.duo.verdict[3];
+  return T.duo.verdict[4];
 }
 
 export function MatchView({ data, category }: { data: Loaded; category: Category }) {
   const pseudo = data.friend.pseudo;
   const match = useMemo(() => compatibility(data.me, data.them, category), [data, category]);
-  if (!data.friend.shareRanking) return <NeedsSharing pseudo={pseudo} what="son classement" />;
+  if (!data.friend.shareRanking) return <NeedsSharing pseudo={pseudo} what={T.duo.theirRanking} />;
   if (!match) {
     return (
       <p className="muted center">
-        Pas assez de {CATEGORY_LABEL[category].plural} classé{category === 'tv' ? 'e' : ''}s par vous deux (il en faut au moins 5 en commun). Continuez les duels !
+        {T.duo.notEnough(category)}
       </p>
     );
   }
@@ -27,7 +28,7 @@ export function MatchView({ data, category }: { data: Loaded; category: Category
     <ul className="list">
       {items.map((x) => {
         const t = data.titles.get(x.key);
-        return t && <TitleRow key={x.key} title={t} below={<span className="muted tiny">Toi : n°{x.mine} · {pseudo} : n°{x.theirs}</span>} />;
+        return t && <TitleRow key={x.key} title={t} below={<span className="muted tiny">{T.duo.positions(T.duo.nth(x.mine), pseudo, T.duo.nth(x.theirs))}</span>} />;
       })}
     </ul>
   );
@@ -37,18 +38,18 @@ export function MatchView({ data, category }: { data: Loaded; category: Category
         <p className="duo-percent">{match.percent} %</p>
         <p>{verdict(match.percent)}</p>
         <p className="muted small">
-          Sur {match.common} {CATEGORY_LABEL[category].plural} classé{category === 'tv' ? 'e' : ''}s par vous deux.
+          {T.duo.basedOn(match.common, category)}
         </p>
       </section>
       {match.agree.length > 0 && (
         <section className="duo-section">
-          <h3>🤝 Vous êtes d’accord</h3>
+          <h3>{T.duo.agree}</h3>
           {list(match.agree)}
         </section>
       )}
       {match.disagree.length > 0 && (
         <section className="duo-section">
-          <h3>⚔️ Vos plus gros désaccords</h3>
+          <h3>{T.duo.disagree}</h3>
           {list(match.disagree)}
         </section>
       )}

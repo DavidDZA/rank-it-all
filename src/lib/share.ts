@@ -2,8 +2,9 @@ import type { Title } from './db';
 import { CATEGORY_LABEL, type Category } from './category';
 
 const plural = (c: Category) => CATEGORY_LABEL[c].plural;
-const slug = (c: Category) => plural(c).normalize('NFD').replace(/[̀-ͯ]/g, '');
+const slug = (c: Category) => plural(c).normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/\s+/g, '-');
 import { posterUrl } from './tmdb';
+import { T } from '../i18n';
 
 const FONT = '"Fredoka Variable", system-ui, sans-serif';
 
@@ -52,7 +53,7 @@ export async function shareTop(category: Category, titles: Title[], filterLabel?
   canvas.height = H;
   const ctx = canvas.getContext('2d')!;
   paintBackground(ctx, W, H);
-  paintTitle(ctx, W, `Mon top ${top.length} ${plural(category)}`, filterLabel ? `🏆 ${filterLabel}` : '🏆 classé duel après duel');
+  paintTitle(ctx, W, T.share.topTitle(top.length, plural(category)), filterLabel ? `🏆 ${filterLabel}` : T.share.topSubtitle);
 
   const images = await Promise.all(top.map((t) => loadImage(posterUrl(t.posterPath, 'w342'))));
 
@@ -109,9 +110,9 @@ export async function shareTop(category: Category, titles: Title[], filterLabel?
 
   ctx.fillStyle = 'rgba(246,244,255,0.55)';
   ctx.font = `500 24px ${FONT}`;
-  ctx.fillText('Fait avec Rank It All 🍿', W / 2, H - 32);
+  ctx.fillText(T.share.madeWith, W / 2, H - 32);
 
-  await shareCanvas(canvas, `mon-top-${slug(category)}.png`, `Mon top ${top.length}`);
+  await shareCanvas(canvas, T.share.topFile(slug(category)), T.share.topShareTitle(top.length));
 }
 
 function paintBackground(ctx: CanvasRenderingContext2D, W: number, H: number) {
@@ -151,7 +152,7 @@ function paintTitle(ctx: CanvasRenderingContext2D, W: number, title: string, sub
 
 async function shareCanvas(canvas: HTMLCanvasElement, filename: string, title: string): Promise<void> {
   const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, 'image/png'));
-  if (!blob) throw new Error('Impossible de créer l’image.');
+  if (!blob) throw new Error(T.share.imageError);
   const file = new File([blob], filename, { type: 'image/png' });
   if (navigator.canShare?.({ files: [file] })) {
     try {
@@ -188,7 +189,7 @@ export async function shareTierList(category: Category, tiers: { label: string; 
   canvas.height = H;
   const ctx = canvas.getContext('2d')!;
   paintBackground(ctx, W, H);
-  paintTitle(ctx, W, `Ma tier list ${plural(category)}`, filterLabel ? `🏆 ${count} titres · ${filterLabel}` : `🏆 ${count} titres classés duel après duel`);
+  paintTitle(ctx, W, T.share.tierTitle(plural(category)), filterLabel ? T.share.tierFiltered(count, filterLabel) : T.share.tierSubtitle(count));
 
   const images = await Promise.all(tiers.flatMap((t) => t.items).map((t) => loadImage(posterUrl(t.posterPath, 'w185'))));
   let index = 0;
@@ -227,6 +228,6 @@ export async function shareTierList(category: Category, tiers: { label: string; 
   ctx.textBaseline = 'alphabetic';
   ctx.fillStyle = 'rgba(246,244,255,0.55)';
   ctx.font = `500 24px ${FONT}`;
-  ctx.fillText('Fait avec Rank It All 🍿', W / 2, H - 28);
-  await shareCanvas(canvas, `ma-tier-list-${slug(category)}.png`, 'Ma tier list');
+  ctx.fillText(T.share.madeWith, W / 2, H - 28);
+  await shareCanvas(canvas, T.share.tierFile(slug(category)), T.share.tierShareTitle);
 }

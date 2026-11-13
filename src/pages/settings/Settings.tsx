@@ -10,13 +10,16 @@ import { CatalogueSetting } from './CatalogueSetting';
 import { CustomImportSetting } from './CustomImportSetting';
 import { TokenSetting } from './TokenSetting';
 import { DangerZone } from './DangerZone';
+import { LanguageSetting } from './LanguageSetting';
+import { LANG, T } from '../../i18n';
 
 /** `section` : rubrique à afficher directement (« #/settings/catalogue », « #/settings/tmdb »). */
 export default function Settings({ section }: { section?: string }) {
   useScrollToSection(section);
   return (
     <main className="page">
-      <TopBar title="⚙️ Réglages" />
+      <TopBar title={T.settings.title} />
+      <LanguageSetting />
       <Account />
       <SwipeModeSetting />
       <MyProviders />
@@ -30,19 +33,19 @@ export default function Settings({ section }: { section?: string }) {
           className="btn small"
           onClick={() => {
             resetTutorials();
-            toast('💡 Les astuces reviendront à la prochaine visite de chaque écran.');
+            toast(T.settings.tipsReset);
           }}
-          title="Réafficher l’astuce de chaque écran à ta prochaine visite"
+          title={T.settings.tipsTip}
         >
-          💡 Revoir les astuces
+          {T.settings.tips}
         </button>
       </div>
       <p className="muted small center">
-        Données et affiches fournies par TMDB.
+        {T.settings.tmdbCredit}
         <br />
         This product uses the TMDB API but is not endorsed or certified by TMDB.
         <br />
-        <a href={`${import.meta.env.BASE_URL}confidentialite.html`}>Politique de confidentialité</a>
+        <a href={`${import.meta.env.BASE_URL}confidentialite.html?lang=${LANG}`}>{T.settings.privacy}</a>
       </p>
     </main>
   );

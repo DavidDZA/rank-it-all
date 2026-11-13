@@ -162,3 +162,10 @@
 .password-rules .ok {
   color: var(--green);
 }
+
+/* Réglages → Langue et pays : les deux listes l'une sous l'autre, en pleine largeur. */
+.language-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}

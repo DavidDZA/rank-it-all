@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react';
 import { exportData, importData } from '../../lib/backup';
 import { useCloud } from '../../lib/cloud';
+import { T } from '../../i18n';
 
 /**
  * Réglages → Sauvegarde : export / import d'un fichier JSON. Rarement utile : avec un compte, tout est synchronisé
@@ -13,10 +14,10 @@ export function BackupSetting() {
 
   const onImport = async (file: File | undefined) => {
     if (!file) return;
-    if (!confirm('Remplacer toutes tes réponses et classements actuels par cette sauvegarde ?')) return;
+    if (!confirm(T.backup.confirm)) return;
     try {
       const n = await importData(file);
-      setMsg(`✓ ${n} réponses restaurées.`);
+      setMsg(T.backup.restored(n));
     } catch (e) {
       setMsg(`✕ ${(e as Error).message}`);
     }
@@ -24,18 +25,18 @@ export function BackupSetting() {
 
   return (
     <section className="card">
-      <h3>💾 Sauvegarde</h3>
+      <h3>{T.backup.title}</h3>
       <p className="muted small">
         {signedIn
-          ? 'Rien à faire : tes données sont enregistrées sur ton compte. Ce fichier ne sert qu’à en garder une copie à toi.'
-          : 'Sans compte, tes données ne sont que sur cet appareil : connecte-toi (en haut de la page) pour ne plus jamais les perdre, ou garde-en une copie dans un fichier.'}
+          ? T.backup.signedIn
+          : T.backup.signedOut}
       </p>
       <div className="row">
-        <button className="btn" onClick={() => exportData()} title="Télécharger un fichier avec tes réponses et classements">
-          Exporter
+        <button className="btn" onClick={() => exportData()} title={T.backup.exportTip}>
+          {T.home.export}
         </button>
-        <button className="btn" onClick={() => fileInput.current?.click()} title="Restaurer une sauvegarde (remplace les données actuelles)">
-          Importer
+        <button className="btn" onClick={() => fileInput.current?.click()} title={T.backup.importTip}>
+          {T.backup.import}
         </button>
         <input ref={fileInput} type="file" accept="application/json,.json" hidden onChange={(e) => onImport(e.target.files?.[0])} />
       </div>

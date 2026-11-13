@@ -7,6 +7,12 @@ import { readMeta, seed } from './helpers';
  * réglé sur différentes langues (l'utilisateur, lui, reste en français).
  */
 
+// Ces tests portent sur la langue du catalogue (titres dans la langue de l'appareil), pas sur celle de l'interface :
+// l'interface reste en français (choisie dans les Réglages), quelle que soit la langue du navigateur.
+test.beforeEach(async ({ context }) => {
+  await context.addInitScript(() => localStorage.setItem('app-lang', 'fr'));
+});
+
 /** TMDB simulé : listes vides ; note la langue originale demandée par chaque requête du catalogue. */
 async function mockDiscover(page: Page): Promise<(string | null)[]> {
   const langs: (string | null)[] = [];

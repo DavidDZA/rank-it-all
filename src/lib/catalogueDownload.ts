@@ -1,9 +1,10 @@
 import { useSyncExternalStore } from 'react';
 import { getMeta, requestPersistentStorage } from './db';
 import { fixMinVotes, getMinVotes, hasTmdbAccess } from './settings';
-import { addNewTitles, NEW_TITLES_EVERY, NEW_TITLES_META, syncCatalogue, type NewTitlesCheck } from './sync';
+import { addNewTitles, catalogueLanguageOutdated, NEW_TITLES_EVERY, NEW_TITLES_META, type NewTitlesCheck, syncCatalogue } from './sync';
 import { syncAndWait, whenCloudReady } from './cloud';
 import { toast } from './fun';
+import { num, T } from '../i18n';
 
 /**
  * Téléchargement du catalogue, partagé par toute l'appli : lancé tout seul au démarrage tant qu'il n'a jamais été
@@ -40,12 +41,12 @@ export function useCatalogueDownload(): CatalogueDownload {
   );
 }
 
-const n = (x: number) => x.toLocaleString('fr-FR');
+const n = num;
 
 /** Télécharge le catalogue avec les seuils enregistrés (ceux du compte, s'il y en a un). Sans effet s'il est déjà en cours. */
 export async function downloadCatalogue(): Promise<void> {
   if (state.running) return;
-  setState({ running: true, message: 'Démarrage…', done: 0, error: null });
+  setState({ running: true, message: T.sync.starting, done: 0, error: null });
   try {
     await requestPersistentStorage();
     await whenCloudReady();
@@ -55,7 +56,7 @@ export async function downloadCatalogue(): Promise<void> {
       setState({ message, ...(done !== undefined ? { done } : {}) }),
     );
     setState({ running: false, message: null, done: 1, version: state.version + 1 });
-    toast(`🎬 Catalogue prêt : ${n(movie)} films, ${n(tv)} séries et ${n(anime)} animes à swiper !`);
+    toast(T.sync.ready(n(movie), n(tv), n(anime)));
   } catch (e) {
     setState({ running: false, message: null, error: (e as Error).message });
   }
@@ -74,7 +75,7 @@ export async function checkNewTitles(): Promise<number> {
     const added = await addNewTitles(await getMinVotes());
     if (added) {
       setState({ version: state.version + 1 });
-      toast(`🆕 ${n(added)} nouveauté${added > 1 ? 's' : ''} au catalogue !`);
+      toast(T.sync.newTitles(added, n(added)));
     }
     return added;
   } catch {
@@ -92,7 +93,8 @@ export async function startFirstCatalogue(): Promise<void> {
     if (!hasTmdbAccess()) return setState({ checked: true });
     const first = (await lastSync()) === null;
     setState({ checked: true });
-    if (first) await downloadCatalogue();
+    // Langue de l'interface changée depuis le dernier téléchargement : titres et résumés retraduits (mise à jour complète).
+    if (first || (await catalogueLanguageOutdated().catch(() => false))) await downloadCatalogue();
     else await checkNewTitles();
   };
   const locks = typeof navigator !== 'undefined' ? navigator.locks : undefined;

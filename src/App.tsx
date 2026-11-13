@@ -3,6 +3,7 @@ import { asCategory } from './lib/category';
 import { checkBadges, checkBadgesSoon } from './lib/badges';
 import { FicheHost } from './components/Fiche';
 import { Toaster } from './components/Toaster';
+import { T } from './i18n';
 import Home from './pages/Home';
 
 // Pages chargées à la demande : l'appli s'ouvre plus vite (l'accueil seul au démarrage) ;
@@ -95,7 +96,7 @@ export default function App() {
 
   return (
     <>
-      <Suspense fallback={<p className="muted center">Chargement…</p>}>{page(name, arg)}</Suspense>
+      <Suspense fallback={<p className="muted center">{T.common.loading}</p>}>{page(name, arg)}</Suspense>
       <FicheHost />
       <Toaster />
     </>

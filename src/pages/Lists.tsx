@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { num, T } from '../i18n';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { clearStatus, db, type Answer, type Title } from '../lib/db';
 import { categoryOf, categoryOptions, useCategories, type Category } from '../lib/category';
@@ -39,12 +40,12 @@ export default function Lists() {
   return (
     <main className="page">
       <Tutorial id="lists" />
-      <TopBar title="📚 Mes listes" right={items && <span className="pill">{items.length.toLocaleString('fr-FR')}</span>} />
+      <TopBar title={T.lists.title} right={items && <span className="pill">{num(items.length)}</span>} />
       <TypeFilter<ListId>
         value={list}
         options={[
-          ['seen', '✓ Vus', 'Tous les titres que tu as vus'],
-          ['unseen', '🙈 Pas vus', 'Les titres pas vus et sans envie (ils ne sont plus proposés au swipe)'],
+          ['seen', T.lists.seen, T.lists.seenTip],
+          ['unseen', T.lists.unseen, T.lists.unseenTip],
         ]}
         onChange={(v) => {
           setList(v);
@@ -54,8 +55,8 @@ export default function Lists() {
       <TypeFilter<Filter>
         value={filter}
         options={[
-          ['all', 'Tous', 'Tous les titres'],
-          ...categoryOptions(categories, (c) => (c === 'movie' ? 'Films seulement' : c === 'tv' ? 'Séries seulement' : 'Animes seulement')),
+          ['all', T.lists.all, T.lists.allTip],
+          ...categoryOptions(categories, (c) => T.lists.only[c]),
         ]}
         onChange={(v) => {
           setFilter(v);
@@ -70,9 +71,9 @@ export default function Lists() {
         }}
       />
       {!items ? (
-        <p className="muted center">Chargement…</p>
+        <p className="muted center">{T.common.loading}</p>
       ) : !shown.length ? (
-        <p className="muted center">{items.length ? 'Aucun titre ne correspond.' : 'Cette liste est vide.'}</p>
+        <p className="muted center">{items.length ? T.list.noMatch : T.lists.empty}</p>
       ) : (
         <ul className="list">
           {shown.slice(0, limit).map(({ t, a }) => (
@@ -80,20 +81,20 @@ export default function Lists() {
               {list === 'seen' ? (
                 <>
                   <SeenButtons title={t} current={a} />
-                  <button className="btn small" onClick={() => changeStatus(t, 'wish')} title="Pas vu finalement : mettre dans la wishlist" aria-label="Mettre en wishlist">
+                  <button className="btn small" onClick={() => changeStatus(t, 'wish')} title={T.lists.toWishTip} aria-label={T.lists.toWish}>
                     ♥
                   </button>
-                  <button className="btn small" onClick={() => changeStatus(t, 'unseen')} title="Pas vu finalement, et pas envie" aria-label="Marquer pas vu">
+                  <button className="btn small" onClick={() => changeStatus(t, 'unseen')} title={T.lists.toUnseenTip} aria-label={T.lists.toUnseen}>
                     ✕
                   </button>
                 </>
               ) : (
                 <>
                   <SeenButtons title={t} />
-                  <button className="btn small" onClick={() => changeStatus(t, 'wish')} title="Finalement, envie de le voir : wishlist" aria-label="Mettre en wishlist">
+                  <button className="btn small" onClick={() => changeStatus(t, 'wish')} title={T.lists.wishAfterAllTip} aria-label={T.lists.toWish}>
                     ♥
                   </button>
-                  <button className="btn small" onClick={() => clearStatus(t.key)} title="Le reproposer au swipe" aria-label="Reproposer au swipe">
+                  <button className="btn small" onClick={() => clearStatus(t.key)} title={T.lists.resetTip} aria-label={T.lists.reset}>
                     ↺
                   </button>
                 </>
@@ -103,8 +104,8 @@ export default function Lists() {
         </ul>
       )}
       {shown.length > limit && (
-        <button className="btn" onClick={() => setLimit((l) => l + PAGE)} title="Afficher les titres suivants">
-          Afficher plus ({(shown.length - limit).toLocaleString('fr-FR')} restants)
+        <button className="btn" onClick={() => setLimit((l) => l + PAGE)} title={T.lists.moreTip}>
+          {T.lists.more(num(shown.length - limit))}
         </button>
       )}
     </main>

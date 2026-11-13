@@ -1,5 +1,7 @@
 import { db, DETAILS_SAVED, detailsMarks, getDetails, titleKey, type Details, type MediaType, type Provider, type Title } from './db';
 import { forgetToken, getToken, TMDB_RELAY } from './settings';
+import { T } from '../i18n';
+import { LANG, REGION, TMDB_LANGUAGE } from '../i18n';
 
 const API = 'https://api.themoviedb.org/3';
 
@@ -89,9 +91,9 @@ export interface TmdbOptions {
 export async function tmdb<T>(path: string, params: Record<string, string | number | boolean> = {}, options: TmdbOptions = {}): Promise<T> {
   const token = options.token === undefined ? getToken() : options.token;
   // Sans clé à joindre : le relais TMDB, qui ajoute la sienne.
-  if (!token && !TMDB_RELAY) throw new TmdbError('Clé TMDB manquante : renseigne-la dans les réglages.', 401);
+  if (!token && !TMDB_RELAY) throw new TmdbError(T.tmdb.missingKey, 401);
   const url = new URL((token ? API : TMDB_RELAY) + path);
-  url.searchParams.set('language', 'fr-FR');
+  url.searchParams.set('language', TMDB_LANGUAGE);
   for (const [k, v] of Object.entries(params)) url.searchParams.set(k, String(v));
 
   for (let attempt = 1; ; attempt++) {
@@ -107,7 +109,7 @@ export async function tmdb<T>(path: string, params: Record<string, string | numb
       });
     } catch (e) {
       release();
-      if ((e as Error).name === 'TimeoutError') throw new TmdbError('TMDB ne répond pas : vérifie ta connexion.', 0);
+      if ((e as Error).name === 'TimeoutError') throw new TmdbError(T.tmdb.timeout, 0);
       throw e;
     }
     release();
@@ -123,8 +125,8 @@ export async function tmdb<T>(path: string, params: Record<string, string | numb
       forgetToken();
       return tmdb<T>(path, params, { ...options, token: null });
     }
-    if (res.status === 401) throw new TmdbError('Clé TMDB refusée : vérifie le jeton dans les réglages.', 401);
-    if (!res.ok) throw new TmdbError(`Erreur TMDB (${res.status})`, res.status);
+    if (res.status === 401) throw new TmdbError(T.tmdb.refused, 401);
+    if (!res.ok) throw new TmdbError(T.tmdb.error(res.status), res.status);
     return res.json() as Promise<T>;
   }
 }
@@ -197,6 +199,9 @@ export interface DetailsResponse {
   genres?: { id: number; name: string }[];
   created_by?: CreditPerson[];
   belongs_to_collection?: { id: number; name: string } | null;
+  title?: string; // film, dans la langue demandée
+  name?: string; // série
+  overview?: string;
   credits?: { cast: CreditPerson[]; crew: CreditPerson[] };
   videos?: { results: { key: string; site: string; type: string; iso_639_1: string; official: boolean }[] };
   'watch/providers'?: {
@@ -211,14 +216,14 @@ const toProviders = (list: RawProvider[] = []): Provider[] =>
 
 export function pickTrailer(videos: NonNullable<DetailsResponse['videos']>['results'] = []): string | null {
   const yt = videos.filter((v) => v.site === 'YouTube' && (v.type === 'Trailer' || v.type === 'Teaser'));
-  const score = (v: (typeof yt)[number]) => (v.type === 'Trailer' ? 4 : 0) + (v.iso_639_1 === 'fr' ? 2 : 0) + (v.official ? 1 : 0);
+  const score = (v: (typeof yt)[number]) => (v.type === 'Trailer' ? 4 : 0) + (v.iso_639_1 === LANG ? 2 : 0) + (v.official ? 1 : 0);
   return yt.sort((a, b) => score(b) - score(a))[0]?.key ?? null;
 }
 
 export function parseDetails(type: MediaType, res: DetailsResponse): Details {
   const cast = [...(res.credits?.cast ?? [])].sort((a, b) => (a.order ?? 99) - (b.order ?? 99));
   const crew = res.credits?.crew ?? [];
-  const fr = res['watch/providers']?.results.FR;
+  const local = res['watch/providers']?.results[REGION];
   return {
     fetchedAt: Date.now(),
     directors: (type === 'movie' ? crew.filter((c) => c.job === 'Director') : (res.created_by ?? [])).slice(0, 2).map((c) => c.name),
@@ -233,8 +238,10 @@ export function parseDetails(type: MediaType, res: DetailsResponse): Details {
     episodes: res.number_of_episodes,
     collection: res.belongs_to_collection ? { id: res.belongs_to_collection.id, name: res.belongs_to_collection.name } : null,
     trailer: pickTrailer(res.videos?.results),
-    providers: { flatrate: toProviders(fr?.flatrate), rent: toProviders(fr?.rent), buy: toProviders(fr?.buy), link: fr?.link ?? null },
+    providers: { flatrate: toProviders(local?.flatrate), rent: toProviders(local?.rent), buy: toProviders(local?.buy), link: local?.link ?? null },
     complete: !!res.credits && !!res['watch/providers'],
+    lang: TMDB_LANGUAGE,
+    region: REGION,
   };
 }
 
@@ -250,19 +257,26 @@ export const WEEK = 7 * 86_400_000;
  * (réponse sans casting ni plateformes : réalisateur, acteurs, plateformes et bande-annonce manquaient pour de bon).
  */
 export const detailsOutdated = (d?: Details) =>
-  !d || d.genreIds === undefined || d.topCast === undefined || (!d.complete && !d.directors.length && !d.topCast.length);
+  !d ||
+  d.genreIds === undefined ||
+  d.topCast === undefined ||
+  (!d.complete && !d.directors.length && !d.topCast.length) ||
+  // Autre langue (genres, saga) ou autre pays (plateformes) que ceux de l'appli. Les fiches d'avant la traduction
+  // (sans repère) étaient en français, pour la France.
+  (d.lang ?? 'fr-FR') !== TMDB_LANGUAGE ||
+  (d.region ?? 'FR') !== REGION;
 
 // ---------- Enregistrement groupé des fiches ----------
 // Chaque écriture relance les lectures de la base affichées à l'écran (classement, wishlist…) : 300 fiches
 // enregistrées une à une, c'étaient 300 relectures et 300 redessins de la liste. Les fiches arrivées à quelques
 // instants d'intervalle sont enregistrées ensemble, en une seule écriture.
 export const SAVE_BATCH_MS = 200;
-const toSave = new Map<string, { title: Title; details: Details }>();
+const toSave = new Map<string, { title: Title; details: Details; texts?: { title?: string; overview?: string } }>();
 let saveTimer: ReturnType<typeof setTimeout> | undefined;
 let saveWaiters: (() => void)[] = [];
 
-function saveDetails(title: Title, details: Details): Promise<void> {
-  toSave.set(title.key, { title, details });
+function saveDetails(title: Title, details: Details, texts?: { title?: string; overview?: string }): Promise<void> {
+  toSave.set(title.key, { title, details, texts });
   return new Promise((resolve) => {
     saveWaiters.push(resolve);
     saveTimer ??= setTimeout(flushDetails, SAVE_BATCH_MS);
@@ -280,13 +294,16 @@ async function flushDetails(): Promise<void> {
       await db.details.bulkPut(batch.map(({ title, details }) => ({ ...details, key: title.key })));
       // Repères sur le titre, et infos qui lui manquaient (catalogue téléchargé avant qu'on les enregistre).
       const stored = await db.titles.bulkGet(batch.map(({ title }) => title.key));
-      const updates = batch.flatMap(({ title, details }, i) => {
+      const updates = batch.flatMap(({ title, details, texts }, i) => {
         const t = stored[i];
         if (!t) return [];
         const changes: Partial<Title> = detailsMarks(title.type, details);
         if (!t.genreIds?.length && details.genreIds?.length) changes.genreIds = details.genreIds;
         if (!t.originalLanguage && details.originalLanguage) changes.originalLanguage = details.originalLanguage;
         if (t.rating === undefined && details.rating) changes.rating = details.rating;
+        // Nom et résumé dans la langue de l'interface (titres ajoutés à la main, ou d'avant un changement de langue).
+        if (texts?.title && texts.title !== t.title) changes.title = texts.title;
+        if (texts?.overview && texts.overview !== t.overview) changes.overview = texts.overview;
         return [{ key: title.key, changes }];
       });
       if (updates.length) await db.titles.bulkUpdate(updates);
@@ -317,7 +334,7 @@ export function ensureDetails(title: Title, maxAge = Infinity, background = fals
       if (fresh(saved)) return saved!;
       const res = await tmdb<DetailsResponse>(
         `/${title.type}/${title.tmdbId}`,
-        { append_to_response: 'credits,videos,watch/providers', include_video_language: 'fr,en' },
+        { append_to_response: 'credits,videos,watch/providers', include_video_language: LANG === 'en' ? 'en' : `${LANG},en` },
         { background },
       );
       const details = parseDetails(title.type, res);
@@ -325,7 +342,7 @@ export function ensureDetails(title: Title, maxAge = Infinity, background = fals
       // Réponse sans casting ni plateformes : pas enregistrée (elle ne remplace pas une fiche plus complète), et
       // redemandée au prochain affichage.
       if (!details.complete) return saved && !detailsOutdated(saved) ? saved : details;
-      await saveDetails(title, details);
+      await saveDetails(title, details, { title: res.title ?? res.name, overview: res.overview });
       return details;
     } catch {
       failedAt.set(title.key, Date.now());
@@ -389,14 +406,14 @@ export interface ProviderOption extends Provider {
   priority: number;
 }
 
-/** Plateformes disponibles en France (films + séries), les plus courantes d'abord. */
+/** Plateformes disponibles dans le pays de l'utilisateur (films + séries), les plus courantes d'abord. */
 export async function fetchProviderOptions(): Promise<ProviderOption[]> {
   const [movie, tv] = await Promise.all(
-    (['movie', 'tv'] as const).map((type) => tmdb<{ results: RawProvider[] }>(`/watch/providers/${type}`, { watch_region: 'FR' })),
+    (['movie', 'tv'] as const).map((type) => tmdb<{ results: RawProvider[] }>(`/watch/providers/${type}`, { watch_region: REGION })),
   );
   const byId = new Map<number, ProviderOption>();
   for (const p of [...movie.results, ...tv.results]) {
-    const priority = p.display_priorities?.FR ?? 999;
+    const priority = p.display_priorities?.[REGION] ?? 999;
     const prev = byId.get(p.provider_id);
     if (!prev || priority < prev.priority) byId.set(p.provider_id, { id: p.provider_id, name: p.provider_name, logo: p.logo_path, priority });
   }

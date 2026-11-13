@@ -57,14 +57,42 @@
       </div>
     </div>
     <script>
+      // Textes de l'écran de chargement dans la langue de l'appli (celle choisie, sinon celle de l'appareil, sinon
+      // l'anglais : même règle que src/i18n/index.ts, qui n'est pas encore chargé ici).
+      var BOOT = {
+        fr: ['Chargement…', 'L’appli ne démarre pas. Vérifie ta connexion et que Chrome est à jour, puis réessaie.', 'Réessayer'],
+        en: ['Loading…', 'The app won’t start. Check your connection and that Chrome is up to date, then try again.', 'Try again'],
+        es: ['Cargando…', 'La app no arranca. Revisa tu conexión y que Chrome esté actualizado, y vuelve a intentarlo.', 'Reintentar'],
+        de: ['Wird geladen…', 'Die App startet nicht. Prüfe deine Verbindung und ob Chrome aktuell ist, und versuch es noch einmal.', 'Erneut versuchen'],
+        it: ['Caricamento…', 'L’app non si avvia. Controlla la connessione e che Chrome sia aggiornato, poi riprova.', 'Riprova'],
+        pt: ['Carregando…', 'O app não abre. Confira sua conexão e se o Chrome está atualizado, depois tente de novo.', 'Tentar de novo'],
+      };
+      var bootLang = (function () {
+        try {
+          var chosen = localStorage.getItem('app-lang');
+          if (BOOT[chosen]) return chosen;
+        } catch (e) {}
+        var prefs = navigator.languages && navigator.languages.length ? navigator.languages : [navigator.language || ''];
+        for (var i = 0; i < prefs.length; i++) {
+          var base = String(prefs[i]).toLowerCase().split(/[-_]/)[0];
+          if (BOOT[base]) return base;
+        }
+        return 'en';
+      })();
+      document.documentElement.lang = bootLang;
+      document.getElementById('boot-text').textContent = BOOT[bootLang][0];
+      // Installation (nom, description) dans la langue de l'appli : manifeste traduit (voir vite.config.ts).
+      if (bootLang !== 'fr') {
+        var manifest = document.querySelector('link[rel="manifest"]');
+        if (manifest) manifest.setAttribute('href', manifest.getAttribute('href').replace('manifest.webmanifest', 'manifest-' + bootLang + '.webmanifest'));
+      }
       // L'appli remplace #boot dès qu'elle s'affiche. Toujours là au bout de 15 s : elle n'a pas démarré.
       setTimeout(function () {
         var boot = document.getElementById('boot');
         if (!boot) return;
-        document.getElementById('boot-text').textContent =
-          'L’appli ne démarre pas. Vérifie ta connexion et que Chrome est à jour, puis réessaie.';
+        document.getElementById('boot-text').textContent = BOOT[bootLang][1];
         var again = document.createElement('button');
-        again.textContent = 'Réessayer';
+        again.textContent = BOOT[bootLang][2];
         again.onclick = function () {
           location.reload();
         };

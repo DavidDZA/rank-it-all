@@ -9,6 +9,7 @@ import { moveInRanking, promote, readRanking, unrankedKeys, type Scope } from '.
 import { matchesSearch, titlesOf, useTitleMap } from '../lib/hooks';
 import { toast } from '../lib/fun';
 import { SearchBox, TitleRow } from './common';
+import { T } from '../i18n';
 
 const MEDALS = ['🥇', '🥈', '🥉'];
 
@@ -71,7 +72,7 @@ export function RankedList({
 
   const sensors = useSensors(useSensor(PointerSensor), useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }));
 
-  if (!data) return <p className="muted center">Chargement…</p>;
+  if (!data) return <p className="muted center">{T.common.loading}</p>;
   if (!data.ranked.length && !data.unranked.length) return <p className="muted center">{empty}</p>;
 
   const byKey = new Map(data.ranked.map((t) => [t.key, t]));
@@ -90,11 +91,11 @@ export function RankedList({
     if (from === -1 || to === from) return;
     setOptimistic(promote(keys, from, to));
     await moveInRanking(scope, t.key, to);
-    toast(`↕️ « ${t.title} » passe n°${to + 1}`);
+    toast(T.list.moved(t.title, to + 1));
   };
 
   const askPlace = (t: Title, rank: number) => {
-    const answer = prompt(`Nouvelle place pour « ${t.title} » (de 1 à ${rankedTitles.length}) :`, String(rank));
+    const answer = prompt(T.list.newPlace(t.title, rankedTitles.length), String(rank));
     const n = Math.floor(Number(answer));
     if (answer !== null && n >= 1) move(t, Math.min(n, rankedTitles.length) - 1);
   };
@@ -115,11 +116,11 @@ export function RankedList({
     );
     const className = `rank-num ${rank <= 3 ? 'medal' : ''}`;
     return canMove ? (
-      <button className={className} onClick={() => askPlace(t, rank)} title="Toucher pour choisir une nouvelle place">
+      <button className={className} onClick={() => askPlace(t, rank)} title={T.list.placeTip}>
         {content}
       </button>
     ) : (
-      <span className={className} title={filter ? `n°${overall} au classement complet` : undefined}>
+      <span className={className} title={filter ? T.list.overall(overall) : undefined}>
         {content}
       </span>
     );
@@ -144,9 +145,9 @@ export function RankedList({
   return (
     <>
       {data.ranked.length + data.unranked.length > 8 && <SearchBox value={query} onChange={setQuery} />}
-      {canMove && <p className="muted tiny center">⠿ Glisse un titre pour le déplacer · touche son numéro pour choisir sa place</p>}
-      {!canMove && filter && rankedTitles.length > 1 && <p className="muted tiny center">Retire les filtres pour déplacer les titres à la main.</p>}
-      {!ranked.length && !unranked.length && <p className="muted center">Aucun titre ne correspond.</p>}
+      {canMove && <p className="muted tiny center">{T.list.moveHint}</p>}
+      {!canMove && filter && rankedTitles.length > 1 && <p className="muted tiny center">{T.list.filtersNoMove}</p>}
+      {!ranked.length && !unranked.length && <p className="muted center">{T.list.noMatch}</p>}
       {canMove ? (
         <DndContext sensors={sensors} collisionDetection={closestCenter} modifiers={[restrictToVerticalAxis]} onDragEnd={onDragEnd}>
           <SortableContext items={shownRanked.map(({ t }) => t.key)} strategy={verticalListSortingStrategy}>
@@ -158,7 +159,7 @@ export function RankedList({
       )}
       {shownUnranked.length > 0 && (
         <>
-          <h3 className="section-title">Non classés ({unranked.length})</h3>
+          <h3 className="section-title">{T.list.unranked(unranked.length)}</h3>
           <ul className="list">
             {shownUnranked.map((t) => (
               <TitleRow key={t.key} title={t} below={below?.(t)}>
@@ -185,7 +186,7 @@ function SortableRow({ title, badge, below, children }: { title: Title; badge: R
       itemClass={isDragging ? 'dragging' : ''}
       prefix={
         <>
-          <button ref={setActivatorNodeRef} className="drag-handle" {...attributes} {...listeners} aria-label={`Déplacer « ${title.title} »`} title="Glisser pour déplacer">
+          <button ref={setActivatorNodeRef} className="drag-handle" {...attributes} {...listeners} aria-label={T.list.moveAria(title.title)} title={T.list.dragTip}>
             ⠿
           </button>
           {badge}

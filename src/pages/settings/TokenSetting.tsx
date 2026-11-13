@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { getUserToken, hasBuiltInToken, setToken } from '../../lib/settings';
 import { tmdb } from '../../lib/tmdb';
+import { T } from '../../i18n';
 
 /** Réglages → Clé TMDB : une clé personnelle, prioritaire sur celle intégrée au site. */
 export function TokenSetting() {
@@ -8,11 +9,11 @@ export function TokenSetting() {
   const [msg, setMsg] = useState<string | null>(null);
 
   const save = async () => {
-    setMsg('Vérification…');
+    setMsg(T.token.checking);
     try {
       await tmdb('/authentication', {}, { token: token.trim() });
       setToken(token);
-      setMsg('✓ Clé valide et enregistrée.');
+      setMsg(T.token.saved);
     } catch (e) {
       setMsg(`✕ ${(e as Error).message}`);
     }
@@ -20,12 +21,12 @@ export function TokenSetting() {
 
   return (
     <section className="card" id="tmdb">
-      <h3>🔑 Clé TMDB</h3>
-      <p className="muted small">Le « jeton d’accès en lecture » de ton compte themoviedb.org (Paramètres → API). Il reste uniquement dans ce navigateur.</p>
-      {hasBuiltInToken && <p className="small">✓ L’accès à TMDB est intégré au site : rien à saisir. Remplis ce champ seulement pour utiliser ta propre clé.</p>}
-      <input className="input" type="password" value={token} onChange={(e) => setTokenInput(e.target.value)} placeholder={hasBuiltInToken ? 'Accès intégré utilisé' : 'eyJhbGciOi…'} autoComplete="off" />
-      <button className="btn primary" onClick={save} disabled={!token.trim()} title="Vérifier la clé auprès de TMDB puis l’enregistrer">
-        Enregistrer
+      <h3>{T.token.title}</h3>
+      <p className="muted small">{T.token.text}</p>
+      {hasBuiltInToken && <p className="small">{T.token.builtIn}</p>}
+      <input className="input" type="password" value={token} onChange={(e) => setTokenInput(e.target.value)} placeholder={hasBuiltInToken ? T.token.builtInPlaceholder : 'eyJhbGciOi…'} autoComplete="off" />
+      <button className="btn primary" onClick={save} disabled={!token.trim()} title={T.token.saveTip}>
+        {T.token.save}
       </button>
       {msg && <p className="small">{msg}</p>}
     </section>

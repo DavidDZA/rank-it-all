@@ -32,6 +32,7 @@ import { KNOWN_VOTES, personFilmography } from '../../lib/tmdb';
 import { downloadCatalogue, useCatalogueDownload } from '../../lib/catalogueDownload';
 import { CatalogueProgress } from '../../components/CatalogueProgress';
 import { Tutorial } from '../../components/Tutorial';
+import { num, T } from '../../i18n';
 
 const FLIP_MS = 350; // durée du retournement de la carte (animation flip-in)
 
@@ -212,7 +213,7 @@ export default function Swipe({ category }: { category: Category }) {
     recordActivity(group.length);
     const n = count + group.length;
     if (Math.floor(n / 25) > Math.floor(count / 25)) {
-      toast(`${pick(MILESTONES)} ${Math.floor(n / 25) * 25} titres triés`);
+      toast(T.swipe.milestone(pick(MILESTONES), Math.floor(n / 25) * 25));
       burst(['🎉', '🎊', '✨', '🥳'], undefined, 28);
     }
     setHistory((h) => [...h.slice(-49), group]);
@@ -275,7 +276,7 @@ export default function Swipe({ category }: { category: Category }) {
     const group = sagaInQueue(queueRef.current ?? queue!, tags, saga.id);
     for (const t of group) await setStatus(t, 'unseen');
     counted(group);
-    toast(`💤 Saga ${saga.name} : ${group.length} films écartés`);
+    toast(T.swipe.sagaDropped(saga.name, group.length));
     const dropped = new Set(group.map((t) => t.key));
     advance((queueRef.current ?? queue!).filter((t) => !dropped.has(t.key)));
   };
@@ -343,13 +344,13 @@ export default function Swipe({ category }: { category: Category }) {
     <ActionButton
       className="small"
       icon="↶"
-      caption="Annuler"
-      tip="Revenir au titre précédent (touche Retour arrière)"
+      caption={T.swipe.undo}
+      tip={T.swipe.undoTip}
       onClick={undo}
       disabled={phase === 'seen' && !history.length}
     />
   );
-  const skipButton = <ActionButton className="small" icon="⤼" caption="Passer" tip="Je ne sais pas : le titre reviendra plus tard (flèche ↓)" onClick={skip} />;
+  const skipButton = <ActionButton className="small" icon="⤼" caption={T.swipe.skip} tip={T.swipe.skipTip} onClick={skip} />;
   const cornerButton = (c: Corner) => (
     <ActionButton
       className={`corner tone-${CORNERS[c].tone}`}
@@ -372,29 +373,29 @@ export default function Swipe({ category }: { category: Category }) {
         </h2>
         <FilterButton
           active={!isNoTheme(theme)}
-          label={`${themeLabel(media, theme)} · ${remaining.toLocaleString('fr-FR')} titres restants`}
+          label={T.swipe.remainingLong(themeLabel(media, theme), num(remaining))}
           onClick={() => setShowThemes(true)}
         />
-        <span className="pill" title="Titres triés pendant cette session">
+        <span className="pill" title={T.swipe.countTip}>
           🔥 {count}
         </span>
       </header>
       {!isNoTheme(theme) && (
-        <button className="theme-strip" onClick={() => setShowThemes(true)} title="Changer les filtres">
-          <FilterIcon /> {themeLabel(media, theme)} · {remaining.toLocaleString('fr-FR')} restants
+        <button className="theme-strip" onClick={() => setShowThemes(true)} title={T.filterSheet.changeTip}>
+          <FilterIcon /> {T.swipe.remaining(themeLabel(media, theme), num(remaining))}
         </button>
       )}
 
       {loadError ? (
         <div className="empty">
           <span className="big-emoji">⚠️</span>
-          <p>Impossible de charger le catalogue : {loadError}</p>
+          <p>{T.swipe.loadError(loadError)}</p>
           <button className="btn primary" onClick={() => setCatalogueVersion((v) => v + 1)}>
-            Réessayer
+            {T.common.retry}
           </button>
         </div>
       ) : queue === null ? (
-        <p className="muted center">Chargement…</p>
+        <p className="muted center">{T.common.loading}</p>
       ) : !current ? (
         <div className="empty">
           {catalogue.current.length === 0 ? (
@@ -403,29 +404,29 @@ export default function Swipe({ category }: { category: Category }) {
             ) : (
               <>
                 <span className="big-emoji">📦</span>
-                <p>Le catalogue est vide.</p>
-                <button className="btn primary" onClick={() => downloadCatalogue()} title="Récupérer les films et séries depuis TMDB (environ une minute)">
-                  Télécharger le catalogue
+                <p>{T.swipe.emptyCatalogue}</p>
+                <button className="btn primary" onClick={() => downloadCatalogue()} title={T.swipe.downloadTip}>
+                  {T.swipe.download}
                 </button>
               </>
             )
           ) : !isNoTheme(theme) ? (
             <>
               <span className="big-emoji">🔍</span>
-              <p>Plus rien à trier avec ces filtres !</p>
+              <p>{T.swipe.nothingFiltered}</p>
               <button className="btn primary" onClick={() => setShowThemes(true)}>
-                Changer les filtres
+                {T.filterSheet.changeTip}
               </button>
             </>
           ) : (
             <>
               <span className="big-emoji">🏁</span>
-              <p>Tout est trié ! Mets à jour le catalogue de temps en temps pour récupérer les nouveautés.</p>
+              <p>{T.swipe.allSorted}</p>
             </>
           )}
           {history.length > 0 && (
-            <button className="btn" onClick={undo} title="Revenir sur la dernière réponse (touche Retour arrière)">
-              ↶ Annuler
+            <button className="btn" onClick={undo} title={T.swipe.undoLastTip}>
+              {T.duel.undo}
             </button>
           )}
         </div>
@@ -446,7 +447,7 @@ export default function Swipe({ category }: { category: Category }) {
               labels={labels}
               fling={fling}
               onSwipe={onSwipe}
-              onAmbiguous={() => toast('↖ ↗ ↙ ↘ Swipe en diagonale, vers un coin')}
+              onAmbiguous={() => toast(T.swipe.diagonal)}
               stay={mode === 'horizontal' && phase === 'seen' ? ['left', 'right'] : []}
               className={phase !== 'seen' ? 'flip-in' : ''}
               onTap={() => openFiche(current)}
@@ -485,7 +486,7 @@ export default function Swipe({ category }: { category: Category }) {
           type={media}
           initial={theme}
           count={(t) => catalogue.current.filter((x) => !answered.current.has(x.key) && matchesTheme(x, t)).length}
-          applyLabel={(n) => `C’est parti (${n.toLocaleString('fr-FR')})`}
+          applyLabel={(n) => T.swipe.go(num(n))}
           hasCatalogueData={catalogue.current.some((t) => t.rating !== undefined)}
           missingRatings={catalogue.current.filter((t) => !answered.current.has(t.key) && ratingMissing(t)).length}
           onCatalogueUpdated={() => setCatalogueVersion((v) => v + 1)}

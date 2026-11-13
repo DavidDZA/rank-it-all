@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { T } from '../i18n';
 import { titlesOf, useTitleMap } from '../lib/hooks';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db, type Title } from '../lib/db';
@@ -45,13 +46,13 @@ export default function Tonight() {
     shown.current.clear();
   };
 
-  if (!data) return <Shell>{<p className="muted center">Chargement…</p>}</Shell>;
+  if (!data) return <Shell>{<p className="muted center">{T.common.loading}</p>}</Shell>;
   if (!data.titles.length) {
     return (
       <Shell>
         <div className="empty">
           <span className="big-emoji">💖</span>
-          <p>Ta wishlist est vide : swipe « envie » sur quelques titres d’abord !</p>
+          <p>{T.tonightPage.empty}</p>
         </div>
       </Shell>
     );
@@ -89,7 +90,7 @@ export default function Tonight() {
   };
 
   const seen = (t: Title) => {
-    toast(`✓ « ${t.title} » passe dans tes titres vus`);
+    toast(T.tonightPage.seen(t.title));
     setPicked(null);
   };
 
@@ -100,29 +101,29 @@ export default function Tonight() {
       <TypeFilter<TonightFilters['category']>
         value={filters.category}
         options={[
-          ['all', 'Tout', 'Toute la wishlist'],
-          ['movie', 'Un film', 'Seulement les films'],
-          ['tv', 'Une série', 'Seulement les séries'],
-          ...(categories.includes('anime') ? [['anime', 'Un anime', 'Seulement les animes'] as ['anime', string, string]] : []),
+          ['all', T.tonightPage.all, T.tonightPage.allTip],
+          ['movie', T.tonightPage.one.movie, T.lists.only.movie],
+          ['tv', T.tonightPage.one.tv, T.lists.only.tv],
+          ...(categories.includes('anime') ? [['anime', T.tonightPage.one.anime, T.lists.only.anime] as ['anime', string, string]] : []),
         ]}
         onChange={(category) => update({ ...filters, category })}
       />
       <div className="chips">
         {hasMyProviders(mine) && (
-          <button className={`chip ${filters.mineOnly ? 'active' : ''}`} onClick={() => update({ ...filters, mineOnly: !filters.mineOnly })} title="Seulement ce qui est dispo sur tes abonnements">
-            📺 Sur mes abonnements
+          <button className={`chip ${filters.mineOnly ? 'active' : ''}`} onClick={() => update({ ...filters, mineOnly: !filters.mineOnly })} title={T.tonightPage.mineTip}>
+            {T.tonightPage.mine}
           </button>
         )}
         {(filters.category === 'all' || filters.category === 'movie') && (
-          <button className={`chip ${filters.short ? 'active' : ''}`} onClick={() => update({ ...filters, short: !filters.short })} title="Films de 2 h maximum">
-            ⏱️ Moins de 2 h
+          <button className={`chip ${filters.short ? 'active' : ''}`} onClick={() => update({ ...filters, short: !filters.short })} title={T.tonightPage.shortTip}>
+            {T.tonightPage.short}
           </button>
         )}
       </div>
       {genres.length > 0 && (
         <div className="chips genre-chips">
           <button className={`chip ${filters.genre === null ? 'active' : ''}`} onClick={() => update({ ...filters, genre: null })}>
-            Tous genres
+            {T.tonightPage.allGenres}
           </button>
           {genres.map((g) => (
             <button key={g} className={`chip ${filters.genre === g ? 'active' : ''}`} onClick={() => update({ ...filters, genre: g })}>
@@ -132,13 +133,13 @@ export default function Tonight() {
         </div>
       )}
 
-      <button className="btn primary roll-btn" onClick={roll} disabled={!candidates.length || !!rolling} title="Tirer un titre au sort dans ta wishlist">
-        {picked ? '🎲 Un autre !' : '🎲 Tirer au sort'}
+      <button className="btn primary roll-btn" onClick={roll} disabled={!candidates.length || !!rolling} title={T.tonightPage.rollTip}>
+        {picked ? T.tonightPage.again : T.tonightPage.roll}
       </button>
       <p className="muted small center">
         {candidates.length
-          ? `${candidates.length} titre${candidates.length > 1 ? 's' : ''} possible${candidates.length > 1 ? 's' : ''} · tes priorités ont plus de chances`
-          : 'Aucun titre de ta wishlist ne correspond à ces filtres.'}
+          ? T.tonightPage.candidates(candidates.length)
+          : T.tonightPage.noMatch}
       </p>
 
       {shownTitle && (
@@ -152,10 +153,10 @@ export default function Tonight() {
             {picked && !rolling && (
               <>
                 <ProviderLine title={picked} maxAge={WEEK} />
-                <p className="tonight-overview">{picked.overview || 'Pas de résumé disponible.'}</p>
+                <p className="tonight-overview">{picked.overview || T.common.noOverview}</p>
                 <div className="row">
-                  <button className="btn small" onClick={() => openFiche(picked)} title="Durée, note, bande-annonce, où regarder…">
-                    📄 Fiche
+                  <button className="btn small" onClick={() => openFiche(picked)} title={T.tonightPage.ficheTip}>
+                    {T.tonightPage.fiche}
                   </button>
                   <SeenButtons title={picked} onSeen={() => seen(picked)} />
                 </div>
@@ -172,7 +173,7 @@ function Shell({ children }: { children: React.ReactNode }) {
   return (
     <main className="page">
       <Tutorial id="tonight" />
-      <TopBar title="🍿 Ce soir ?" />
+      <TopBar title={T.tonightPage.title} />
       {children}
     </main>
   );

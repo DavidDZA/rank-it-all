@@ -108,7 +108,8 @@ describe('langue de l’appareil', () => {
     expect(IMPORT_LANGS).toBe(ORIGINAL_LANGS);
     expect(CATALOGUE_LANGS.map(([c]) => c)).toEqual(ORIGINAL_LANGS.map(([c]) => c).filter((c) => c !== 'en'));
     expect(langName('es')).toBe('espagnol');
-    expect(langName('zh')).toBe('chinois (mandarin)');
+    expect(langName('zh')).toBe('chinois'); // noms donnés par le navigateur (Intl.DisplayNames)
+    expect(langName('cn')).toBe('cantonais'); // « cn » : le code TMDB du cantonais
   });
 });
 

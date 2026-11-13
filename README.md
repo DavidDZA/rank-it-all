@@ -3,6 +3,7 @@
 _Anciennement « Sort my stuffs »._
 
 Web app (PWA) pour construire petit à petit la liste des films et séries qu'on a vus, sa wishlist, et son classement.
+En 6 langues (français, anglais, espagnol, allemand, italien, portugais du Brésil), selon l'appareil ou au choix.
 
 ## Modes
 
@@ -77,6 +78,7 @@ src/
     fun.ts hooks.ts    confettis / messages, hooks React partagés
   components/        briques d'interface réutilisées (carte de swipe, duels, listes, fiche…)
   pages/             un fichier par écran ; swipe/, settings/ et duo/ découpés en sous-parties
+  i18n/              langue et pays, un dictionnaire de textes par langue (fr.ts en référence)
   styles/            un fichier CSS par écran, importés dans l'ordre par index.css
 tests/               tests Vitest (logique pure + base en mémoire)
 e2e/                 tests Playwright (appli construite)

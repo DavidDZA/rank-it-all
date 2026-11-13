@@ -9,8 +9,12 @@ import { migrateDatabaseName } from './lib/db';
 import { splitAnimeRankings } from './lib/ranking';
 import { startFirstCatalogue } from './lib/catalogueDownload';
 import './styles/index.css';
+import { LANG } from './i18n';
 
 registerSW({ immediate: true });
+
+// Langue de la page (lecteurs d'écran, césure, traduction automatique du navigateur).
+document.documentElement.lang = LANG;
 
 // Avant l'affichage : base reprise sous le nouveau nom de l'appli, seuils repris de l'ancien stockage,
 // animes sortis des classements de séries. Jamais plus de quelques secondes : une base qui ne répond pas ne doit

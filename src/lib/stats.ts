@@ -4,6 +4,7 @@ import { bestStreak, lastDays, loadActivity, streak, todayCount } from './activi
 import { readRanking } from './ranking';
 import { genreName } from './genres';
 import { detailsOutdated } from './tmdb';
+import { LANG, num, T } from '../i18n';
 
 export interface Bar {
   label: string;
@@ -41,7 +42,7 @@ export interface Stats {
   /** Pour les badges : découverte et curiosités, sur tous les titres vus. */
   discovery: {
     languages: number; // langues originales différentes
-    french: number; // titres en français
+    local: number; // titres dans la langue de l'interface (en anglais : titres qui ne sont pas en anglais)
     movieGenres: number; // genres de films différents
     oldFilms: number; // films d'avant 1960
     recent: number; // titres sortis cette année ou l'an dernier
@@ -145,7 +146,7 @@ export async function computeStats(): Promise<Stats> {
   const language = (t: Title) => t.originalLanguage ?? t.details?.originalLanguage;
   const discovery: Stats['discovery'] = {
     languages: new Set(seenTitles.map(language).filter(Boolean)).size,
-    french: seenTitles.filter((t) => language(t) === 'fr').length,
+    local: seenTitles.filter((t) => (LANG === 'en' ? !!language(t) && language(t) !== 'en' : language(t) === LANG)).length,
     movieGenres: new Set(movies.flatMap((t) => t.genreIds ?? t.details?.genreIds ?? [])).size,
     oldFilms: movies.filter((t) => t.year && t.year < 1960).length,
     recent: seenTitles.filter((t) => t.year && t.year >= year - 1).length,
@@ -183,7 +184,6 @@ export async function computeStats(): Promise<Stats> {
 
 export function formatHours(minutes: number): string {
   const h = Math.round(minutes / 60);
-  if (h < 48) return `${h} h`;
-  const days = Math.floor(h / 24);
-  return `${h.toLocaleString('fr-FR')} h (${days} jours)`;
+  if (h < 48) return T.stats.hours(num(h));
+  return T.stats.hoursAndDays(num(h), Math.floor(h / 24));
 }

@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
+import { num, T } from '../i18n';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db, type Title } from '../lib/db';
 import { categoryOf, categoryOptions, mediaOf, useCategories, type Category } from '../lib/category';
@@ -48,7 +49,7 @@ export default function Wishlist() {
   const actions = (t: Title, ranked: boolean): ReactNode => (
     <>
       {ranked && (
-        <button className="btn small" onClick={() => unrank(scope, t.key)} title="Retirer de l’ordre de priorité pour le replacer avec de nouveaux duels" aria-label="Re-prioriser">
+        <button className="btn small" onClick={() => unrank(scope, t.key)} title={T.wishPage.reprioritizeTip} aria-label={T.wishPage.reprioritize}>
           ↺
         </button>
       )}
@@ -60,13 +61,13 @@ export default function Wishlist() {
   return (
     <main className="page wide wishlist-page">
       <Tutorial id="wishlist" />
-      <TopBar title={wishes ? `💖 Wishlist (${wishes.length})` : '💖 Wishlist'} right={<FilterButton active={!!byTheme} label={label} onClick={() => setShowFilters(true)} />} />
+      <TopBar title={T.wishPage.title(wishes?.length ?? null)} right={<FilterButton active={!!byTheme} label={label} onClick={() => setShowFilters(true)} />} />
       {byTheme && <FilterStrip label={label} onClick={() => setShowFilters(true)} />}
       <TypeFilter<View>
         value={view}
         options={[
-          ['list', 'Liste', 'Voir la wishlist'],
-          ['duel', 'Prioriser', 'Classer la wishlist en choisissant entre deux titres'],
+          ['list', T.wishPage.list, T.wishPage.listTip],
+          ['duel', T.wishPage.prioritize, T.wishPage.prioritizeTip],
         ]}
         onChange={(v) => {
           setView(v);
@@ -76,33 +77,33 @@ export default function Wishlist() {
       <TypeFilter<Filter>
         value={view === 'duel' ? category : filter}
         options={[
-          ...(view === 'list' ? [['all', 'Tous', 'Tous les titres, du plus récent au plus ancien ajout'] as [Filter, string, string]] : []),
-          ...categoryOptions(categories, (c) => `${c === 'movie' ? 'Films' : c === 'tv' ? 'Séries' : 'Animes'} seulement, par ordre de priorité`),
+          ...(view === 'list' ? [['all', T.lists.all, T.wishPage.allTip] as [Filter, string, string]] : []),
+          ...categoryOptions(categories, (c) => T.wishPage.onlyTip[c]),
         ]}
         onChange={setFilter}
       />
-      {view === 'list' && <MineChip value={onlyMine} onChange={setOnlyMine} title="N’afficher que les titres disponibles sur tes abonnements" />}
+      {view === 'list' && <MineChip value={onlyMine} onChange={setOnlyMine} title={T.wishPage.mineTip} />}
       {view === 'duel' ? (
         <Duel
           key={`${scopeId(scope)}-${JSON.stringify(theme)}`}
           scope={scope}
           filter={byTheme}
-          question="Lequel as-tu le plus envie de voir ?"
-          emptyText="Rien dans la wishlist pour l’instant."
+          question={T.wishPage.question}
+          emptyText={T.wishPage.empty}
         />
       ) : filter === 'all' ? (
         <AllWishes filter={combined} below={providers} />
       ) : (
-        <RankedList key={scopeId(scope)} scope={scope} empty="Rien dans la wishlist pour l’instant." actions={actions} filter={combined} below={providers} />
+        <RankedList key={scopeId(scope)} scope={scope} empty={T.wishPage.empty} actions={actions} filter={combined} below={providers} />
       )}
-      {view === 'list' && <p className="muted tiny center">Disponibilités : JustWatch</p>}
+      {view === 'list' && <p className="muted tiny center">{T.fiche.justwatch}</p>}
 
       {showFilters && (
         <FilterSheet
           type={listType}
           initial={savedTheme}
           count={(t) => (wishes ?? []).filter((x) => (!listCat || categoryOf(x) === listCat) && matchesTheme(x, listType ? t : { ...t, genre: null })).length}
-          applyLabel={(n) => `Appliquer (${n.toLocaleString('fr-FR')} titres)`}
+          applyLabel={(n) => T.wishPage.apply(num(n))}
           hasCatalogueData={(wishes ?? []).some((t) => t.rating !== undefined || t.details?.rating)}
           pendingInfo={(wishes ?? []).filter(missingFilterInfo).length}
           onApply={(t) => {
@@ -121,7 +122,7 @@ function WishActions({ title }: { title: Title }) {
   return (
     <>
       <SeenButtons title={title} />
-      <button className="btn small" onClick={() => changeStatus(title, 'unseen')} title="Retirer de la wishlist" aria-label="Retirer de la wishlist">
+      <button className="btn small" onClick={() => changeStatus(title, 'unseen')} title={T.wishPage.remove} aria-label={T.wishPage.remove}>
         ✕
       </button>
     </>
@@ -135,14 +136,14 @@ function AllWishes({ filter, below }: { filter: ((t: Title) => boolean) | null; 
   const map = useTitleMap(keys); // fiches jointes : plateformes, pour le filtre « dispo »
   const items = useMemo(() => keys && map && titlesOf(keys, map), [keys, map]);
 
-  if (!items) return <p className="muted center">Chargement…</p>;
-  if (!items.length) return <p className="muted center">Rien dans la wishlist pour l’instant.</p>;
+  if (!items) return <p className="muted center">{T.common.loading}</p>;
+  if (!items.length) return <p className="muted center">{T.wishPage.empty}</p>;
   const shown = items.filter((t) => matchesSearch(t, query) && (!filter || filter(t)));
 
   return (
     <>
       {items.length > 8 && <SearchBox value={query} onChange={setQuery} />}
-      {!shown.length && <p className="muted center">Aucun titre ne correspond.</p>}
+      {!shown.length && <p className="muted center">{T.list.noMatch}</p>}
       <ul className="list">
         {shown.map((t) => (
           <TitleRow key={t.key} title={t} showType below={below(t)}>

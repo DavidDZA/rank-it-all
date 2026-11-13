@@ -17,3 +17,4 @@ android/app/build
 android/local.properties
 android/*.aab
 android/*.apk
+dist-captures

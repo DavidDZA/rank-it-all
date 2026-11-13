@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { clearChoices } from '../../lib/db';
 import { useCloud } from '../../lib/cloud';
+import { T } from '../../i18n';
 
 /** Réglages → Zone dangereuse : effacer tous ses choix (pas le catalogue). */
 export function DangerZone() {
@@ -10,13 +11,13 @@ export function DangerZone() {
   const clear = async () => {
     if (
       !confirm(
-        `Êtes-vous sûr ? Tous tes choix (titres vus et pas vus, wishlist, classements, activité) seront définitivement effacés${signedIn ? ', sur cet appareil et sur ton compte (donc sur tous tes appareils)' : ''}. Le catalogue est conservé.\n\nPense à exporter une sauvegarde avant si tu veux pouvoir les récupérer.`,
+        T.danger.confirm(signedIn),
       )
     )
       return;
     try {
       await clearChoices();
-      setMsg('✓ Tous tes choix ont été effacés. Le catalogue est intact : tu peux recommencer à swiper.');
+      setMsg(T.danger.done);
     } catch (e) {
       setMsg(`✕ ${(e as Error).message}`);
     }
@@ -24,10 +25,10 @@ export function DangerZone() {
 
   return (
     <section className="card danger-zone">
-      <h3>⚠️ Zone dangereuse</h3>
-      <p className="muted small">Efface tous tes choix : titres vus et pas vus, wishlist, classements et activité. Le catalogue et ta clé TMDB sont conservés.</p>
-      <button className="btn danger" onClick={clear} title="Effacer tous tes choix sans toucher au catalogue (demande confirmation)">
-        🗑️ Effacer tous mes choix
+      <h3>{T.danger.title}</h3>
+      <p className="muted small">{T.danger.text}</p>
+      <button className="btn danger" onClick={clear} title={T.danger.buttonTip}>
+        {T.danger.button}
       </button>
       {msg && <p className="small">{msg}</p>}
     </section>

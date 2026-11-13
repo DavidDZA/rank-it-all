@@ -1,4 +1,5 @@
 import type { SagaTag } from './pool';
+import { T } from '../../i18n';
 
 /** Bouton rond du swipe, avec sa légende et (option) la flèche de son coin. */
 export function ActionButton(props: {
@@ -25,7 +26,7 @@ export function ActionButton(props: {
 export function CardTag({ saga }: { saga?: SagaTag }) {
   if (!saga) return null;
   return (
-    <span className="card-tag saga-tag" title={`Saga ${saga.name} : film ${saga.position} sur ${saga.total}`}>
+    <span className="card-tag saga-tag" title={T.swipe.sagaTip(saga.name, saga.position, saga.total)}>
       <span className="saga-name">🎞️ {saga.name}</span>
       <span className="saga-count">
         · {saga.position}/{saga.total}
@@ -42,9 +43,9 @@ export function SagaDropButton({ left, onDrop }: { left: number; onDrop: () => v
       // Le bouton est sur la carte : l'appui ne doit pas commencer un glissement.
       onPointerDown={(e) => e.stopPropagation()}
       onClick={onDrop}
-      title={`Pas vus, pas envie : les ${left} films de la saga restant à trier ne seront plus proposés`}
+      title={T.swipe.dropSagaTip(left)}
     >
-      💤 Pas envie de la saga ({left})
+      {T.swipe.dropSaga(left)}
     </button>
   );
 }

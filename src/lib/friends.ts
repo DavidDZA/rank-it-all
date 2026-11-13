@@ -5,6 +5,7 @@ import { frError, siteUrl, titleFromCopy, type TitleCopy } from './cloud';
 import { supabase } from './supabase';
 import type { Side } from './together';
 import type { Database } from './database.types';
+import { T } from '../i18n';
 
 /** Amis : ajout par code, partage, lecture (seule) des données qu'un ami partage. */
 
@@ -30,7 +31,7 @@ const sb = () => {
 async function myId(): Promise<string> {
   const { data } = await sb().auth.getSession();
   const id = data.session?.user.id;
-  if (!id) throw new Error('Connecte-toi d’abord.');
+  if (!id) throw new Error(T.friends.signInFirst);
   return id;
 }
 

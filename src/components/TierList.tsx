@@ -9,6 +9,7 @@ import { toast } from '../lib/fun';
 import { titlesOf, useLongPress, useTitleMap } from '../lib/hooks';
 import { Poster } from './common';
 import { openFiche } from './Fiche';
+import { T } from '../i18n';
 
 /** Classement en paliers S → D, d'après la position de chaque titre. */
 export function TierList({ category, filter = null, filterLabel }: { category: Category; filter?: ((t: Title) => boolean) | null; filterLabel?: string }) {
@@ -20,9 +21,9 @@ export function TierList({ category, filter = null, filterLabel }: { category: C
   // Avec des filtres, les paliers sont recalculés sur la sélection (« ma tier list des comédies »).
   const tiers = titles && tierize(filter ? titles.filter(filter) : titles);
 
-  if (!tiers) return <p className="muted center">Chargement…</p>;
+  if (!tiers) return <p className="muted center">{T.common.loading}</p>;
   const count = tiers.reduce((s, t) => s + t.items.length, 0);
-  if (!count) return <p className="muted center">{filter ? 'Aucun titre classé ne correspond à ces filtres.' : 'Classe quelques titres pour voir ta tier list.'}</p>;
+  if (!count) return <p className="muted center">{filter ? T.tiers.noMatch : T.tiers.empty}</p>;
 
   const share = async () => {
     setSharing(true);
@@ -37,8 +38,8 @@ export function TierList({ category, filter = null, filterLabel }: { category: C
 
   return (
     <>
-      <button className="btn primary" onClick={share} disabled={sharing} title="Créer une image de ta tier list à partager">
-        {sharing ? 'Création de l’image…' : '📤 Partager ma tier list'}
+      <button className="btn primary" onClick={share} disabled={sharing} title={T.tiers.shareTip}>
+        {sharing ? T.tiers.creating : T.tiers.share}
       </button>
       <div className="tier-list">
         {tiers.map((tier) => (
@@ -52,7 +53,7 @@ export function TierList({ category, filter = null, filterLabel }: { category: C
           </div>
         ))}
       </div>
-      <p className="muted tiny center">S : top 10 % · A : 20 % · B : 30 % · C : 25 % · D : 15 % — appui long sur une affiche pour sa fiche</p>
+      <p className="muted tiny center">{T.tiers.legend}</p>
     </>
   );
 }

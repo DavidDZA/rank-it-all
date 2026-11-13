@@ -1,3 +1,5 @@
+import { T } from '../i18n';
+
 const reducedMotion = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 /** Petite explosion d'emojis autour d'un point de l'écran. */
@@ -36,11 +38,4 @@ export function toast(message: string): void {
 
 export const pick = <T,>(items: T[]): T => items[Math.floor(Math.random() * items.length)];
 
-export const MILESTONES = [
-  '🔥 Tu es en feu !',
-  '🍿 Quel cinéphile !',
-  '🚀 Rien ne t’arrête !',
-  '🏅 Belle session !',
-  '🎬 Ta base grandit !',
-  '⚡ Machine de tri !',
-];
+export const MILESTONES = T.milestones;

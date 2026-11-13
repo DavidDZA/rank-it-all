@@ -1,6 +1,6 @@
 # Feuille de route — ce qui reste à faire
 
-> État au 13/11/2026. Comment l'appli marche aujourd'hui : [ARCHITECTURE.md](ARCHITECTURE.md).
+> État au 14/11/2026. Comment l'appli marche aujourd'hui : [ARCHITECTURE.md](ARCHITECTURE.md).
 > Fait : comptes et synchro, amis et « À deux », catégorie Animes, seuils français / vieux films, classement à
 > la main, refonte (fiches à part, chargement découpé, types Supabase, tests de bout en bout) ; puis (01-02/11)
 > renommage en **Rank It All** (base locale migrée, ancienne adresse redirigée), filtre « dispo sur mes
@@ -25,10 +25,12 @@
 > Multilingue, 1re étape (13/11) : la langue des « titres dans ta langue » du catalogue suit celle de l'appareil
 > (ARCHITECTURE § 3.3), testée en plusieurs langues (`tests/langue.test.ts`, `e2e/langue.spec.ts`).
 >
+> (14/11) **Traduction en 6 langues** livrée (ARCHITECTURE § 2.2).
+>
 > **Reprendre ici** — test fermé en cours depuis le 11/11 (12 testeurs inscrits le 12/11) : 14 jours écoulés vers le
-> 26/11 (§ 2 étapes 5-6), puis demander la production. D'abord : demander à l'utilisateur ce que les testeurs pensent
-> des changements du 13/11 (repères du swipe surtout), et s'il a d'autres retours. Ensuite : suite de la
-> **traduction** (§ 4 : textes de l'appli, langue TMDB, pays des plateformes ; décisions à prendre au début), puis musique et jeux vidéo (§ 5). Faire connaître l'appli après la sortie : [PROMOTION.md](PROMOTION.md).
+> 26/11 (§ 2 étapes 5-6), puis demander la production. D'abord : demander à l'utilisateur s'il a ajouté les fiches
+> traduites dans la Play Console, ce que les testeurs pensent des changements du 13-14/11, et s'il a d'autres retours.
+> Ensuite : musique et jeux vidéo (§ 5). Faire connaître l'appli après la sortie : [PROMOTION.md](PROMOTION.md).
 
 ## 1. Décisions en attente
 
@@ -129,15 +131,12 @@ libres (TMDB, Supabase) — c'est autorisé. Utile aussi si le Play Store est bl
 
 ## 4. Petites améliorations proposées (non lancées)
 
-- **Traduction** (prochaine session) : environ 1 100 lignes de texte français dans une quarantaine de fichiers.
-  Proposition : un dictionnaire par langue, le français en référence, typé pour que la compilation échoue s'il
-  manque une traduction ; langue et pays détectés depuis le téléphone, modifiables dans les réglages. Au-delà des
-  textes : langue des titres et résumés TMDB (`language: 'fr-FR'` dans `tmdb.ts` ; changer de langue demande une
-  mise à jour du catalogue), **pays** des plateformes de streaming (`watch_region: 'FR'`, `results.FR`), fiche du
-  Play Store et page de confidentialité. ~~Seuils « titres en français » à généraliser~~ — fait le 13/11 : langue de
-  l'appareil, fixée au premier téléchargement, modifiable (ARCHITECTURE § 3.3). Reste à adapter ensuite : le badge
-  « Cocorico » (titres en français), et l'ordre des langues dans les filtres (le français en premier). **À décider** : les langues à la sortie (recommandé : français + anglais, d'autres ensuite) et
-  le pays (recommandé : détecté depuis le téléphone, modifiable).
+- ~~**Traduction**~~ — fait le 14/11 (ARCHITECTURE § 2.2) : 6 langues (français, anglais, espagnol, allemand,
+  italien, portugais du Brésil), langue et pays de l'appareil modifiables dans les Réglages, titres TMDB et plateformes
+  du pays, page de confidentialité, manifestes et fiche du Play Store traduits. **À faire par l'utilisateur** : ajouter
+  les 5 traductions de la fiche dans la Play Console (`store/fiche-play-store.md`, § « Fiches dans les autres
+  langues », avec les captures de `store/captures/<langue>/` et la bannière de `store/bannieres/`). Plus tard : e-mails Supabase traduits (en anglais) ;
+  relecture des traductions par des locuteurs natifs (faites par Claude).
 
 - **Code ami** : nouvel essai automatique si le code tiré existe déjà (risque infime aujourd'hui : l'inscription
   échouerait) — quelques lignes dans `schema.sql`.

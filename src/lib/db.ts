@@ -53,7 +53,10 @@ export interface Details {
   episodes?: number;
   collection?: { id: number; name: string } | null; // saga
   trailer?: string | null; // clé YouTube
-  providers: { flatrate: Provider[]; rent: Provider[]; buy: Provider[]; link: string | null }; // France
+  providers: { flatrate: Provider[]; rent: Provider[]; buy: Provider[]; link: string | null }; // pays de `region`
+  /** Langue TMDB de la fiche (genres, saga) et pays de ses plateformes ; absents avant la traduction : fr-FR, FR. */
+  lang?: string;
+  region?: string;
   /**
    * La réponse de TMDB contenait bien casting et plateformes. Absent des fiches d'avant le 12/11 : une de celles-là
    * sans aucun nom (ni réalisateur, ni acteur) est récupérée à nouveau (voir detailsOutdated).

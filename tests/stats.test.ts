@@ -133,7 +133,7 @@ describe('stats', () => {
     ]);
     expect((await computeStats()).discovery).toEqual({
       languages: 3,
-      french: 2,
+      local: 2, // en français (langue de l'interface des tests)
       movieGenres: 3, // Drame, Comédie, Animation
       oldFilms: 1,
       recent: 2,

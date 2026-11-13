@@ -9,11 +9,21 @@ import { ensureDetails, posterUrl, profileUrl, providerLogo } from '../lib/tmdb'
 import { groupProviders, hasMyProviders, isMineGroup, loadMyProviders } from '../lib/providers';
 import { useCloseOnBack } from '../lib/hooks';
 import { openFiche } from './Fiche';
+import { decimal, num, T } from '../i18n';
+
+/** Texte d'un dictionnaire avec des passages en **gras**. */
+export function Rich({ text }: { text: string }) {
+  return (
+    <>
+      {text.split(/\*\*(.+?)\*\*/).map((part, i) => (i % 2 ? <b key={i}>{part}</b> : part))}
+    </>
+  );
+}
 
 /** Bouton retour à l'accueil : chevron dessiné (centré exactement, contrairement au caractère « ‹ »). */
 export function BackLink() {
   return (
-    <a className="icon-btn" href="#/" aria-label="Retour" title="Retour à l’accueil">
+    <a className="icon-btn" href="#/" aria-label={T.common.back} title={T.common.backHome}>
       <svg className="icon-svg" viewBox="0 0 24 24" aria-hidden>
         <path d="M15.25 5.5 8.75 12l6.5 6.5" />
       </svg>
@@ -81,8 +91,8 @@ export function RatingBadge({ title, className = '' }: { title: Title; className
   if (!d?.rating) return null;
   const level = d.rating >= 7.5 ? 'high' : d.rating >= 6 ? 'mid' : 'low';
   return (
-    <span className={`rating-badge ${level} ${className}`} title={`Note moyenne TMDB : ${d.rating.toLocaleString('fr-FR')}/10`}>
-      ⭐ {d.rating.toLocaleString('fr-FR', { minimumFractionDigits: 1, maximumFractionDigits: 1 })}
+    <span className={`rating-badge ${level} ${className}`} title={T.card.ratingTip(num(d.rating))}>
+      ⭐ {decimal(d.rating)}
     </span>
   );
 }
@@ -92,8 +102,8 @@ function CardLines({ title }: { title: Title }) {
   const d = useDetails(title);
   const meta = [title.year, cardGenres(title, d).join(', ')].filter(Boolean).join(' · ');
   const credits = [
-    d?.directors.length ? `${title.type === 'movie' ? 'De' : 'Créée par'} ${d.directors.join(', ')}` : '',
-    d?.cast.length ? `Avec ${d.cast.join(', ')}` : '',
+    d?.directors.length ? (title.type === 'movie' ? T.card.by : T.card.createdBy)(d.directors.join(', ')) : '',
+    d?.cast.length ? T.card.with(d.cast.join(', ')) : '',
   ]
     .filter(Boolean)
     .join(' · ');
@@ -112,7 +122,7 @@ export function ProviderLine({ title, maxAge }: { title: Title; maxAge?: number 
   const mine = loadMyProviders();
   const { flatrate, rent, buy } = d.providers;
   if (!flatrate.length) {
-    return rent.length || buy.length ? <div className="providers muted small">💰 Location / achat</div> : null;
+    return rent.length || buy.length ? <div className="providers muted small">{T.card.rentBuy}</div> : null;
   }
   return (
     <div className="providers">
@@ -136,13 +146,13 @@ export function MineChip({ value, onChange, title }: { value: boolean; onChange:
   if (!hasMyProviders(loadMyProviders())) {
     return (
       <a className="muted small" href="#/settings">
-        📺 Choisis tes abonnements dans les réglages pour filtrer ce qui est dispo chez toi →
+        {T.card.chooseProviders}
       </a>
     );
   }
   return (
     <button className={`chip ${value ? 'active' : ''}`} onClick={() => onChange(!value)} title={title}>
-      📺 Dispo sur mes abonnements
+      {T.card.onMyProviders}
     </button>
   );
 }
@@ -178,7 +188,7 @@ export function TitleRow({
         tabIndex={0}
         onClick={open}
         onKeyDown={(e) => e.key === 'Enter' && open()}
-        title="Fiche complète : résumé, durée, bande-annonce, où regarder…"
+        title={T.fiche.openTip}
       >
         <Poster title={title} size="w92" className="thumb" />
         <div className="row-text">
@@ -204,7 +214,7 @@ export function TypeFilter<T extends string>({ value, options, onChange }: { val
   );
 }
 
-export function SearchBox({ value, onChange, placeholder = 'Rechercher un titre…' }: { value: string; onChange: (v: string) => void; placeholder?: string }) {
+export function SearchBox({ value, onChange, placeholder = T.common.search }: { value: string; onChange: (v: string) => void; placeholder?: string }) {
   return <input className="input" type="search" placeholder={`🔍 ${placeholder}`} value={value} onChange={(e) => onChange(e.target.value)} />;
 }
 
@@ -219,7 +229,7 @@ export function Sheet({ onClose, children, label }: { onClose: () => void; child
   return (
     <div className="sheet-backdrop" onClick={onClose}>
       <div className="sheet" role="dialog" aria-label={label} onClick={(e) => e.stopPropagation()}>
-        <button className="sheet-close icon-btn" onClick={onClose} aria-label="Fermer" title="Fermer">
+        <button className="sheet-close icon-btn" onClick={onClose} aria-label={T.common.close} title={T.common.close}>
           ✕
         </button>
         {children}
@@ -263,19 +273,19 @@ export function SeenButtons({
         className={`btn ${size} seen-btn good ${isActive('good') ? 'active' : ''}`}
         onClick={() => mark('good')}
         disabled={isActive('good')}
-        title={isActive('good') ? 'Vu, avis « bien »' : 'Vu, et j’ai aimé : classé avec les « bien »'}
-        aria-label="Vu, bien"
+        title={isActive('good') ? T.seen.goodActive : T.seen.goodTip}
+        aria-label={T.seen.goodAria}
       >
-        {labels ? '👍 Vu · bien' : '👍'}
+        {labels ? T.seen.goodLabel : '👍'}
       </button>
       <button
         className={`btn ${size} seen-btn meh ${isActive('meh') ? 'active' : ''}`}
         onClick={() => mark('meh')}
         disabled={isActive('meh')}
-        title={isActive('meh') ? 'Vu, avis « bof »' : 'Vu, mais bof : en duel après les « bien »'}
-        aria-label="Vu, bof"
+        title={isActive('meh') ? T.seen.mehActive : T.seen.mehTip}
+        aria-label={T.seen.mehAria}
       >
-        {labels ? '😐 Vu · bof' : '😐'}
+        {labels ? T.seen.mehLabel : '😐'}
       </button>
     </>
   );

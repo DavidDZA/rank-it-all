@@ -1,12 +1,13 @@
 # Architecture — comment marche Rank It All
 
-> **À lire en premier par toute nouvelle session de travail.** État au 13/11/2026. Ce qui reste à faire est dans
+> **À lire en premier par toute nouvelle session de travail.** État au 14/11/2026. Ce qui reste à faire est dans
 > [ROADMAP.md](ROADMAP.md).
 
 ## 1. L'appli
 
-Web app (PWA) en français pour trier petit à petit les **films**, **séries** et **animes** qu'on a vus, sa
-wishlist et ses classements, par sessions courtes. Gratuite, sans publicité, open source.
+Web app (PWA) pour trier petit à petit les **films**, **séries** et **animes** qu'on a vus, sa wishlist et ses
+classements, par sessions courtes. Gratuite, sans publicité, open source. En **6 langues** (français, anglais,
+espagnol, allemand, italien, portugais du Brésil : § 2.2).
 
 - **Swipe** (deux modes : 4 coins par défaut — ↗ vu 👍, ↘ vu 😐, ↖ envie, ↙ pas envie — ou 2 directions).
   Dès qu'on appuie sur la carte, des repères fixes et transparents montrent chaque direction (celle visée s'allume :
@@ -84,6 +85,46 @@ version Android n'est utile que pour changer ses réglages (nom, icône, couleur
   source dans `tools/racine-du-site/`) liste les empreintes SHA-256 de la clé de dépôt **et** de la clé de
   signature de Google Play. Sans lui, l'appli affiche une barre d'adresse. Les liens `…/rank-it-all/…`
   (invitations, réinitialisation du mot de passe) ouvrent l'appli.
+
+### 2.2 Traduction (14/11/2026)
+
+**6 langues** : français (référence), anglais, espagnol, allemand, italien, portugais du Brésil ; ton familier partout.
+
+- **Langue de l'interface** (`src/i18n/index.ts`) : celle de l'appareil si elle est traduite (la première des langues
+  préférées), sinon l'anglais ; modifiable dans Réglages → Langue et pays (`LanguageSetting.tsx`, localStorage
+  `app-lang`, propre à l'appareil). **Pays** des plateformes : celui de l'appareil (« fr-BE » → BE), sinon celui de la
+  langue ; modifiable (`app-region`). Tout est lu une fois au démarrage (`LANG`, `REGION`, `T`…) : changer de langue ou
+  de pays recharge l'appli (`applyLanguage`).
+- **Textes** : un dictionnaire par langue (`fr.ts`, `en.ts`, `es.ts`, `de.ts`, `it.ts`, `pt.ts`), utilisés partout
+  par `T` (`T.swipe.skip`, `T.duel.ranked(titre, rang)`). Les autres langues sont typées sur le français : **la
+  compilation échoue s'il manque un texte**. Textes avec des valeurs, pluriels et accords (genre des catégories) :
+  des fonctions, propres à chaque langue. Gras dans une phrase : `**…**`, affiché par `<Rich>` (`common.tsx`).
+  Noms de langues et de pays : `Intl.DisplayNames` (`languageName`, `regionName`) ; nombres et dates : `num`, `LOCALE`.
+- **Ajouter un texte** : l'écrire dans `fr.ts` puis dans les 5 autres (la compilation les réclame). **Ajouter une
+  langue** : un fichier de plus dans `src/i18n/`, l'ajouter à `LANGS`, `DICTS`, `LANG_NAMES`, `DEFAULT_REGION`,
+  `tmdbLanguageOf`, à l'écran de chargement d'`index.html` (`BOOT`), aux manifestes (`vite.config.ts`), à la page de
+  confidentialité (un `<template>`) et à `e2e/traduction.spec.ts`.
+- **Garde-fou** : `tests/frenchScan.ts` (analyse du code par `@babel/parser`, TypeScript 7 n'ayant plus d'API
+  JavaScript) cherche tout texte français écrit en dur hors des dictionnaires (chaînes, textes JSX, attributs
+  `title` / `placeholder` / `aria-label`, propriétés `label`, `caption`…). `tests/i18n.test.ts` exige zéro résultat.
+  Lancé seul : `npx tsx tests/frenchScan.ts [--all] [fichier]`.
+- **TMDB** : titres, résumés et genres dans la langue de l'interface (`TMDB_LANGUAGE` : variante es-MX pour
+  l'Amérique latine, pt-PT pour le Portugal) ; plateformes du pays (`results[REGION]`, `watch_region`). Chaque fiche
+  garde sa langue et son pays (`lang`, `region`) : une fiche d'une autre langue ou d'un autre pays est redemandée
+  (`detailsOutdated` ; sans repère : fr-FR, FR). Le catalogue garde sa langue (meta `catalogue-language`, propre à
+  l'appareil) : au démarrage, s'il est dans une autre langue, il est retéléchargé (`catalogueLanguageOutdated`). Les
+  titres hors catalogue prennent leur nom traduit avec leur fiche (`saveDetails`).
+- **Hors de l'appli** : écran « Chargement… » d'`index.html` (petit dictionnaire `BOOT`, même règle de langue) ; un
+  manifeste par langue (`manifest-xx.webmanifest`, plugin de `vite.config.ts`, choisi par `index.html`) ; page de
+  confidentialité en 6 langues (`<template>` par langue, `?lang=` depuis l'appli, sinon la langue du navigateur ;
+  ancres `#suppression` identiques) ; fiche du Play Store dans `store/fiche-play-store.md`, avec ses **captures dans
+  chaque langue** (`store/captures/<langue>/`), refaites par `node tools/captures-store/captures.mjs` (site construit
+  avec le relais TMDB dans `dist-captures`, servi sur `localhost:5173`, vrai catalogue de la langue, profil de
+  démonstration ; vérifiées par `i18n.test.ts` : présentes, 1080 × 1920), et sa **bannière** dans chaque langue
+  (`store/bannieres/`, 1024 × 500, `tools/captures-store/banniere.mjs` : icône, slogan traduit, tier list de la
+  langue ; la française d'origine reste `store/banniere-1024x500.png`).
+- Le badge « Cocorico » (identifiant `french25`, gardé) compte les titres dans la langue de l'interface (en anglais :
+  ceux qui ne sont pas en anglais). Les e-mails de Supabase (mot de passe oublié) restent en anglais.
 
 ## 3. Données
 
@@ -264,7 +305,9 @@ Restaurer (dans un projet Supabase neuf, ou le même vidé) :
   décision du démarrage (premier téléchargement ou nouveautés, au plus une fois par jour : `demarrage.test.ts`), les
   sagas du swipe (films restant à écarter) et les genres sous l'affiche (`swipe.test.ts`), la langue du catalogue
   (détection de la langue de l'appareil, langue fixée, ancien format, requêtes et téléchargement en espagnol,
-  japonais, français ou sans langue : `langue.test.ts`).
+  japonais, français ou sans langue : `langue.test.ts`), la traduction (aucun texte français en dur, mêmes clés et
+  aucun texte vide dans les 6 dictionnaires, valeurs insérées, pluriels, 51 badges par langue, langue, pays et langue
+  TMDB détectés : `i18n.test.ts`).
 - `npm run e2e` : Playwright sur l'appli construite, dans le Chrome installé, formats téléphone (tactile) et PC.
   Parcours couverts : swipe (4 coins et 2 directions, boutons, vrais gestes, clavier, annuler / passer, « Annuler »
   une fois tout trié, repères pendant le glissement et tampon masqué, plus d'étiquette « Comme … » ; « Pas envie de
@@ -276,7 +319,10 @@ Restaurer (dans un projet Supabase neuf, ou le même vidé) :
   duels, Mes listes, « Ce soir ? », sauvegarde exportée puis réimportée (`parcours.spec.ts`), stats (6 cases, aussi
   sans les animes, plus de rubrique « Sagas complètes ») et 51 badges à 3 par ligne, tier list, partage en image
   (partage du téléphone simulé, ou téléchargement), filtres du swipe (`ecrans.spec.ts`), astuces à jour
-  (`tutoriel.spec.ts`), langue du catalogue avec un navigateur en espagnol, portugais, japonais, français, allemand,
+  (`tutoriel.spec.ts`), traduction (chaque écran dans chaque langue sans texte français oublié, manifeste et page
+  de confidentialité de la langue, langue et pays changés dans les Réglages, fiche TMDB en anglais avec les
+  plateformes des États-Unis ou de Belgique, catalogue retéléchargé dans la nouvelle langue : `traduction.spec.ts`),
+  langue du catalogue avec un navigateur en espagnol, portugais, japonais, français, allemand,
   anglais ou swahili : premier téléchargement, réglages, langue choisie à la main, utilisateurs actuels restés en
   français (`langue.spec.ts`, option `locale` de Playwright). Outils communs dans `e2e/helpers.ts`
   (`seed`, `readAnswers`, `readMeta`, `mockTmdbApi`).
@@ -304,7 +350,8 @@ Restaurer (dans un projet Supabase neuf, ou le même vidé) :
 
 ## 6. Conventions de travail
 
-- Interface, messages de commit et commentaires **en français**, sobres.
+- Messages de commit et commentaires **en français**, sobres. Textes de l'interface : **jamais écrits en dur**,
+  toujours dans les dictionnaires `src/i18n/` (les 6 langues), sinon `tests/i18n.test.ts` échoue (§ 2.2).
 - L'utilisateur a un **téléphone Android professionnel** (pas d'APK hors magasin) et utilise aussi l'appli sur
   **PC** : vérifier tout changement visible aux deux formats (393 × 760 tactile et PC).
 - L'utilisateur demande en général de **pousser directement sur `main`** une fois vérifié ; vérifier ensuite que

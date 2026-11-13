@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { getMyProviderFamilies, getMyProviders, hasTmdbAccess, setMyProviderFamilies, setMyProviders } from '../../lib/settings';
 import { fetchProviderOptions, providerLogo } from '../../lib/tmdb';
+import { REGION, regionName, T } from '../../i18n';
 import { groupProviders, type ProviderGroup } from '../../lib/providers';
 
 const VISIBLE = 16;
@@ -44,22 +45,22 @@ export function MyProviders() {
 
   return (
     <section className="card">
-      <h3>📺 Mes abonnements</h3>
-      <p className="muted small">Coche tes plateformes : la wishlist pourra n’afficher que ce qui est dispo chez toi.</p>
+      <h3>{T.providers.title}</h3>
+      <p className="muted small">{T.providers.text(regionName(REGION))}</p>
       {error && <p className="error small">{error}</p>}
-      {!hasTmdbAccess() && <p className="muted small">Renseigne d’abord ta clé TMDB.</p>}
-      {hasTmdbAccess() && !groups && !error && <p className="muted small">Chargement…</p>}
+      {!hasTmdbAccess() && <p className="muted small">{T.providers.needKey}</p>}
+      {hasTmdbAccess() && !groups && !error && <p className="muted small">{T.common.loading}</p>}
       {shown && (
         <div className="provider-picker">
           {shown.map((g) => {
             const active = mine.includes(g.key);
-            const variants = g.names.length > 1 ? ` (inclut : ${g.names.filter((n) => n !== g.label).join(', ')})` : '';
+            const variants = g.names.length > 1 ? T.providers.includes(g.names.filter((n) => n !== g.label).join(', ')) : '';
             return (
               <button
                 key={g.key}
                 className={`provider-option ${active ? 'active' : ''}`}
                 onClick={() => toggle(g.key)}
-                title={`${active ? `Retirer ${g.label}` : `Je suis abonné à ${g.label}`}${variants}`}
+                title={(active ? T.providers.remove(g.label) : T.providers.subscribe(g.label)) + variants}
               >
                 {g.logo && <img src={providerLogo(g.logo) ?? ''} alt="" />}
                 <span>{g.label}</span>
@@ -69,8 +70,8 @@ export function MyProviders() {
         </div>
       )}
       {groups && groups.length > VISIBLE && (
-        <button className="btn small" onClick={() => setShowAll((v) => !v)} title="Afficher toutes les plateformes disponibles en France">
-          {showAll ? 'Moins de plateformes' : `Toutes les plateformes (${groups.length})`}
+        <button className="btn small" onClick={() => setShowAll((v) => !v)} title={T.providers.allTip(regionName(REGION))}>
+          {showAll ? T.providers.less : T.providers.all(groups.length)}
         </button>
       )}
     </section>

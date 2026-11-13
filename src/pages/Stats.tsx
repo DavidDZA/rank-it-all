@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
 import { getMeta } from '../lib/db';
-import { CATEGORY_LABEL, categoryOptions, useCategories, type Category } from '../lib/category';
+import { categoryOptions, useCategories, type Category } from '../lib/category';
 import { computeStats, formatHours, TOP_SIZE, type Bar, type Stats } from '../lib/stats';
 import { BADGES } from '../lib/badges';
 import { prefetchDetails } from '../lib/tmdb';
 import { TopBar, TypeFilter } from '../components/common';
+import { LOCALE, num, T } from '../i18n';
 
 /** Pendant le complément des fiches, les stats sont recalculées à ce rythme. */
 const STATS_REFRESH_MS = 3000;
@@ -47,8 +48,8 @@ export default function StatsPage() {
   if (!stats) {
     return (
       <main className="page">
-        <TopBar title="📊 Stats" />
-        <p className="muted center">Calcul en cours…</p>
+        <TopBar title={T.statsPage.title} />
+        <p className="muted center">{T.statsPage.computing}</p>
       </main>
     );
   }
@@ -61,60 +62,66 @@ export default function StatsPage() {
 
   return (
     <main className="page">
-      <TopBar title="📊 Stats" />
+      <TopBar title={T.statsPage.title} />
 
       <div className="stat-tiles">
-        <StatTile emoji="🎬" value={stats.movie.seen} label="films vus" />
-        <StatTile emoji="📺" value={stats.tv.seen} label="séries vues" />
+        <StatTile emoji="🎬" value={stats.movie.seen} label={T.statsPage.tiles.movie} />
+        <StatTile emoji="📺" value={stats.tv.seen} label={T.statsPage.tiles.tv} />
         {categories.includes('anime') ? (
-          <StatTile emoji="🎌" value={stats.anime.seen} label="animes vus" />
+          <StatTile emoji="🎌" value={stats.anime.seen} label={T.statsPage.tiles.anime} />
         ) : (
-          <StatTile emoji="👍" value={stats.good} label="aimés" /> // toujours 6 cases, même sans les animes
+          <StatTile emoji="👍" value={stats.good} label={T.statsPage.tiles.good} /> // toujours 6 cases, même sans les animes
         )}
-        <StatTile emoji="💖" value={stats.wish} label="en wishlist" />
-        <StatTile emoji="🏆" value={all.reduce((s, x) => s + x.ranked, 0)} label="classés" />
-        <StatTile emoji="⏱️" value={formatHours(minutes)} label={`devant l’écran${coverage < 100 ? ` (sur ${coverage} % des titres)` : ''}`} />
+        <StatTile emoji="💖" value={stats.wish} label={T.statsPage.tiles.wish} />
+        <StatTile emoji="🏆" value={all.reduce((s, x) => s + x.ranked, 0)} label={T.statsPage.tiles.ranked} />
+        <StatTile emoji="⏱️" value={formatHours(minutes)} label={T.statsPage.tiles.screen(coverage < 100 ? coverage : null)} />
       </div>
-      {completing > 0 && <p className="muted small center">⏳ Complément des infos de {completing} titres…</p>}
+      {completing > 0 && <p className="muted small center">{T.statsPage.completing(completing)}</p>}
 
       <section className="card">
-        <h3>📅 Activité (30 derniers jours)</h3>
+        <h3>{T.statsPage.activity}</h3>
         <ActivityChart days={stats.last30} />
         <div className="row stat-row">
-          <span title="Jours d’affilée avec au moins un tri">🔥 Série : <b>{stats.streak}</b> j</span>
-          <span title="Plus longue série de jours d’affilée">🏅 Record : <b>{stats.bestStreak}</b> j</span>
-          <span title="Plus grand nombre de tris en une journée">⚡ Meilleur jour : <b>{stats.bestDay}</b></span>
+          <span title={T.home.streakTip}>
+            {T.statsPage.streak} <b>{stats.streak}</b> {T.statsPage.daysShort}
+          </span>
+          <span title={T.statsPage.recordTip}>
+            {T.statsPage.record} <b>{stats.bestStreak}</b> {T.statsPage.daysShort}
+          </span>
+          <span title={T.statsPage.bestDayTip}>
+            {T.statsPage.bestDay} <b>{stats.bestDay}</b>
+          </span>
         </div>
       </section>
 
       <TypeFilter<Category>
         value={category}
-        options={categoryOptions(categories, (c) => `Statistiques des ${CATEGORY_LABEL[c].plural} ${CATEGORY_LABEL[c].seen}`)}
+        options={categoryOptions(categories, (c) => T.statsPage.categoryTip(c))}
         onChange={setCategory}
       />
 
       <section className="card">
-        <h3>⭐ Les {TOP_SIZE[category]} {CATEGORY_LABEL[category].plural} les plus populaires</h3>
+        <h3>{T.statsPage.top(TOP_SIZE[category], category)}</h3>
         <div className="big-progress" title={`${t.top.seen} / ${t.top.total}`}>
           <span style={{ width: `${t.top.total ? (t.top.seen / t.top.total) * 100 : 0}%` }} />
         </div>
         <p className="small">
-          <b>{t.top.total ? Math.round((t.top.seen / t.top.total) * 100) : 0} %</b> vus ({t.top.seen} sur {t.top.total})
+          <b>{t.top.total ? Math.round((t.top.seen / t.top.total) * 100) : 0} %</b> {T.statsPage.topSeen(t.top.seen, t.top.total)}
         </p>
       </section>
 
-      <BarCard title="🕰️ Par décennie" bars={t.decades} empty="Pas encore de titre vu." />
-      <BarCard title="🎭 Genres favoris" bars={t.genres} empty="Pas encore assez de données." />
+      <BarCard title={T.statsPage.decades} bars={t.decades} empty={T.statsPage.decadesEmpty} />
+      <BarCard title={T.statsPage.genres} bars={t.genres} empty={T.statsPage.genresEmpty} />
       <BarCard
-        title={category === 'movie' ? '🎬 Réalisateurs les plus vus' : '✍️ Créateurs les plus vus'}
+        title={category === 'movie' ? T.statsPage.directors : T.statsPage.creators}
         bars={t.people}
-        empty="Il faut au moins 2 titres vus du même auteur."
+        empty={T.statsPage.peopleEmpty}
       />
-      <BarCard title="🌟 Acteurs les plus vus" bars={t.actors} empty="Il faut au moins 2 titres vus avec le même acteur." />
+      <BarCard title={T.statsPage.actors} bars={t.actors} empty={T.statsPage.actorsEmpty} />
 
       <section className="card">
         <h3>
-          🏅 Badges ({BADGES.filter((b) => unlocked.has(b.id)).length}/{BADGES.length})
+          {T.statsPage.badges(BADGES.filter((b) => unlocked.has(b.id)).length, BADGES.length)}
         </h3>
         <div className="badge-grid">
           {BADGES.map((b) => {
@@ -148,7 +155,7 @@ function StatTile({ emoji, value, label }: { emoji: string; value: number | stri
   return (
     <div className="stat-tile">
       <span className="stat-emoji">{emoji}</span>
-      <span className="stat-value">{typeof value === 'number' ? value.toLocaleString('fr-FR') : value}</span>
+      <span className="stat-value">{typeof value === 'number' ? num(value) : value}</span>
       <span className="stat-label">{label}</span>
     </div>
   );
@@ -181,20 +188,20 @@ function BarCard({ title, bars, empty }: { title: string; bars: Bar[]; empty: st
 
 function ActivityChart({ days }: { days: { date: Date; count: number }[] }) {
   const max = Math.max(1, ...days.map((d) => d.count));
-  const fmt = (d: Date) => d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
+  const fmt = (d: Date) => d.toLocaleDateString(LOCALE, { day: 'numeric', month: 'short' });
   return (
     <div className="activity-chart">
       <div className="columns">
         {days.map((d) => (
-          <span key={d.date.toDateString()} className="column" title={`${fmt(d.date)} : ${d.count} tri${d.count > 1 ? 's' : ''}`}>
+          <span key={d.date.toDateString()} className="column" title={T.statsPage.dayTip(fmt(d.date), d.count)}>
             <span className="column-fill" style={{ height: `${(d.count / max) * 100}%` }} />
           </span>
         ))}
       </div>
       <div className="columns-axis muted tiny">
         <span>{fmt(days[0].date)}</span>
-        <span>max {max}</span>
-        <span>aujourd’hui</span>
+        <span>{T.statsPage.max(max)}</span>
+        <span>{T.statsPage.today}</span>
       </div>
     </div>
   );

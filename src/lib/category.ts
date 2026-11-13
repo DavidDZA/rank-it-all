@@ -1,6 +1,7 @@
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db, type MediaType, type Title } from './db';
 import { getShowAnime } from './settings';
+import { T } from '../i18n';
 
 /**
  * Catégories de l'appli : films, séries et animes (séries d'animation japonaises).
@@ -22,12 +23,12 @@ export const isAnimeTitle = (t: Title) =>
 
 export const categoryOf = (t: Title): Category => (t.type === 'movie' ? 'movie' : isAnimeTitle(t) ? 'anime' : 'tv');
 
-/** Libellés : « Films », « un film », « film »… */
-export const CATEGORY_LABEL: Record<Category, { plural: string; one: string; badge: string; emoji: string; seen: string }> = {
-  movie: { plural: 'films', one: 'film', badge: 'Film', emoji: '🎬', seen: 'vus' },
-  tv: { plural: 'séries', one: 'série', badge: 'Série', emoji: '📺', seen: 'vues' },
-  anime: { plural: 'animes', one: 'anime', badge: 'Anime', emoji: '🎌', seen: 'vus' },
-};
+const EMOJI: Record<Category, string> = { movie: '🎬', tv: '📺', anime: '🎌' };
+
+/** Libellés dans la langue de l'interface : « films », « un film », badge « Film »… */
+export const CATEGORY_LABEL: Record<Category, { plural: string; one: string; badge: string; emoji: string; seen: string }> = Object.fromEntries(
+  CATEGORIES.map((c) => [c, { ...T.cat[c], emoji: EMOJI[c] }]),
+) as Record<Category, { plural: string; one: string; badge: string; emoji: string; seen: string }>;
 
 export const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 

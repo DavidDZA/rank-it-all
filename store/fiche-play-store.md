@@ -54,6 +54,247 @@ captures téléphone : les 6 de `captures/` dans l'ordre (accueil, swipe, duel, 
 
 **Règles de confidentialité** : `https://daviddza.github.io/rank-it-all/confidentialite.html`
 
+## Fiches dans les autres langues (*Fiche principale → Gérer les traductions → Ajouter vos propres traductions*)
+
+L'appli est traduite en anglais, espagnol, allemand, italien et portugais (Brésil) : elle s'affiche dans la langue du
+téléphone. Ajouter ces 5 langues dans la Play Console (*Gérer les traductions → Ajouter vos propres traductions* :
+`en-US`, `es-ES`, `de-DE`, `it-IT`, `pt-BR`), puis coller pour chacune le nom, la description courte et la description
+complète ci-dessous, et remplacer les **captures téléphone** par celles de la langue : `captures/<langue>/` (`en`, `es`,
+`de`, `it`, `pt`), les 6 dans l'ordre (accueil, swipe, duel, classement, tier list, wishlist), et la **bannière**
+(« image de présentation », 1024 × 500 : la grande image en haut de la fiche et dans les mises en avant de Google Play)
+par `bannieres/banniere-<langue>.png`. L'icône reste la même. Aucune nouvelle version de l'appli n'est nécessaire.
+
+Les captures se refont (après un changement visible de l'appli) avec `node tools/captures-store/captures.mjs`
+(`… fr` pour le français, `… en de` pour quelques langues) : le site construit avec le relais TMDB, un téléphone
+réglé sur chaque langue et son pays, le vrai catalogue (affiches et titres de la langue), un profil de démonstration,
+puis les 6 écrans en 1080 × 1920, et enfin les bannières. Il faut le réseau ; quelques minutes en tout. Les bannières
+seules (texte changé, sans réseau) : `node tools/captures-store/banniere.mjs` (slogans dans `BANNER_TEXT`).
+
+La page de confidentialité est la même adresse pour toutes les langues : elle s'affiche dans la langue du navigateur.
+
+### Anglais (en-US)
+
+**Nom** : `Rank It All`
+
+**Description courte** :
+
+```
+Swipe, rank and compare your favorite movies, TV shows and anime with friends.
+```
+
+**Description complète** :
+
+```
+Rank It All helps you sort out everything you've watched — movies, TV shows and anime — in short sessions of a few minutes.
+
+🎬 SWIPE
+One title at a time, picked among the best known: seen (liked it or meh), want to watch, or not interested. Your list builds itself, no typing needed.
+
+🏆 RANK WITH DUELS
+"Which one do you prefer?" Two titles, one choice: each title finds its place in a few duels. Move them by hand if you like, and get your S, A, B, C, D tier list.
+
+💖 WISHLIST
+Keep what you want to watch, prioritize it with duels and see which streaming platforms have it — with an "on my subscriptions" filter.
+
+🍿 WHAT SHOULD I WATCH TONIGHT?
+A random pick from your wishlist, based on your mood.
+
+👫 WITH FRIENDS
+Compare your rankings, find something to watch together with your shared wishlist, and swap recommendations.
+
+✨ AND ALSO
+Filters (period, genre, language, director, actor, rating), sagas in order, recommendations based on what you liked, stats and badges, share your top 10 as an image.
+
+🔒 FREE, NO ADS, OPEN SOURCE
+No ads, no trackers. Without an account, everything stays on your phone. An account (optional, email or Google) syncs your lists across your devices.
+
+Catalog and posters: TMDB. Streaming availability: JustWatch.
+This product uses the TMDB API but is not endorsed or certified by TMDB.
+```
+
+### Espagnol (es-ES)
+
+**Nom** : `Rank It All`
+
+**Description courte** :
+
+```
+Desliza, clasifica y compara tus películas, series y animes con tus amigos.
+```
+
+**Description complète** :
+
+```
+Rank It All te ayuda a ordenar todo lo que has visto — películas, series y animes — en sesiones cortas de unos minutos.
+
+🎬 DESLIZA
+Un título cada vez, elegido entre los más conocidos: visto (te gustó o regular), quiero verlo o no me interesa. Tu lista se crea sola, sin escribir nada.
+
+🏆 CLASIFICA CON DUELOS
+«¿Cuál prefieres?» Dos títulos, una elección: cada título encuentra su sitio en pocos duelos. Muévelos a mano si quieres y consigue tu tier list S, A, B, C, D.
+
+💖 WISHLIST
+Guarda lo que quieres ver, priorízalo con duelos y mira en qué plataformas de streaming está disponible, con un filtro «en mis suscripciones».
+
+🍿 ¿QUÉ VEO ESTA NOCHE?
+Un sorteo en tu wishlist, según lo que te apetezca.
+
+👫 CON AMIGOS
+Comparad vuestras clasificaciones, encontrad qué ver juntos gracias a vuestra wishlist común e intercambiad recomendaciones.
+
+✨ Y ADEMÁS
+Filtros (época, género, idioma, director, actor, nota), sagas en orden, recomendaciones según lo que te gustó, estadísticas e insignias, comparte tu top 10 en una imagen.
+
+🔒 GRATIS, SIN ANUNCIOS, CÓDIGO ABIERTO
+Sin anuncios ni rastreadores. Sin cuenta, todo se queda en tu móvil. Una cuenta (opcional, correo o Google) sincroniza tus listas entre tus dispositivos.
+
+Catálogo y pósteres: TMDB. Disponibilidad en streaming: JustWatch.
+This product uses the TMDB API but is not endorsed or certified by TMDB.
+```
+
+### Allemand (de-DE)
+
+**Nom** : `Rank It All`
+
+**Description courte** :
+
+```
+Swipe, ranke und vergleiche deine Filme, Serien und Animes mit Freunden.
+```
+
+**Description complète** :
+
+```
+Rank It All hilft dir, alles zu sortieren, was du gesehen hast — Filme, Serien und Animes — in kurzen Sessions von ein paar Minuten.
+
+🎬 SWIPEN
+Ein Titel nach dem anderen, ausgewählt unter den bekanntesten: gesehen (gut oder naja), will ich sehen oder kein Interesse. Deine Liste entsteht von selbst, ganz ohne Tippen.
+
+🏆 RANKEN MIT DUELLEN
+„Welchen findest du besser?“ Zwei Titel, eine Wahl: Jeder Titel findet in wenigen Duellen seinen Platz. Verschieb sie von Hand, wenn du willst, und hol dir deine Tier-List S, A, B, C, D.
+
+💖 WISHLIST
+Merk dir, was du sehen willst, priorisiere es mit Duellen und sieh, auf welchen Streaming-Plattformen es läuft — mit dem Filter „in meinen Abos“.
+
+🍿 WAS SCHAUE ICH HEUTE ABEND?
+Eine Auslosung aus deiner Wishlist, je nach Lust und Laune.
+
+👫 MIT FREUNDEN
+Vergleicht eure Rankings, findet mit eurer gemeinsamen Wishlist etwas für einen gemeinsamen Abend und tauscht Tipps aus.
+
+✨ UND AUSSERDEM
+Filter (Zeitraum, Genre, Sprache, Regie, Schauspieler, Bewertung), Filmreihen in der richtigen Reihenfolge, Empfehlungen nach deinem Geschmack, Statistiken und Abzeichen, deine Top 10 als Bild teilen.
+
+🔒 KOSTENLOS, OHNE WERBUNG, OPEN SOURCE
+Keine Werbung, keine Tracker. Ohne Konto bleibt alles auf deinem Handy. Ein Konto (optional, E-Mail oder Google) synchronisiert deine Listen zwischen deinen Geräten.
+
+Katalog und Poster: TMDB. Streaming-Verfügbarkeit: JustWatch.
+This product uses the TMDB API but is not endorsed or certified by TMDB.
+```
+
+### Italien (it-IT)
+
+**Nom** : `Rank It All`
+
+**Description courte** :
+
+```
+Swipa, classifica e confronta film, serie e anime preferiti con gli amici.
+```
+
+**Description complète** :
+
+```
+Rank It All ti aiuta a mettere in ordine tutto ciò che hai visto — film, serie e anime — in brevi sessioni di pochi minuti.
+
+🎬 SWIPE
+Un titolo alla volta, scelto tra i più conosciuti: visto (bello o così così), voglio vederlo o non mi interessa. La tua lista si crea da sola, senza scrivere niente.
+
+🏆 CLASSIFICA CON I DUELLI
+«Quale preferisci?» Due titoli, una scelta: ogni titolo trova il suo posto in pochi duelli. Spostali a mano se vuoi, e ottieni la tua tier list S, A, B, C, D.
+
+💖 WISHLIST
+Tieni ciò che vuoi vedere, dagli priorità con i duelli e scopri su quali piattaforme di streaming è disponibile, con il filtro «sui miei abbonamenti».
+
+🍿 COSA GUARDO STASERA?
+Un’estrazione a caso dalla tua wishlist, secondo l’umore del momento.
+
+👫 CON GLI AMICI
+Confrontate le vostre classifiche, trovate cosa guardare insieme grazie alla wishlist in comune e scambiatevi consigli.
+
+✨ E INOLTRE
+Filtri (epoca, genere, lingua, regista, attore, voto), saghe in ordine, consigli in base a ciò che ti è piaciuto, statistiche e badge, condivisione della tua top 10 in un’immagine.
+
+🔒 GRATIS, SENZA PUBBLICITÀ, OPEN SOURCE
+Niente pubblicità, niente tracker. Senza account, tutto resta sul tuo telefono. Un account (facoltativo, email o Google) sincronizza le tue liste tra i tuoi dispositivi.
+
+Catalogo e locandine: TMDB. Disponibilità in streaming: JustWatch.
+This product uses the TMDB API but is not endorsed or certified by TMDB.
+```
+
+### Portugais du Brésil (pt-BR)
+
+**Nom** : `Rank It All`
+
+**Description courte** :
+
+```
+Deslize, classifique e compare filmes, séries e animes favoritos com amigos.
+```
+
+**Description complète** :
+
+```
+O Rank It All ajuda você a organizar tudo o que já assistiu — filmes, séries e animes — em sessões curtas de poucos minutos.
+
+🎬 DESLIZE
+Um título por vez, escolhido entre os mais conhecidos: vi (gostei ou mais ou menos), quero ver ou sem interesse. Sua lista se monta sozinha, sem digitar nada.
+
+🏆 CLASSIFIQUE COM DUELOS
+“Qual você prefere?” Dois títulos, uma escolha: cada título encontra seu lugar em poucos duelos. Mova-os à mão se quiser e tenha sua tier list S, A, B, C, D.
+
+💖 WISHLIST
+Guarde o que você quer ver, priorize com duelos e veja em quais plataformas de streaming está disponível, com o filtro “nas minhas assinaturas”.
+
+🍿 O QUE EU ASSISTO HOJE?
+Um sorteio na sua wishlist, de acordo com o seu humor.
+
+👫 COM AMIGOS
+Comparem seus rankings, encontrem o que assistir juntos com a wishlist em comum e troquem dicas.
+
+✨ E MAIS
+Filtros (época, gênero, idioma, diretor, ator, nota), sagas em ordem, recomendações com base no que você curtiu, estatísticas e medalhas, compartilhe seu top 10 em uma imagem.
+
+🔒 GRÁTIS, SEM ANÚNCIOS, CÓDIGO ABERTO
+Sem anúncios, sem rastreadores. Sem conta, tudo fica no seu celular. Uma conta (opcional, e-mail ou Google) sincroniza suas listas entre seus aparelhos.
+
+Catálogo e pôsteres: TMDB. Disponibilidade em streaming: JustWatch.
+This product uses the TMDB API but is not endorsed or certified by TMDB.
+```
+
+### Notes de version (toutes langues, pour la prochaine version du test fermé ou de la production)
+
+```
+<en-US>
+Now available in English, Spanish, German, Italian and Portuguese.
+</en-US>
+<es-ES>
+Ya disponible en inglés, español, alemán, italiano y portugués.
+</es-ES>
+<de-DE>
+Jetzt auf Englisch, Spanisch, Deutsch, Italienisch und Portugiesisch verfügbar.
+</de-DE>
+<it-IT>
+Ora disponibile in inglese, spagnolo, tedesco, italiano e portoghese.
+</it-IT>
+<pt-BR>
+Agora disponível em inglês, espanhol, alemão, italiano e português.
+</pt-BR>
+<fr-FR>
+L’appli existe maintenant en anglais, espagnol, allemand, italien et portugais.
+</fr-FR>
+```
+
 ## Contenu de l'appli (*Règles → Contenu de l'appli*)
 
 | Rubrique | Réponse |

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { T } from '../i18n';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db, type Answer, type Status, type Title } from '../lib/db';
 import { changeStatus } from '../lib/ranking';
@@ -10,26 +11,13 @@ import { tutorialSeen } from '../lib/tutorial';
 type Mode = 'title' | PersonRole;
 
 const PLACEHOLDER: Record<Mode, string> = {
-  title: 'Titre d’un film ou d’une série…',
-  director: 'Nom d’un réalisateur ou d’une réalisatrice…',
-  actor: 'Nom d’un acteur ou d’une actrice…',
+  title: T.add.titlePlaceholder,
+  director: T.filterSheet.directorPlaceholder,
+  actor: T.filterSheet.actorPlaceholder,
 };
 
 /** Métier principal d'une personne selon TMDB. */
-const DEPARTMENTS: Record<string, string> = {
-  Directing: '🎥 Réalisation',
-  Acting: '🎭 Interprétation',
-  Writing: '✍️ Scénario',
-  Production: '🎬 Production',
-  Camera: '📷 Image',
-  Editing: '✂️ Montage',
-  Sound: '🎵 Musique / son',
-  Art: '🎨 Décors',
-  'Costume & Make-Up': '👗 Costumes',
-  'Visual Effects': '✨ Effets visuels',
-  Crew: 'Équipe',
-  Lighting: '💡 Lumière',
-};
+const DEPARTMENTS: Record<string, string> = T.add.departments;
 
 /** Ajout manuel : par titre, ou par réalisateur / acteur (on choisit la personne, puis sa filmographie). */
 export default function AddManual() {
@@ -100,7 +88,7 @@ export default function AddManual() {
   const row = (t: Title) => (
     <TitleRow key={t.key} title={t} showType>
       <SeenButtons title={t} current={statuses?.get(t.key)} />
-      <StatusButton title={t} status="wish" current={statuses?.get(t.key)?.status} label="♥" tip="Ajouter à la wishlist" />
+      <StatusButton title={t} status="wish" current={statuses?.get(t.key)?.status} label="♥" tip={T.fiche.wishTip} />
     </TitleRow>
   );
 
@@ -111,13 +99,13 @@ export default function AddManual() {
   return (
     <main className="page">
       <Tutorial id="add" />
-      <TopBar title="🔍 Ajout manuel" />
+      <TopBar title={T.add.title} />
       <TypeFilter<Mode>
         value={mode}
         options={[
-          ['title', 'Titre', 'Chercher un film ou une série par son titre'],
-          ['director', 'Réalisateur', 'Chercher un réalisateur et voir les films qu’il a réalisés'],
-          ['actor', 'Acteur', 'Chercher un acteur et voir les films et séries où il a joué'],
+          ['title', T.add.byTitle, T.add.byTitleTip],
+          ['director', T.filterSheet.director, T.add.byDirectorTip],
+          ['actor', T.filterSheet.actor, T.add.byActorTip],
         ]}
         onChange={(m) => {
           setMode(m);
@@ -125,45 +113,45 @@ export default function AddManual() {
         }}
       />
       <input className="input" type="search" placeholder={PLACEHOLDER[mode]} value={query} onChange={(e) => setQuery(e.target.value)} autoFocus={focusSearch} />
-      {loading && <p className="muted center">Recherche…</p>}
+      {loading && <p className="muted center">{T.add.searching}</p>}
       {error && <p className="error">{error}</p>}
 
       {mode === 'title' ? (
         <>
-          {!loading && query.trim().length >= 2 && !titles.length && !error && <p className="muted center">Aucun résultat.</p>}
+          {!loading && query.trim().length >= 2 && !titles.length && !error && <p className="muted center">{T.add.noResult}</p>}
           <ul className="list">{titles.map(row)}</ul>
         </>
       ) : person ? (
         <>
           <div className="person-head">
-            <button className="btn small" onClick={() => setPerson(null)} title="Revenir aux résultats de la recherche">
-              ‹ Résultats
+            <button className="btn small" onClick={() => setPerson(null)} title={T.add.backTip}>
+              {T.add.back}
             </button>
             <PersonAvatar person={person} />
             <div className="person-name">
               <b>{person.name}</b>
               <span className="muted small">
                 {works === null
-                  ? 'Chargement…'
-                  : `${works.length} ${mode === 'director' ? 'réalisé(s)' : 'rôle(s)'} · ${seenCount} vu${seenCount > 1 ? 's' : ''}`}
+                  ? T.common.loading
+                  : T.add.works(works.length, mode === 'director', seenCount)}
               </span>
             </div>
           </div>
-          {works !== null && !works.length && <p className="muted center">Aucun film ni série retenu pour cette personne.</p>}
+          {works !== null && !works.length && <p className="muted center">{T.add.noWorks}</p>}
           <ul className="list">{known.map(row)}</ul>
           {lesser.length > 0 && (
             <details className="lesser">
-              <summary title="Titres avec peu de votes sur TMDB (souvent des courts métrages)">Moins connus ({lesser.length})</summary>
+              <summary title={T.add.lesserTip}>{T.add.lesser(lesser.length)}</summary>
               <ul className="list">{lesser.map(row)}</ul>
             </details>
           )}
         </>
       ) : (
         <>
-          {!loading && query.trim().length >= 2 && !people.length && !error && <p className="muted center">Aucune personne trouvée.</p>}
+          {!loading && query.trim().length >= 2 && !people.length && !error && <p className="muted center">{T.add.noPerson}</p>}
           <ul className="list">
             {people.map((p) => (
-              <li key={p.id} className="list-item person-row" role="button" tabIndex={0} onClick={() => setPerson(p)} title={`Voir la filmographie de ${p.name}`}>
+              <li key={p.id} className="list-item person-row" role="button" tabIndex={0} onClick={() => setPerson(p)} title={T.add.filmographyTip(p.name)}>
                 <PersonAvatar person={p} />
                 <div className="row-text">
                   <div className="title-main">{p.name}</div>
@@ -190,9 +178,9 @@ function StatusButton({ title, status, current, label, tip }: { title: Title; st
       className={`btn small ${active ? 'primary' : ''}`}
       onClick={() => changeStatus(title, status)}
       disabled={active}
-      title={active ? (status === 'seen' ? 'Déjà dans les titres vus' : 'Déjà dans la wishlist') : tip}
+      title={active ? (status === 'seen' ? T.add.alreadySeen : T.add.alreadyWish) : tip}
     >
-      {active && status === 'seen' ? '✓ Vu' : label}
+      {active && status === 'seen' ? T.fiche.status.seen : label}
     </button>
   );
 }

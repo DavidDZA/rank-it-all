@@ -18,6 +18,7 @@ import {
 import { burst, centerOf, toast } from '../lib/fun';
 import { recordActivity } from '../lib/activity';
 import { DuelCard } from './DuelCard';
+import { T } from '../i18n';
 
 interface DuelState {
   ranking: string[];
@@ -188,7 +189,7 @@ export function Duel({
         if (choice === 'candidate') {
           updated = promote(ranking, verify.b, verify.a);
           await saveRanking(scope, updated);
-          toast(`↕️ « ${st.candidate?.title ?? ''} » remonte n°${verify.a + 1}`);
+          toast(T.duel.movedUp(st.candidate?.title ?? '', verify.a + 1));
         }
         await afterDecision(updated, false);
         return;
@@ -207,7 +208,7 @@ export function Duel({
         setPlaced((n) => n + 1);
         placedCount.current++;
         const title = st.candidate?.title ?? '';
-        toast(scope.list === 'seen' ? `🏆 « ${title} » classé n°${lo + 1}` : `💖 « ${title} » priorité n°${lo + 1}`);
+        toast(scope.list === 'seen' ? T.duel.ranked(title, lo + 1) : T.duel.prioritized(title, lo + 1));
         await afterDecision(updated, true);
       } else {
         const updated = { ...ins!, lo, hi };
@@ -232,7 +233,7 @@ export function Duel({
       await saveRanking(scope, updated);
       setPlaced((n) => n + 1);
       placedCount.current++;
-      toast(`🗑️ « ${st.candidate?.title ?? ''} » envoyé en dernier (n°${updated.length})`);
+      toast(T.duel.trashed(st.candidate?.title ?? '', updated.length));
       await afterDecision(updated, true);
     } finally {
       busy.current = false;
@@ -311,21 +312,21 @@ export function Duel({
     return () => removeEventListener('keydown', onKey);
   });
 
-  if (!st) return <p className="muted center">Chargement…</p>;
+  if (!st) return <p className="muted center">{T.common.loading}</p>;
 
   if ((!st.ins && st.verify === null) || !st.candidate || !st.opponent || !left || !right) {
     return (
       <div className="empty">
         <span className="big-emoji">{st.ranking.length ? '🏆' : '🍿'}</span>
-        <p>{st.ranking.length ? (filter ? 'Tout est classé pour ces filtres !' : 'Tout est classé !') : emptyText}</p>
+        <p>{st.ranking.length ? (filter ? T.duel.allRankedFiltered : T.duel.allRanked) : emptyText}</p>
         {st.ranking.length >= 2 && (
-          <button className="btn primary" onClick={refine} title="Des duels entre titres voisins pour corriger le classement">
-            🔍 Affiner mon classement
+          <button className="btn primary" onClick={refine} title={T.duel.refineTip}>
+            {T.duel.refine}
           </button>
         )}
         {undoStack.current.length > 0 && (
-          <button className="btn" onClick={undo} title="Revenir sur le dernier choix">
-            ↶ Annuler le dernier choix
+          <button className="btn" onClick={undo} title={T.duel.undoTip}>
+            {T.duel.undoLast}
           </button>
         )}
       </div>
@@ -337,12 +338,12 @@ export function Duel({
   return (
     <>
       <p className="question">
-        {verifying && <span className="verify-tag">🔍 Vérification</span>}
+        {verifying && <span className="verify-tag">{T.duel.verification}</span>}
         {question}
       </p>
       <div className="duel">
         <span className="vs" aria-hidden>
-          VS
+          {T.duel.vs}
         </span>
         {[left, right].map((t) => (
           <DuelCard
@@ -354,18 +355,18 @@ export function Duel({
         ))}
       </div>
       <div className="row center">
-        <button className="btn" onClick={undo} disabled={!undoStack.current.length && !picked} title="Revenir sur le dernier choix (Retour arrière)">
-          ↶ Annuler
+        <button className="btn" onClick={undo} disabled={!undoStack.current.length && !picked} title={T.duel.undoKeyTip}>
+          {T.duel.undo}
         </button>
-        <button className="btn" onClick={() => choose('tie')} title={verifying ? 'Les deux se valent : on ne change rien (↓)' : 'Impossible de départager : les placer côte à côte (↓)'}>
-          Égalité
+        <button className="btn" onClick={() => choose('tie')} title={verifying ? T.duel.tieVerifyTip : T.duel.tieTip}>
+          {T.duel.tie}
         </button>
-        <button className="btn" onClick={skip} title={verifying ? 'Passer à une autre vérification' : 'Laisser ce titre de côté pour cette session'}>
-          {verifying ? 'Passer' : 'Passer ce titre'}
+        <button className="btn" onClick={skip} title={verifying ? T.duel.skipVerifyTip : T.duel.skipTip}>
+          {verifying ? T.duel.skipVerify : T.duel.skip}
         </button>
         {canTrash && (
-          <button className="btn" onClick={trash} title={`Envoyer « ${st.candidate.title} » en dernière place, sans duel (Suppr)`}>
-            🗑️ Trash
+          <button className="btn" onClick={trash} title={T.duel.trashTip(st.candidate.title)}>
+            {T.duel.trash}
           </button>
         )}
         {verifying && verifyOnly.current && (
@@ -375,33 +376,36 @@ export function Duel({
               verifyOnly.current = false;
               next(st.ranking);
             }}
-            title="Arrêter les vérifications"
+            title={T.duel.finishTip}
           >
-            Terminer
+            {T.duel.finish}
           </button>
         )}
       </div>
       <p className="muted small center">
         {verifying ? (
           <>
-            Ces deux titres sont voisins {filter ? 'dans ta sélection' : 'dans ton classement'} (n°{st.verify!.a + 1} et n°{st.verify!.b + 1}) :
-            toujours d’accord ?
+            {T.duel.neighbours(!!filter, st.verify!.a + 1, st.verify!.b + 1)}
           </>
         ) : (
           <>
-            Encore ~{duelsLeft(st.ins!)} duel(s) pour placer « {st.candidate.title} »
-            {st.tier && (st.tier === 'good' ? ' · 👍 noté « bien »' : ' · 😐 noté « bof »')}
+            {T.duel.left(duelsLeft(st.ins!), st.candidate.title)}
+            {st.tier && (st.tier === 'good' ? T.duel.ratedGood : T.duel.ratedMeh)}
           </>
         )}
         <br />
-        {st.ranking.length} classés · {st.unranked} non classés · {placed} placés cette session
+        {T.duel.counts(st.ranking.length, st.unranked, placed)}
         {st.waiting.good > 0 && st.waiting.meh > 0 && (
           <>
-            <br />👍 {st.waiting.good} « bien » d’abord, puis 😐 {st.waiting.meh} « bof »
+            <br />
+            {T.duel.goodFirst(st.waiting.good, st.waiting.meh)}
           </>
         )}
       </p>
-      <p className="muted tiny center kbd-hint">Clavier : ← → choisir · ↓ égalité · ⌫ annuler{canTrash && ' · Suppr poubelle'}</p>
+      <p className="muted tiny center kbd-hint">
+        {T.duel.keys}
+        {canTrash && T.duel.keysTrash}
+      </p>
     </>
   );
 }

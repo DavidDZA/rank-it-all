@@ -6,7 +6,8 @@ import { fixMinVotes, readPref, writePref } from '../lib/settings';
 import { requestPersistentStorage } from '../lib/db';
 import { syncCatalogue } from '../lib/sync';
 import { syncAndWait } from '../lib/cloud';
-import { PersonAvatar, Sheet } from './common';
+import { PersonAvatar, Rich, Sheet } from './common';
+import { num, T } from '../i18n';
 
 /**
  * Fenêtre des filtres (swipe, classement, wishlist) : note minimum, période, genre, langue.
@@ -39,12 +40,12 @@ export function FilterSheet(props: {
 
   const updateCatalogue = async () => {
     setSyncing(true);
-    setSync('Démarrage…');
+    setSync(T.sync.starting);
     await requestPersistentStorage();
     try {
       await syncAndWait(); // seuils de votes du compte
       const { movie, tv, anime } = await syncCatalogue(await fixMinVotes(), setSync);
-      setSync(`✓ Catalogue à jour (${(movie + tv + anime).toLocaleString('fr-FR')} titres) : les notes sont là.`);
+      setSync(T.filterSheet.updated(num(movie + tv + anime)));
       props.onCatalogueUpdated?.();
     } catch (e) {
       setSync(`✕ ${(e as Error).message}`);
@@ -54,34 +55,31 @@ export function FilterSheet(props: {
   };
 
   return (
-    <Sheet onClose={props.onClose} label="Filtres">
+    <Sheet onClose={props.onClose} label={T.filterSheet.title}>
       <h2 className="sheet-title">
-        <FilterIcon /> Filtres
+        <FilterIcon /> {T.filterSheet.title}
       </h2>
       {(props.missingRatings ?? 0) > 0 || sync ? (
         <div className="banner-soft small catalogue-update">
           {sync ?? (
-            <>
-              ⭐ <b>{props.missingRatings!.toLocaleString('fr-FR')} titres</b> n’ont pas encore leur note : ton catalogue a été téléchargé avant
-              qu’on l’enregistre. Avec une note minimum, ils sont écartés.
-            </>
+            <Rich text={T.filterSheet.missingRatings(num(props.missingRatings!))} />
           )}
           {!syncing && !sync?.startsWith('✓') && (
-            <button className="btn small primary" onClick={updateCatalogue} title="Retélécharger le catalogue avec les notes (environ 1 minute)">
-              Mettre à jour le catalogue (≈ 1 min)
+            <button className="btn small primary" onClick={updateCatalogue} title={T.filterSheet.updateTip}>
+              {T.filterSheet.update}
             </button>
           )}
         </div>
       ) : props.pendingInfo ? (
         <p className="banner-soft small">
-          ⏳ Récupération des genres, langues et notes de {props.pendingInfo.toLocaleString('fr-FR')} titres… les résultats se complètent.
+          {T.filterSheet.pending(num(props.pendingInfo))}
         </p>
       ) : (
-        !props.hasCatalogueData && <p className="banner-soft small">Mets à jour le catalogue (Réglages) pour filtrer par genre, langue et note.</p>
+        !props.hasCatalogueData && <p className="banner-soft small">{T.filterSheet.noData}</p>
       )}
 
       <h3 className="sheet-label">
-        Note TMDB minimum : <b className="rating-value">{draft.minRating > 0 ? `⭐ ${draft.minRating.toLocaleString('fr-FR')}` : 'toutes'}</b>
+        {T.filterSheet.minRating} <b className="rating-value">{draft.minRating > 0 ? `⭐ ${num(draft.minRating)}` : T.filterSheet.anyRating}</b>
       </h3>
       <input
         className="rating-slider"
@@ -91,7 +89,7 @@ export function FilterSheet(props: {
         step={0.5}
         value={draft.minRating}
         onChange={(e) => setDraft({ ...draft, minRating: Number(e.target.value) })}
-        aria-label="Note TMDB minimum"
+        aria-label={T.filterSheet.minRatingAria}
       />
       <div className="rating-scale muted tiny">
         <span>0</span>
@@ -99,7 +97,7 @@ export function FilterSheet(props: {
         <span>10</span>
       </div>
 
-      <h3 className="sheet-label">Période</h3>
+      <h3 className="sheet-label">{T.filterSheet.period}</h3>
       <div className="chips">
         {PERIODS.map((p) => (
           <button key={p.id} className={`chip ${draft.period === p.id ? 'active' : ''}`} onClick={() => setDraft({ ...draft, period: p.id })}>
@@ -108,17 +106,17 @@ export function FilterSheet(props: {
         ))}
       </div>
 
-      <h3 className="sheet-label">Réalisateur</h3>
+      <h3 className="sheet-label">{T.filterSheet.director}</h3>
       <PersonField role="director" value={draft.director ?? null} onChange={(p) => setDraft({ ...draft, director: p })} onTitles={props.onPersonTitles} />
 
-      <h3 className="sheet-label">Acteur</h3>
+      <h3 className="sheet-label">{T.filterSheet.actor}</h3>
       <PersonField role="actor" value={draft.actor ?? null} onChange={(p) => setDraft({ ...draft, actor: p })} onTitles={props.onPersonTitles} />
 
-      <h3 className="sheet-label">Genre</h3>
+      <h3 className="sheet-label">{T.filterSheet.genre}</h3>
       {props.type ? (
         <div className="chips">
           <button className={`chip ${draft.genre === null ? 'active' : ''}`} onClick={() => setDraft({ ...draft, genre: null })}>
-            Tous
+            {T.filterSheet.allGenres}
           </button>
           {genreOptions(props.type).map((g) => (
             <button key={g.id} className={`chip ${draft.genre === g.id ? 'active' : ''}`} onClick={() => setDraft({ ...draft, genre: g.id })}>
@@ -127,10 +125,10 @@ export function FilterSheet(props: {
           ))}
         </div>
       ) : (
-        <p className="muted small">Choisis Films ou Séries pour filtrer par genre.</p>
+        <p className="muted small">{T.filterSheet.chooseType}</p>
       )}
 
-      <h3 className="sheet-label">Langue originale</h3>
+      <h3 className="sheet-label">{T.filterSheet.language}</h3>
       <div className="chips">
         {LANGS.map((l) => (
           <button key={l.id} className={`chip ${draft.lang === l.id ? 'active' : ''}`} onClick={() => setDraft({ ...draft, lang: l.id })}>
@@ -140,10 +138,10 @@ export function FilterSheet(props: {
       </div>
 
       <div className="row center sheet-actions">
-        <button className="btn" onClick={() => setDraft(NO_THEME)} title="Retirer tous les filtres">
-          Réinitialiser
+        <button className="btn" onClick={() => setDraft(NO_THEME)} title={T.filterSheet.resetTip}>
+          {T.filterSheet.reset}
         </button>
-        <button className="btn primary" onClick={() => props.onApply(draft)} disabled={n === 0} title="Appliquer ces filtres">
+        <button className="btn primary" onClick={() => props.onApply(draft)} disabled={n === 0} title={T.filterSheet.applyTip}>
           {props.applyLabel(n)}
         </button>
       </div>
@@ -152,8 +150,8 @@ export function FilterSheet(props: {
 }
 
 const PERSON_TEXT: Record<PersonRole, { icon: string; placeholder: string }> = {
-  director: { icon: '🎥', placeholder: 'Nom d’un réalisateur ou d’une réalisatrice…' },
-  actor: { icon: '🎭', placeholder: 'Nom d’un acteur ou d’une actrice…' },
+  director: { icon: '🎥', placeholder: T.filterSheet.directorPlaceholder },
+  actor: { icon: '🎭', placeholder: T.filterSheet.actorPlaceholder },
 };
 
 /** Choix d'une personne (recherche TMDB) ; sa filmographie devient le filtre. */
@@ -206,7 +204,7 @@ function PersonField(props: {
   if (props.value) {
     return (
       <div className="chips">
-        <button className="chip active person-chip" onClick={() => props.onChange(null)} title="Retirer ce filtre">
+        <button className="chip active person-chip" onClick={() => props.onChange(null)} title={T.filterSheet.removeTip}>
           {icon} {props.value.name} <span aria-hidden>✕</span>
         </button>
       </div>
@@ -215,13 +213,13 @@ function PersonField(props: {
   return (
     <div className="person-field">
       <input className="input" type="search" placeholder={placeholder} value={query} onChange={(e) => setQuery(e.target.value)} />
-      {busy && <p className="muted small">Filmographie de {busy}…</p>}
+      {busy && <p className="muted small">{T.filterSheet.filmography(busy)}</p>}
       {error && <p className="error small">{error}</p>}
       {!busy && results.length > 0 && (
         <ul className="person-results">
           {results.map((p) => (
             <li key={p.id}>
-              <button onClick={() => choose(p)} title={`Filtrer sur ${p.name}`}>
+              <button onClick={() => choose(p)} title={T.filterSheet.filterOn(p.name)}>
                 <PersonAvatar person={p} />
                 <span className="person-result-text">
                   <b>{p.name}</b>
@@ -248,7 +246,7 @@ export function FilterIcon() {
 /** Bouton rond d'ouverture des filtres, en couleur quand un filtre est actif. */
 export function FilterButton({ active, label, onClick }: { active: boolean; label: string; onClick: () => void }) {
   return (
-    <button className={`icon-btn filter-btn ${active ? 'active' : ''}`} onClick={onClick} aria-label="Filtres" title={`Filtres : ${label}`}>
+    <button className={`icon-btn filter-btn ${active ? 'active' : ''}`} onClick={onClick} aria-label={T.filterSheet.title} title={T.filterSheet.buttonTip(label)}>
       <FilterIcon />
     </button>
   );
@@ -257,7 +255,7 @@ export function FilterButton({ active, label, onClick }: { active: boolean; labe
 /** Bandeau du filtre actif, sous la barre du haut ; le toucher rouvre les filtres. */
 export function FilterStrip({ label, onClick }: { label: string; onClick: () => void }) {
   return (
-    <button className="theme-strip" onClick={onClick} title="Changer les filtres">
+    <button className="theme-strip" onClick={onClick} title={T.filterSheet.changeTip}>
       <FilterIcon /> {label}
     </button>
   );

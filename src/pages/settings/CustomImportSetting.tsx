@@ -1,4 +1,5 @@
 import { useEffect, useState, type ChangeEvent } from 'react';
+import { num, T } from '../../i18n';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { requestPersistentStorage } from '../../lib/db';
 import {
@@ -66,14 +67,13 @@ export function CustomImportSetting() {
 
   const run = async () => {
     setBusy(true);
-    setMsg('Démarrage…');
+    setMsg(T.sync.starting);
     await requestPersistentStorage();
     try {
       const { found, added } = await importCustom(criteria, setMsg);
       const saved = await getCustomImports();
       if (!saved.some((c) => sameImport(c, criteria))) await setCustomImports([...saved, criteria]);
-      const n = (x: number) => x.toLocaleString('fr-FR');
-      setMsg(`✓ ${n(found)} films trouvés, dont ${n(added)} nouveaux au catalogue. Ils seront gardés à chaque mise à jour.`);
+      setMsg(T.customImport.done(num(found), num(added)));
       setDraft({ ...draft, id: newCustomImport().id }); // critères gardés à l'écran, pour en essayer d'autres
     } catch (e) {
       setMsg(`✕ ${(e as Error).message}`);
@@ -83,7 +83,7 @@ export function CustomImportSetting() {
   };
 
   const remove = async (c: CustomImport) => {
-    if (!confirm(`Supprimer l’import « ${customImportLabel(c)} » ? Ses films partiront à la prochaine mise à jour du catalogue, sauf ceux vus ou en wishlist.`)) return;
+    if (!confirm(T.customImport.confirmRemove(customImportLabel(c)))) return;
     await setCustomImports((await getCustomImports()).filter((x) => x.id !== c.id));
   };
 
@@ -91,16 +91,15 @@ export function CustomImportSetting() {
 
   return (
     <section className="card import-form" id="import">
-      <h3>🧩 Import sur mesure (films)</h3>
+      <h3>{T.customImport.title}</h3>
       <p className="muted small">
-        Il te manque des films d’un genre, d’une langue, d’un pays ou d’une époque ? Récupère-les avec un seuil de votes plus bas que celui du catalogue.
-        L’import est gardé et relancé à chaque mise à jour du catalogue (et suit ton compte).
+        {T.customImport.text}
       </p>
       <div className="row">
         <label className="field">
-          Genre
+          {T.filterSheet.genre}
           <select className="input" value={draft.genre ?? ''} onChange={(e) => setDraft({ ...draft, genre: e.target.value ? Number(e.target.value) : null })}>
-            <option value="">Tous</option>
+            <option value="">{T.customImport.all}</option>
             {genreOptions('movie').map((g) => (
               <option key={g.id} value={g.id}>
                 {g.label}
@@ -109,9 +108,9 @@ export function CustomImportSetting() {
           </select>
         </label>
         <label className="field">
-          Langue originale
+          {T.filterSheet.language}
           <select className="input" value={draft.lang ?? ''} onChange={pick('lang')}>
-            <option value="">Toutes</option>
+            <option value="">{T.customImport.allLangs}</option>
             {IMPORT_LANGS.map(([code, label]) => (
               <option key={code} value={code}>
                 {label}
@@ -122,9 +121,9 @@ export function CustomImportSetting() {
       </div>
       <div className="row">
         <label className="field">
-          Pays de production
+          {T.customImport.country}
           <select className="input" value={draft.country ?? ''} onChange={pick('country')}>
-            <option value="">Tous</option>
+            <option value="">{T.customImport.allCountries}</option>
             {IMPORT_COUNTRIES.map(([code, label]) => (
               <option key={code} value={code}>
                 {label}
@@ -133,7 +132,7 @@ export function CustomImportSetting() {
           </select>
         </label>
         <label className="field">
-          Votes minimum
+          {T.customImport.minVotes}
           <input
             className="input"
             type="number"
@@ -146,35 +145,35 @@ export function CustomImportSetting() {
       </div>
       <div className="row">
         <label className="field">
-          Sortis à partir de
+          {T.customImport.from}
           <input className="input" type="number" min={1870} max={YEAR + 1} placeholder="1870" value={text.from} onChange={(e) => setText({ ...text, from: e.target.value })} />
         </label>
         <label className="field">
-          Jusqu’à
+          {T.customImport.to}
           <input className="input" type="number" min={1870} max={YEAR + 1} placeholder={String(YEAR)} value={text.to} onChange={(e) => setText({ ...text, to: e.target.value })} />
         </label>
       </div>
       <p className="muted small">
         {!hasCriteria(criteria)
-          ? 'Choisis au moins un critère. Pour tous les films, baisse plutôt le seuil du catalogue ci-dessus.'
+          ? T.customImport.noCriteria
           : estimate !== null
-            ? `≈ ${estimate.toLocaleString('fr-FR')} films correspondent sur TMDB (y compris ceux déjà au catalogue).`
-            : `Films « ${customImportLabel(criteria)} » avec au moins ${criteria.minVotes.toLocaleString('fr-FR')} votes.`}
+            ? T.customImport.estimate(num(estimate))
+            : T.customImport.summary(customImportLabel(criteria), num(criteria.minVotes))}
       </p>
-      <button className="btn primary" onClick={run} disabled={busy || !ready} title="Récupérer ces films depuis TMDB et garder cet import">
-        {busy ? 'Import en cours…' : 'Importer ces films'}
+      <button className="btn primary" onClick={run} disabled={busy || !ready} title={T.customImport.runTip}>
+        {busy ? T.customImport.running : T.customImport.run}
       </button>
       {msg && <p className="small">{msg}</p>}
       {imports && imports.length > 0 && (
         <>
-          <p className="small">Imports gardés :</p>
+          <p className="small">{T.customImport.saved}</p>
           <ul className="import-list">
             {imports.map((c) => (
               <li key={c.id}>
                 <span>
-                  {customImportLabel(c)} <span className="muted small">· {c.minVotes.toLocaleString('fr-FR')} votes min.</span>
+                  {customImportLabel(c)} <span className="muted small">{T.customImport.votesMin(num(c.minVotes))}</span>
                 </span>
-                <button className="btn small" onClick={() => remove(c)} title="Supprimer cet import" aria-label={`Supprimer l’import ${customImportLabel(c)}`}>
+                <button className="btn small" onClick={() => remove(c)} title={T.customImport.removeTip} aria-label={T.customImport.removeAria(customImportLabel(c))}>
                   ✕
                 </button>
               </li>

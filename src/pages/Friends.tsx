@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { T } from '../i18n';
 import { useCloud } from '../lib/cloud';
 import { cloudEnabled } from '../lib/supabase';
 import {
@@ -24,15 +25,15 @@ export default function Friends({ invite }: { invite?: string }) {
   return (
     <main className="page">
       <Tutorial id="friends" />
-      <TopBar title="👥 Amis" />
+      <TopBar title={T.friendsPage.title} />
       {!cloudEnabled ? (
-        <p className="muted center">Les comptes ne sont pas disponibles sur cette version du site.</p>
+        <p className="muted center">{T.friendsPage.unavailable}</p>
       ) : !cloud.ready ? (
-        <p className="muted center">Chargement…</p>
+        <p className="muted center">{T.common.loading}</p>
       ) : !cloud.user ? (
         <>
           <p className="small center">
-            {invite ? 'Connecte-toi ou crée un compte pour accepter l’invitation.' : 'Connecte-toi pour ajouter des amis et comparer vos goûts.'}
+            {invite ? T.friendsPage.signInInvite : T.friendsPage.signIn}
           </p>
           <Account />
         </>
@@ -68,7 +69,7 @@ function FriendsHome({ invite }: { invite?: string }) {
     setMsg(null);
     try {
       const pseudo = await addFriend(c);
-      toast(`👥 ${pseudo} fait partie de tes amis !`);
+      toast(T.friendsPage.added(pseudo));
       setCode('');
       if (invite) location.hash = '#/friends';
       await reload();
@@ -82,7 +83,7 @@ function FriendsHome({ invite }: { invite?: string }) {
     const url = inviteLink(profile.friendCode);
     if (navigator.share) {
       try {
-        await navigator.share({ title: 'Rank It All', text: 'Ajoute-moi sur Rank It All pour comparer nos films et séries !', url });
+        await navigator.share({ title: 'Rank It All', text: T.friendsPage.shareText, url });
       } catch {
         // Partage annulé.
       }
@@ -95,14 +96,14 @@ function FriendsHome({ invite }: { invite?: string }) {
     if (!profile) return;
     try {
       await navigator.clipboard.writeText(inviteLink(profile.friendCode));
-      toast('🔗 Lien d’invitation copié');
+      toast(T.friendsPage.copied);
     } catch {
-      toast(`Ton lien : ${inviteLink(profile.friendCode)}`);
+      toast(T.friendsPage.yourLink(inviteLink(profile.friendCode)));
     }
   };
 
   const regenerate = async () => {
-    if (!confirm('Créer un nouveau code ami ? L’ancien code et l’ancien lien ne marcheront plus (tes amis actuels restent tes amis).')) return;
+    if (!confirm(T.friendsPage.confirmNewCode)) return;
     try {
       const friendCode = await newFriendCode();
       setProfile((p) => p && { ...p, friendCode });
@@ -123,7 +124,7 @@ function FriendsHome({ invite }: { invite?: string }) {
   };
 
   const remove = async (f: Friend) => {
-    if (!confirm(`Retirer ${f.pseudo} de tes amis ? Vous ne verrez plus les données l’un de l’autre.`)) return;
+    if (!confirm(T.friendsPage.confirmRemove(f.pseudo))) return;
     try {
       await removeFriend(f.id);
       await reload();
@@ -140,24 +141,24 @@ function FriendsHome({ invite }: { invite?: string }) {
       {invite && profile && <Invitation code={invite} own={profile.friendCode === invite} onAdd={() => add(invite)} done={alreadyFriend} />}
 
       <section className="card">
-        <h3>🔗 Inviter un ami</h3>
-        <p className="muted small">Envoie ce lien (ou ton code) à un ami : en l’ouvrant, il t’ajoute à ses amis.</p>
+        <h3>{T.friendsPage.invite}</h3>
+        <p className="muted small">{T.friendsPage.inviteText}</p>
         {profile ? (
           <>
-            <p className="friend-code" title="Ton code ami">
+            <p className="friend-code" title={T.friendsPage.yourCode}>
               {profile.friendCode}
             </p>
             <div className="row center">
               {'share' in navigator && (
-                <button className="btn primary" onClick={share} title="Envoyer ton lien d’invitation (SMS, WhatsApp, e-mail…)">
-                  📤 Partager le lien
+                <button className="btn primary" onClick={share} title={T.friendsPage.shareTip}>
+                  {T.friendsPage.share}
                 </button>
               )}
-              <button className={`btn ${'share' in navigator ? '' : 'primary'}`} onClick={copy} title="Copier ton lien d’invitation">
-                🔗 Copier le lien
+              <button className={`btn ${'share' in navigator ? '' : 'primary'}`} onClick={copy} title={T.friendsPage.copyTip}>
+                {T.friendsPage.copy}
               </button>
-              <button className="btn small" onClick={regenerate} title="Créer un nouveau code si l’ancien a circulé trop loin">
-                Nouveau code
+              <button className="btn small" onClick={regenerate} title={T.friendsPage.newCodeTip}>
+                {T.friendsPage.newCode}
               </button>
             </div>
           </>
@@ -167,7 +168,7 @@ function FriendsHome({ invite }: { invite?: string }) {
       </section>
 
       <section className="card">
-        <h3>➕ Ajouter avec un code</h3>
+        <h3>{T.friendsPage.addWithCode}</h3>
         <form
           className="row"
           onSubmit={(e) => {
@@ -179,23 +180,23 @@ function FriendsHome({ invite }: { invite?: string }) {
             className="input code-input"
             value={code}
             onChange={(e) => setCode(e.target.value.toUpperCase().replace(/[^0-9A-F]/g, '').slice(0, 8))}
-            placeholder="Code ami"
+            placeholder={T.friendsPage.codePlaceholder}
             autoCapitalize="characters"
             autoComplete="off"
           />
           <button className="btn primary" type="submit" disabled={code.length !== 8}>
-            Ajouter
+            {T.friendsPage.add}
           </button>
         </form>
         {msg && <p className="small">{msg}</p>}
       </section>
 
       <section className="card">
-        <h3>👥 Mes amis{friends?.length ? ` (${friends.length})` : ''}</h3>
+        <h3>{T.friendsPage.myFriends(friends?.length ?? 0)}</h3>
         {!friends ? (
           <p className="muted small">…</p>
         ) : !friends.length ? (
-          <p className="muted small">Pas encore d’amis : envoie ton lien d’invitation !</p>
+          <p className="muted small">{T.friendsPage.none}</p>
         ) : (
           <ul className="friend-list">
             {friends.map((f) => (
@@ -204,10 +205,10 @@ function FriendsHome({ invite }: { invite?: string }) {
                   <strong>{f.pseudo}</strong>
                   <span className="muted tiny">{sharedLabel(f)}</span>
                 </div>
-                <a className="btn small primary" href={`#/duo/${f.id}`} title={`Comparer vos wishlists et vos classements avec ${f.pseudo}`}>
-                  À deux →
+                <a className="btn small primary" href={`#/duo/${f.id}`} title={T.friendsPage.duoTip(f.pseudo)}>
+                  {T.friendsPage.duo}
                 </a>
-                <button className="btn small" onClick={() => remove(f)} title={`Retirer ${f.pseudo} de tes amis`} aria-label={`Retirer ${f.pseudo}`}>
+                <button className="btn small" onClick={() => remove(f)} title={T.friendsPage.removeTip(f.pseudo)} aria-label={T.friendsPage.removeAria(f.pseudo)}>
                   ✕
                 </button>
               </li>
@@ -217,15 +218,15 @@ function FriendsHome({ invite }: { invite?: string }) {
       </section>
 
       <section className="card">
-        <h3>👀 Ce que voient mes amis</h3>
-        <p className="muted small">En lecture seule. Tes « pas vu / pas envie » restent privés.</p>
+        <h3>{T.friendsPage.whatTheySee}</h3>
+        <p className="muted small">{T.friendsPage.readOnly}</p>
         {profile && (
           <div className="chips">
-            <button className={`chip ${profile.shareWishlist ? 'active' : ''}`} onClick={() => toggle({ shareWishlist: !profile.shareWishlist })} title="Ta wishlist et son ordre de priorité : pour la wishlist commune et « Ce soir à deux »">
-              💖 Ma wishlist
+            <button className={`chip ${profile.shareWishlist ? 'active' : ''}`} onClick={() => toggle({ shareWishlist: !profile.shareWishlist })} title={T.friendsPage.shareWishTip}>
+              {T.friendsPage.shareWish}
             </button>
-            <button className={`chip ${profile.shareRanking ? 'active' : ''}`} onClick={() => toggle({ shareRanking: !profile.shareRanking })} title="Tes titres vus, tes avis et ton classement : pour les conseils et la compatibilité">
-              🏆 Mes titres vus et mon classement
+            <button className={`chip ${profile.shareRanking ? 'active' : ''}`} onClick={() => toggle({ shareRanking: !profile.shareRanking })} title={T.friendsPage.shareRankTip}>
+              {T.friendsPage.shareRank}
             </button>
           </div>
         )}
@@ -235,8 +236,8 @@ function FriendsHome({ invite }: { invite?: string }) {
 }
 
 function sharedLabel(f: Friend): string {
-  const parts = [f.shareWishlist && 'wishlist', f.shareRanking && 'titres vus et classement'].filter(Boolean);
-  return parts.length ? `Partage : ${parts.join(', ')}` : 'Ne partage rien pour l’instant';
+  const parts = [f.shareWishlist && T.friendsPage.sharesWish, f.shareRanking && T.friendsPage.sharesRank].filter(Boolean);
+  return parts.length ? T.friendsPage.shares(parts.join(', ')) : T.friendsPage.sharesNothing;
 }
 
 function Invitation({ code, own, onAdd, done }: { code: string; own: boolean; onAdd: () => void; done: boolean }) {
@@ -250,22 +251,22 @@ function Invitation({ code, own, onAdd, done }: { code: string; own: boolean; on
 
   return (
     <section className="card invitation">
-      <h3>✉️ Invitation</h3>
+      <h3>{T.friendsPage.invitation}</h3>
       {own ? (
-        <p className="small">C’est ton propre lien d’invitation : envoie-le à un ami pour qu’il t’ajoute.</p>
+        <p className="small">{T.friendsPage.ownLink}</p>
       ) : pseudo === undefined ? (
         <p className="muted small">…</p>
       ) : pseudo === null ? (
-        <p className="small">Ce lien d’invitation ne marche plus (code inconnu ou remplacé).</p>
+        <p className="small">{T.friendsPage.deadLink}</p>
       ) : done ? (
-        <p className="small">✓ {pseudo} fait déjà partie de tes amis.</p>
+        <p className="small">{T.friendsPage.already(pseudo)}</p>
       ) : (
         <>
           <p className="small">
-            <strong>{pseudo}</strong> t’invite à comparer vos films et séries : wishlist commune, conseils, compatibilité de vos classements.
+            <strong>{pseudo}</strong> {T.friendsPage.invites}
           </p>
           <button className="btn primary" onClick={onAdd}>
-            👥 Ajouter {pseudo} à mes amis
+            {T.friendsPage.addFriend(pseudo)}
           </button>
         </>
       )}

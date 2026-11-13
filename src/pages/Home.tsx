@@ -15,19 +15,14 @@ import { cloudEnabled } from '../lib/supabase';
 import { downloadCatalogue, useCatalogueDownload } from '../lib/catalogueDownload';
 import { CatalogueProgress } from '../components/CatalogueProgress';
 import { Tutorial } from '../components/Tutorial';
+import { num, T } from '../i18n';
 
-const fmt = (n: number) => Math.max(0, n).toLocaleString('fr-FR');
+const fmt = (n: number) => num(Math.max(0, n));
 const DAY = 86_400_000;
 const daysAgo = (t: number) => Math.floor((Date.now() - t) / DAY);
 const ratio = (a: number, b: number) => (b > 0 ? a / b : 0);
 
-const TAGLINES = [
-  'Popcorn prêt ? 🍿',
-  '5 minutes, et ta base grandit 🌱',
-  'Qu’est-ce qu’on trie aujourd’hui ?',
-  'Un petit swipe pour la route ? 🎬',
-  'Ta mémoire de cinéphile, en ordre ✨',
-];
+const TAGLINES = T.home.taglines;
 
 /** Accueil : format complet sur PC, compact sur téléphone. */
 export default function Home() {
@@ -88,7 +83,7 @@ export default function Home() {
 
   const backupNow = async () => {
     await exportData();
-    toast('💾 Sauvegarde téléchargée !');
+    toast(T.home.backupDone);
   };
 
   return (
@@ -101,34 +96,34 @@ export default function Home() {
           <p className="tagline">{tagline}</p>
         </div>
         {cloud.user && (
-          <a className="icon-btn" href="#/friends" aria-label="Amis" title="Amis : wishlist commune, conseils, compatibilité">
+          <a className="icon-btn" href="#/friends" aria-label={T.home.friends} title={T.home.friendsTip}>
             👥
           </a>
         )}
-        <a className="icon-btn" href="#/settings" aria-label="Réglages" title="Réglages : clé TMDB, abonnements, catalogue, sauvegarde">
+        <a className="icon-btn" href="#/settings" aria-label={T.home.settings} title={T.home.settingsTip}>
           ⚙️
         </a>
       </header>
 
       {noToken ? (
         <a className="banner" href="#/settings/tmdb">
-          🔑 Commence par renseigner ta clé TMDB dans les réglages →
+          {T.home.needKey}
         </a>
       ) : download.running || download.error ? (
         <CatalogueProgress />
       ) : (
         emptyCatalogue &&
         download.checked && (
-          <button className="banner banner-btn" onClick={() => downloadCatalogue()} title="Récupérer les films et séries depuis TMDB (environ une minute)">
-            📦 Télécharger le catalogue des films et séries
+          <button className="banner banner-btn" onClick={() => downloadCatalogue()} title={T.swipe.downloadTip}>
+            {T.home.download}
           </button>
         )
       )}
 
       {cloudEnabled && cloud.ready && !cloud.user && (
-        <a className="banner-soft row-banner" href="#/settings" title="Se connecter ou créer un compte (Google ou e-mail)">
-          <span>{desktop ? '☁️ Connecte-toi pour ne jamais perdre tes titres, les retrouver sur tous tes appareils et comparer avec tes amis' : '☁️ Connecte-toi : sauvegarde, synchro et amis'}</span>
-          <span className="btn small primary">Se connecter</span>
+        <a className="banner-soft row-banner" href="#/settings" title={T.home.signInTip}>
+          <span>{desktop ? T.home.signInLong : T.home.signInShort}</span>
+          <span className="btn small primary">{T.home.signIn}</span>
         </a>
       )}
 
@@ -138,22 +133,22 @@ export default function Home() {
             💾{' '}
             {desktop
               ? stats.lastExport
-                ? `Dernière sauvegarde il y a ${daysAgo(stats.lastExport)} jours`
-                : 'Aucune sauvegarde pour l’instant'
+                ? T.home.lastBackup(daysAgo(stats.lastExport))
+                : T.home.noBackup
               : stats.lastExport
-                ? `Sauvegarde il y a ${daysAgo(stats.lastExport)} j`
-                : 'Pas encore de sauvegarde'}
+                ? T.home.lastBackupShort(daysAgo(stats.lastExport))
+                : T.home.noBackupShort}
           </span>
-          <button className="btn small primary" onClick={backupNow} title="Télécharger une sauvegarde de tes données">
-            Exporter
+          <button className="btn small primary" onClick={backupNow} title={T.home.exportTip}>
+            {T.home.export}
           </button>
         </div>
       )}
 
       {catalogueOld && (
-        <a className="banner-soft row-banner" href="#/settings/catalogue" title="Récupérer les nouveaux films et séries">
-          <span>{desktop ? `🔄 Catalogue mis à jour il y a ${daysAgo(stats.lastSync!)} jours` : `🔄 Catalogue vieux de ${daysAgo(stats.lastSync!)} j`}</span>
-          <span className="btn small">Mettre à jour</span>
+        <a className="banner-soft row-banner" href="#/settings/catalogue" title={T.home.updateTip}>
+          <span>{desktop ? T.home.catalogueAge(daysAgo(stats.lastSync!)) : T.home.catalogueAgeShort(daysAgo(stats.lastSync!))}</span>
+          <span className="btn small">{T.home.update}</span>
         </a>
       )}
 
@@ -166,36 +161,36 @@ export default function Home() {
           color="pink"
           href="#/swipe/movie"
           icon="🎬"
-          label="Swiper les films"
-          tip="Dire si tu as vu des films, un par un"
-          sub={stats && `${fmt(stats.movie.toSwipe)} à découvrir`}
+          label={T.home.tiles.swipe.movie}
+          tip={T.home.tiles.swipeTip.movie}
+          sub={stats && T.home.toDiscover(fmt(stats.movie.toSwipe))}
           progress={stats && ratio(stats.movie.answered, stats.movie.total)}
         />
         <Tile
           color="violet"
           href="#/rank/movie"
           icon="🏆"
-          label="Classer les films"
-          tip="Classer les films vus par duels"
-          sub={stats && `${fmt(stats.movie.unranked)} non classés`}
+          label={T.home.tiles.rank.movie}
+          tip={T.home.tiles.rankTip.movie}
+          sub={stats && T.home.unranked('movie', fmt(stats.movie.unranked))}
           progress={stats && ratio(stats.movie.ranked, stats.movie.seen)}
         />
         <Tile
           color="orange"
           href="#/swipe/tv"
           icon="📺"
-          label="Swiper les séries"
-          tip="Dire si tu as vu des séries, une par une"
-          sub={stats && `${fmt(stats.tv.toSwipe)} à découvrir`}
+          label={T.home.tiles.swipe.tv}
+          tip={T.home.tiles.swipeTip.tv}
+          sub={stats && T.home.toDiscover(fmt(stats.tv.toSwipe))}
           progress={stats && ratio(stats.tv.answered, stats.tv.total)}
         />
         <Tile
           color="cyan"
           href="#/rank/tv"
           icon="🥇"
-          label="Classer les séries"
-          tip="Classer les séries vues par duels"
-          sub={stats && `${fmt(stats.tv.unranked)} non classées`}
+          label={T.home.tiles.rank.tv}
+          tip={T.home.tiles.rankTip.tv}
+          sub={stats && T.home.unranked('tv', fmt(stats.tv.unranked))}
           progress={stats && ratio(stats.tv.ranked, stats.tv.seen)}
         />
         {showAnime && (
@@ -204,31 +199,31 @@ export default function Home() {
               color="coral"
               href="#/swipe/anime"
               icon="🎌"
-              label="Swiper les animes"
-              tip="Dire si tu as vu des animes (séries d’animation japonaises), un par un"
-              sub={stats && `${fmt(stats.anime.toSwipe)} à découvrir`}
+              label={T.home.tiles.swipe.anime}
+              tip={T.home.tiles.swipeTip.anime}
+              sub={stats && T.home.toDiscover(fmt(stats.anime.toSwipe))}
               progress={stats && ratio(stats.anime.answered, stats.anime.total)}
             />
             <Tile
               color="teal"
               href="#/rank/anime"
               icon="🏯"
-              label="Classer les animes"
-              tip="Classer les animes vus par duels"
-              sub={stats && `${fmt(stats.anime.unranked)} non classés`}
+              label={T.home.tiles.rank.anime}
+              tip={T.home.tiles.rankTip.anime}
+              sub={stats && T.home.unranked('anime', fmt(stats.anime.unranked))}
               progress={stats && ratio(stats.anime.ranked, stats.anime.seen)}
             />
           </>
         )}
-        <Tile color="red" href="#/wishlist" icon="💖" label="Wishlist" tip="Consulter et prioriser ta wishlist" sub={stats && `${fmt(stats.wish)} titres`} />
-        <Tile color="green" href="#/add" icon="🔍" label="Ajout manuel" tip="Chercher un titre précis pour l’ajouter" sub="Rechercher un titre" />
-        <Tile color="yellow" href="#/lists" icon="📚" label="Mes listes" tip="Tous tes titres vus et pas vus, pour corriger une erreur" sub="Vus · Pas vus" />
+        <Tile color="red" href="#/wishlist" icon="💖" label={T.home.tiles.wishlist} tip={T.home.tiles.wishlistTip} sub={stats && T.home.titles(fmt(stats.wish))} />
+        <Tile color="green" href="#/add" icon="🔍" label={T.home.tiles.add} tip={T.home.tiles.addTip} sub={T.home.tiles.addSub} />
+        <Tile color="yellow" href="#/lists" icon="📚" label={T.home.tiles.lists} tip={T.home.tiles.listsTip} sub={T.home.tiles.listsSub} />
         <Tile
           color="blue"
           href="#/stats"
           icon="📊"
-          label="Stats & badges"
-          tip="Tes statistiques et tes badges"
+          label={T.home.tiles.stats}
+          tip={T.home.tiles.statsTip}
           sub={stats && `${stats.badges}/${BADGES.length} badges`}
           progress={stats && ratio(stats.badges, BADGES.length)}
         />
@@ -236,7 +231,7 @@ export default function Home() {
 
       {stats && (
         <p className="muted center small">
-          👀 Vus : {fmt(stats.movie.seen)} films · {fmt(stats.tv.seen)} séries{showAnime && ` · ${fmt(stats.anime.seen)} animes`}
+          {T.home.seenSummary(fmt(stats.movie.seen), fmt(stats.tv.seen), showAnime ? fmt(stats.anime.seen) : null)}
         </p>
       )}
     </main>
@@ -245,35 +240,34 @@ export default function Home() {
 
 /** Activité du jour : grande carte sur PC, fine bande sur téléphone. */
 function Activity({ today, streak, desktop }: { today: number; streak: number; desktop: boolean }) {
-  const plural = today > 1 ? 's' : '';
   const streakClass = `streak ${streak ? 'on' : ''}`;
-  const streakTip = 'Jours d’affilée avec au moins un tri';
+  const streakTip = T.home.streakTip;
 
   if (!desktop) {
     return (
-      <section className="activity-strip" title="Swipes et duels du jour">
+      <section className="activity-strip" title={T.home.activityTip}>
         <span className={streakClass} title={streakTip}>
-          🔥 {streak} j
+          {T.home.streakShort(streak)}
         </span>
         <span>
-          <b className="activity-num">{today}</b> tri{plural} aujourd’hui
+          <b className="activity-num">{today}</b> {T.home.sortsToday(today)}
         </span>
-        <span className="activity-msg muted">{today === 0 ? 'Un petit swipe ?' : today < 25 ? 'Bien parti !' : 'Champion 🏆'}</span>
+        <span className="activity-msg muted">{today === 0 ? T.home.cheer0 : today < 25 ? T.home.cheer1 : T.home.cheer2}</span>
       </section>
     );
   }
   return (
-    <section className="activity" title="Swipes et duels du jour">
+    <section className="activity" title={T.home.activityTip}>
       <div className="activity-today">
         <span className="activity-num">{today}</span>
-        <span className="activity-label">tri{plural} aujourd’hui</span>
+        <span className="activity-label">{T.home.sortsToday(today)}</span>
       </div>
       <div className="activity-side">
         <span className={streakClass} title={streakTip}>
-          🔥 {streak} jour{streak > 1 ? 's' : ''}
+          {T.home.streak(streak)}
         </span>
         <span className="muted small">
-          {today === 0 ? 'Un petit swipe pour lancer la journée ?' : today < 25 ? 'Bien parti, continue !' : 'Session de champion 🏆'}
+          {today === 0 ? T.home.cheerLong0 : today < 25 ? T.home.cheerLong1 : T.home.cheerLong2}
         </span>
       </div>
     </section>
@@ -282,16 +276,16 @@ function Activity({ today, streak, desktop }: { today: number; streak: number; d
 
 function TonightButton({ desktop }: { desktop: boolean }) {
   return (
-    <a className="tonight-btn" href="#/tonight" title="Tirer au sort un titre de ta wishlist pour ce soir">
+    <a className="tonight-btn" href="#/tonight" title={T.home.tonightTip}>
       <span className="tonight-emoji">🍿</span>
       {desktop ? (
         <span>
-          <b>Ce soir, je regarde quoi ?</b>
-          <span className="tonight-sub">Un tirage dans ta wishlist, selon tes priorités</span>
+          <b>{T.home.tonight}</b>
+          <span className="tonight-sub">{T.home.tonightSub}</span>
         </span>
       ) : (
         <>
-          <b>Ce soir, je regarde quoi ?</b>
+          <b>{T.home.tonight}</b>
           <span className="tonight-arrow">›</span>
         </>
       )}

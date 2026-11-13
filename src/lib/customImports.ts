@@ -1,6 +1,7 @@
 import { getMeta, setMeta } from './db';
 import { GENRES } from './genres';
 import { ORIGINAL_LANGS } from './language';
+import { flagOf, regionName, T } from '../i18n';
 
 /**
  * Import sur mesure (films seulement) : une requête /discover de plus, avec ses critères et son propre seuil de
@@ -23,40 +24,43 @@ export const DEFAULT_IMPORT_VOTES = 150;
 /** Langues originales proposées (code TMDB → libellé) : la liste commune (language.ts). */
 export const IMPORT_LANGS = ORIGINAL_LANGS;
 
-/** Pays de production proposés (code TMDB → libellé). */
-export const IMPORT_COUNTRIES: [string, string][] = [
-  ['FR', '🇫🇷 France'],
-  ['BE', '🇧🇪 Belgique'],
-  ['CH', '🇨🇭 Suisse'],
-  ['CA', '🇨🇦 Canada'],
-  ['US', '🇺🇸 États-Unis'],
-  ['GB', '🇬🇧 Royaume-Uni'],
-  ['IE', '🇮🇪 Irlande'],
-  ['AU', '🇦🇺 Australie'],
-  ['ES', '🇪🇸 Espagne'],
-  ['IT', '🇮🇹 Italie'],
-  ['DE', '🇩🇪 Allemagne'],
-  ['PT', '🇵🇹 Portugal'],
-  ['NL', '🇳🇱 Pays-Bas'],
-  ['SE', '🇸🇪 Suède'],
-  ['DK', '🇩🇰 Danemark'],
-  ['NO', '🇳🇴 Norvège'],
-  ['FI', '🇫🇮 Finlande'],
-  ['PL', '🇵🇱 Pologne'],
-  ['RU', '🇷🇺 Russie'],
-  ['TR', '🇹🇷 Turquie'],
-  ['IR', '🇮🇷 Iran'],
-  ['IN', '🇮🇳 Inde'],
-  ['JP', '🇯🇵 Japon'],
-  ['KR', '🇰🇷 Corée du Sud'],
-  ['CN', '🇨🇳 Chine'],
-  ['HK', '🇭🇰 Hong Kong'],
-  ['TW', '🇹🇼 Taïwan'],
-  ['TH', '🇹🇭 Thaïlande'],
-  ['MX', '🇲🇽 Mexique'],
-  ['AR', '🇦🇷 Argentine'],
-  ['BR', '🇧🇷 Brésil'],
+/** Pays de production proposés (code TMDB) ; leurs noms viennent du navigateur, dans la langue de l'interface. */
+const IMPORT_COUNTRY_CODES = [
+  'FR',
+  'BE',
+  'CH',
+  'CA',
+  'US',
+  'GB',
+  'IE',
+  'AU',
+  'ES',
+  'IT',
+  'DE',
+  'PT',
+  'NL',
+  'SE',
+  'DK',
+  'NO',
+  'FI',
+  'PL',
+  'RU',
+  'TR',
+  'IR',
+  'IN',
+  'JP',
+  'KR',
+  'CN',
+  'HK',
+  'TW',
+  'TH',
+  'MX',
+  'AR',
+  'BR',
 ];
+
+/** [code, libellé] (« 🇫🇷 France »). */
+export const IMPORT_COUNTRIES: [string, string][] = IMPORT_COUNTRY_CODES.map((code) => [code, `${flagOf(code)} ${regionName(code)}`]);
 
 const nameOf = (list: [string, string][], code: string) => list.find(([c]) => c === code)?.[1] ?? code;
 
@@ -80,13 +84,13 @@ export const sameImport = (a: CustomImport, b: CustomImport) =>
 /** Résumé des critères (« Horreur · 1970–1989 · 🇮🇹 Italien »). */
 export function customImportLabel(c: CustomImport): string {
   const parts: string[] = [];
-  if (c.genre !== null) parts.push(GENRES.movie[c.genre] ?? `genre ${c.genre}`);
+  if (c.genre !== null) parts.push(GENRES.movie[c.genre] ?? T.imports.genre(c.genre));
   if (c.from !== null && c.to !== null) parts.push(c.from === c.to ? String(c.from) : `${c.from}–${c.to}`);
-  else if (c.from !== null) parts.push(`depuis ${c.from}`);
-  else if (c.to !== null) parts.push(`jusqu’à ${c.to}`);
+  else if (c.from !== null) parts.push(T.imports.since(c.from));
+  else if (c.to !== null) parts.push(T.imports.until(c.to));
   if (c.lang) parts.push(nameOf(IMPORT_LANGS, c.lang));
   if (c.country) parts.push(nameOf(IMPORT_COUNTRIES, c.country));
-  return parts.join(' · ') || 'tous les films';
+  return parts.join(' · ') || T.imports.allMovies;
 }
 
 const IMPORTS_META = 'custom-imports';

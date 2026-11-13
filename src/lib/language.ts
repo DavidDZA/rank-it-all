@@ -1,3 +1,5 @@
+import { flagOf, languageName, rawLanguageName } from '../i18n';
+
 /**
  * Langues originales (codes ISO 639-1 de TMDB) et langue de l'appareil.
  *
@@ -7,39 +9,45 @@
  * réglés différemment s'effaceraient des titres à chaque mise à jour du catalogue.
  */
 
-/** Langues originales proposées (code TMDB → libellé), pour l'import sur mesure et la langue du catalogue. */
-export const ORIGINAL_LANGS: [string, string][] = [
-  ['fr', '🇫🇷 Français'],
-  ['en', '🇬🇧 Anglais'],
-  ['es', '🇪🇸 Espagnol'],
-  ['it', '🇮🇹 Italien'],
-  ['de', '🇩🇪 Allemand'],
-  ['pt', '🇵🇹 Portugais'],
-  ['nl', '🇳🇱 Néerlandais'],
-  ['sv', '🇸🇪 Suédois'],
-  ['da', '🇩🇰 Danois'],
-  ['no', '🇳🇴 Norvégien'],
-  ['fi', '🇫🇮 Finnois'],
-  ['pl', '🇵🇱 Polonais'],
-  ['cs', '🇨🇿 Tchèque'],
-  ['hu', '🇭🇺 Hongrois'],
-  ['ro', '🇷🇴 Roumain'],
-  ['el', '🇬🇷 Grec'],
-  ['ru', '🇷🇺 Russe'],
-  ['tr', '🇹🇷 Turc'],
-  ['ar', '🇸🇦 Arabe'],
-  ['he', '🇮🇱 Hébreu'],
-  ['fa', '🇮🇷 Persan'],
-  ['hi', '🇮🇳 Hindi'],
-  ['ta', '🇮🇳 Tamoul'],
-  ['te', '🇮🇳 Télougou'],
-  ['ja', '🇯🇵 Japonais'],
-  ['ko', '🇰🇷 Coréen'],
-  ['zh', '🇨🇳 Chinois (mandarin)'],
-  ['cn', '🇭🇰 Cantonais'],
-  ['th', '🇹🇭 Thaï'],
-  ['id', '🇮🇩 Indonésien'],
+/**
+ * Langues originales proposées (code TMDB, pays de leur drapeau), pour l'import sur mesure et la langue du catalogue.
+ * Leurs noms viennent du navigateur, dans la langue de l'interface (langLabel).
+ */
+export const ORIGINAL_LANG_CODES: [string, string][] = [
+  ['fr', 'FR'],
+  ['en', 'GB'],
+  ['es', 'ES'],
+  ['it', 'IT'],
+  ['de', 'DE'],
+  ['pt', 'PT'],
+  ['nl', 'NL'],
+  ['sv', 'SE'],
+  ['da', 'DK'],
+  ['no', 'NO'],
+  ['fi', 'FI'],
+  ['pl', 'PL'],
+  ['cs', 'CZ'],
+  ['hu', 'HU'],
+  ['ro', 'RO'],
+  ['el', 'GR'],
+  ['ru', 'RU'],
+  ['tr', 'TR'],
+  ['ar', 'SA'],
+  ['he', 'IL'],
+  ['fa', 'IR'],
+  ['hi', 'IN'],
+  ['ta', 'IN'],
+  ['te', 'IN'],
+  ['ja', 'JP'],
+  ['ko', 'KR'],
+  ['zh', 'CN'],
+  ['cn', 'HK'],
+  ['th', 'TH'],
+  ['id', 'ID'],
 ];
+
+/** Les mêmes, avec leur libellé (« 🇪🇸 Espagnol ») : [code, libellé]. */
+export const ORIGINAL_LANGS: [string, string][] = ORIGINAL_LANG_CODES.map(([code, country]) => [code, `${flagOf(country)} ${languageName(code)}`]);
 
 /**
  * Langues possibles pour le seuil « titres dans ma langue » : toutes sauf l'anglais (les titres en anglais ont
@@ -52,9 +60,9 @@ export const isCatalogueLang = (code: unknown): code is string => typeof code ==
 /** Libellé avec drapeau (« 🇪🇸 Espagnol »). */
 export const langLabel = (code: string) => ORIGINAL_LANGS.find(([c]) => c === code)?.[1] ?? code;
 /** Drapeau seul (« 🇪🇸 »). */
-export const langFlag = (code: string) => langLabel(code).split(' ')[0];
-/** Nom en minuscules, pour une phrase (« titres en espagnol », « films en chinois (mandarin) »). */
-export const langName = (code: string) => langLabel(code).split(' ').slice(1).join(' ').toLowerCase();
+export const langFlag = (code: string) => flagOf(ORIGINAL_LANG_CODES.find(([c]) => c === code)?.[1] ?? 'UN');
+/** Nom de la langue tel qu'il s'écrit dans une phrase (« espagnol » en français, « Spanish » en anglais). */
+export const langName = (code: string) => rawLanguageName(code);
 
 /**
  * Code TMDB d'une langue du navigateur (« pt-BR » → « pt »). Quelques codes diffèrent : norvégien bokmål / nynorsk,

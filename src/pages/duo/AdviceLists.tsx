@@ -1,4 +1,5 @@
 import { useMemo, type ReactNode } from 'react';
+import { T } from '../../i18n';
 import type { Title } from '../../lib/db';
 import type { Category } from '../../lib/category';
 import { advice, type Advice } from '../../lib/together';
@@ -9,7 +10,7 @@ export function AdviceLists({ data, category, onWish }: { data: Loaded; category
   const pseudo = data.friend.pseudo;
   const forMe = useMemo(() => advice(data.them, data.me, category, data.catOf), [data, category]);
   const forThem = useMemo(() => advice(data.me, data.them, category, data.catOf), [data, category]);
-  if (!data.friend.shareRanking) return <NeedsSharing pseudo={pseudo} what="ses titres vus" />;
+  if (!data.friend.shareRanking) return <NeedsSharing pseudo={pseudo} what={T.duo.theirSeen} />;
 
   const wish = (t: Title) => addToWishlist(t, onWish);
 
@@ -24,7 +25,7 @@ export function AdviceLists({ data, category, onWish }: { data: Loaded; category
               title={t}
               below={
                 <span className="muted tiny">
-                  {[a.good && '👍 bien', a.rank && `n°${a.rank} pour ${who}`].filter(Boolean).join(' · ')}
+                  {[a.good && T.duo.good, a.rank && T.duo.rankFor(a.rank, who)].filter(Boolean).join(' · ')}
                 </span>
               }
             >
@@ -39,27 +40,27 @@ export function AdviceLists({ data, category, onWish }: { data: Loaded; category
   return (
     <>
       <section className="duo-section">
-        <h3>💡 {pseudo} te conseille</h3>
+        <h3>{T.duo.advises(pseudo)}</h3>
         {forMe.length ? (
           rows(forMe, pseudo, (t, a) =>
             a.inWishlist ? (
-              <span className="muted tiny">Dans ta wishlist</span>
+              <span className="muted tiny">{T.duo.inYourWishlist}</span>
             ) : (
-              <button className="btn small" onClick={() => wish(t)} title="Ajouter à ta wishlist" aria-label="Ajouter à ta wishlist">
+              <button className="btn small" onClick={() => wish(t)} title={T.duo.addToWish} aria-label={T.duo.addToWish}>
                 💖
               </button>
             ),
           )
         ) : (
-          <p className="muted small">Rien de nouveau : tu as déjà vu tout ce que {pseudo} a aimé.</p>
+          <p className="muted small">{T.duo.nothingNew(pseudo)}</p>
         )}
       </section>
       <section className="duo-section">
-        <h3>🎁 À conseiller à {pseudo}</h3>
+        <h3>{T.duo.toAdvise(pseudo)}</h3>
         {forThem.length ? (
-          rows(forThem, 'toi', (_t, a) => a.inWishlist && <span className="muted tiny">Déjà dans sa wishlist</span>)
+          rows(forThem, T.duo.you, (_t, a) => a.inWishlist && <span className="muted tiny">{T.duo.inTheirWishlist}</span>)
         ) : (
-          <p className="muted small">{pseudo} a déjà vu tout ce que tu as aimé.</p>
+          <p className="muted small">{T.duo.allSeen(pseudo)}</p>
         )}
       </section>
     </>

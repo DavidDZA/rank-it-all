@@ -3,6 +3,7 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { db, getMeta, requestPersistentStorage } from '../../lib/db';
 import { DEFAULT_MIN_VOTES, getMinVotes, getShowAnime, hasTmdbAccess, setMinVotes, setShowAnime, VOTE_FIELDS, type MinVotes, type VoteField } from '../../lib/settings';
 import { CATALOGUE_LANGS, langFlag, langName } from '../../lib/language';
+import { LOCALE, num, T } from '../../i18n';
 import { OLD_MOVIES_BEFORE, syncCatalogue } from '../../lib/sync';
 import { isAnimeTitle } from '../../lib/category';
 import { syncAndWait } from '../../lib/cloud';
@@ -12,7 +13,7 @@ import { CatalogueProgress, ProgressBar } from '../../components/CatalogueProgre
 const asText = (v: MinVotes) => Object.fromEntries(VOTE_FIELDS.map((k) => [k, String(v[k])])) as Record<VoteField, string>;
 
 /** Titre de la ligne des titres dans la langue de l'utilisateur (« 🇪🇸 Titres en espagnol (langue originale) »). */
-const langRowTitle = (lang: string | null) => (lang ? `${langFlag(lang)} Titres en ${langName(lang)} (langue originale) :` : '🗣️ Titres dans ta langue :');
+const langRowTitle = (lang: string | null) => (lang ? T.catalogue.langRow(langFlag(lang), langName(lang)) : T.catalogue.langRowNone);
 
 /** Réglages → Catalogue : seuils de votes, catégorie Animes, téléchargement depuis TMDB. */
 export function CatalogueSetting() {
@@ -58,14 +59,14 @@ export function CatalogueSetting() {
 
   /** Champs des seuils, par ligne : un titre est gardé s'il passe l'un des seuils qui le concernent. */
   const voteRows: { title: string; fields: [VoteField, string][]; lang?: true }[] = [
-    { title: 'Votes minimum :', fields: [['movie', '🎬 Films'], ['tv', '📺 Séries'], ['anime', '🎌 Animes']] },
-    { title: langRowTitle(lang), fields: lang ? [['langMovie', '🎬 Films'], ['langTv', '📺 Séries']] : [], lang: true },
-    { title: `🎞️ Films sortis avant ${OLD_MOVIES_BEFORE} :`, fields: [['oldMovie', '🎬 Films']] },
+    { title: T.catalogue.minVotes, fields: [['movie', T.catalogue.movies], ['tv', T.catalogue.series], ['anime', T.catalogue.animes]] },
+    { title: langRowTitle(lang), fields: lang ? [['langMovie', T.catalogue.movies], ['langTv', T.catalogue.series]] : [], lang: true },
+    { title: T.catalogue.oldMovies(OLD_MOVIES_BEFORE), fields: [['oldMovie', T.catalogue.movies]] },
   ];
 
   const sync = async () => {
     setSyncing(true);
-    setSyncMsg('Démarrage…');
+    setSyncMsg(T.sync.starting);
     setSyncDone(0);
     await requestPersistentStorage();
     try {
@@ -82,11 +83,7 @@ export function CatalogueSetting() {
         setSyncMsg(message);
         if (done !== undefined) setSyncDone(done);
       });
-      const n = (x: number) => x.toLocaleString('fr-FR');
-      setSyncMsg(
-        `✓ Terminé : ${n(movie)} films, ${n(tv)} séries et ${n(anime)} animes à jour.` +
-          (removed ? ` ${removed.toLocaleString('fr-FR')} titres absents du nouveau catalogue supprimés.` : ''),
-      );
+      setSyncMsg(T.catalogue.done(num(movie), num(tv), num(anime)) + (removed ? T.catalogue.removed(num(removed)) : ''));
     } catch (e) {
       setSyncMsg(`✕ ${(e as Error).message}`);
     } finally {
@@ -97,33 +94,33 @@ export function CatalogueSetting() {
   const toggleShowAnime = () => {
     if (showAnime === undefined) return;
     setShowAnime(!showAnime);
-    setSyncMsg(showAnime ? 'Catégorie Animes masquée : les animes restent au catalogue, sans apparaître dans les séries.' : '🎌 Catégorie Animes affichée.');
+    setSyncMsg(showAnime ? T.catalogue.animeHidden : T.catalogue.animeShown);
   };
 
   return (
     <section className="card" id="catalogue">
-      <h3>📦 Catalogue</h3>
+      <h3>{T.catalogue.title}</h3>
       <p className="muted small">
-        {info ? `${info.movies.toLocaleString('fr-FR')} films · ${(info.series - info.animes).toLocaleString('fr-FR')} séries · ${info.animes.toLocaleString('fr-FR')} animes` : '…'}
+        {info ? T.catalogue.counts(num(info.movies), num(info.series - info.animes), num(info.animes)) : '…'}
         <br />
-        {info?.lastSync ? `Dernière mise à jour : ${new Date(info.lastSync).toLocaleString('fr-FR')}` : 'Jamais téléchargé'}
+        {info?.lastSync ? T.catalogue.lastSync(new Date(info.lastSync).toLocaleString(LOCALE)) : T.catalogue.never}
       </p>
       <p className="muted small">
-        Seuls les titres ayant un minimum de votes sur TMDB sont récupérés (pour éviter les titres introuvables). Baisse ces seuils pour en avoir plus. Les titres dans ta langue et les vieux films ont moins de votes : ils ont leur propre seuil, plus bas. Avec un compte, ils sont les mêmes sur tous tes appareils.
+        {T.catalogue.explain}
       </p>
       {voteRows.map((row) => (
         <div key={row.lang ? 'lang' : row.title} className="vote-row">
           <p className="small">{row.title}</p>
           {row.lang && (
             <label className="field">
-              Langue originale
+              {T.filterSheet.language}
               <select
                 className="input"
                 value={lang ?? ''}
                 onChange={(e) => editLang(e.target.value)}
-                title="Langue des titres qui ont leur propre seuil, plus bas. Par défaut, celle de ton téléphone ou de ton PC."
+                title={T.catalogue.langTip}
               >
-                <option value="">Aucune</option>
+                <option value="">{T.catalogue.noLang}</option>
                 {CATALOGUE_LANGS.map(([code, label]) => (
                   <option key={code} value={code}>
                     {label}
@@ -149,9 +146,9 @@ export function CatalogueSetting() {
           className={`chip ${showAnime ? 'active' : ''}`}
           onClick={toggleShowAnime}
           disabled={showAnime === undefined}
-          title="Afficher les tuiles et onglets Animes (séries d’animation japonaises). Masquée, la catégorie reste au catalogue."
+          title={T.catalogue.showAnimeTip}
         >
-          🎌 Afficher la catégorie Animes
+          {T.catalogue.showAnime}
         </button>
       </div>
       <CatalogueProgress compact />
@@ -159,13 +156,13 @@ export function CatalogueSetting() {
         className="btn primary"
         onClick={sync}
         disabled={syncing || download.running || !hasTmdbAccess()}
-        title="Récupérer les films et séries depuis TMDB (environ 1 minute)"
+        title={T.catalogue.syncTip}
       >
-        {syncing || download.running ? 'Mise à jour en cours…' : info?.lastSync ? 'Mettre à jour le catalogue' : 'Télécharger le catalogue'}
+        {syncing || download.running ? T.catalogue.syncing : info?.lastSync ? T.catalogue.update : T.swipe.download}
       </button>
       {syncing && <ProgressBar done={syncDone} />}
       {syncMsg && <p className="small">{syncMsg}</p>}
-      <p className="muted small">Les titres absents du nouveau catalogue sont retirés, sauf ceux que tu as vus ou mis dans ta wishlist : eux restent, avec leur place dans tes classements.</p>
+      <p className="muted small">{T.catalogue.removalNote}</p>
     </section>
   );
 }

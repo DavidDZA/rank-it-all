@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { T } from '../../i18n';
 import { db, withDetails, type Title } from '../../lib/db';
 import type { Category } from '../../lib/category';
 import { commonWishlist } from '../../lib/together';
@@ -23,7 +24,7 @@ export function TonightDuo({ data, category }: { data: Loaded; category: Categor
   }, [list.length]);
 
   if (!data.friend.shareWishlist) return <NeedsSharing pseudo={data.friend.pseudo} what="sa wishlist" />;
-  if (!list.length) return <p className="muted center">Pas encore de titre dans vos deux wishlists : rien à tirer au sort.</p>;
+  if (!list.length) return <p className="muted center">{T.duo.nothingToRoll}</p>;
 
   const candidates = list.filter((w) => {
     const t = data.titles.get(w.key);
@@ -44,18 +45,18 @@ export function TonightDuo({ data, category }: { data: Loaded; category: Categor
     <>
       {hasMyProviders(mine) && (
         <div className="chips">
-          <button className={`chip ${mineOnly ? 'active' : ''}`} onClick={() => setMineOnly(!mineOnly)} title="Seulement ce qui est dispo sur tes abonnements">
-            📺 Sur mes abonnements
+          <button className={`chip ${mineOnly ? 'active' : ''}`} onClick={() => setMineOnly(!mineOnly)} title={T.tonightPage.mineTip}>
+            {T.tonightPage.mine}
           </button>
         </div>
       )}
-      <button className="btn primary roll-btn" onClick={roll} disabled={!candidates.length} title="Tirer au sort un titre de votre wishlist commune">
-        {picked ? '🎲 Un autre !' : '🎲 Tirer au sort'}
+      <button className="btn primary roll-btn" onClick={roll} disabled={!candidates.length} title={T.duo.rollTip}>
+        {picked ? T.tonightPage.again : T.tonightPage.roll}
       </button>
       <p className="muted small center">
         {candidates.length
-          ? `${candidates.length} titre${candidates.length > 1 ? 's' : ''} possible${candidates.length > 1 ? 's' : ''} · vos priorités à tous les deux ont plus de chances`
-          : 'Aucun titre commun dispo sur tes abonnements.'}
+          ? T.duo.candidates(candidates.length)
+          : T.duo.noneOnProviders}
       </p>
       {picked && (
         <div className="tonight-card revealed">
@@ -66,10 +67,10 @@ export function TonightDuo({ data, category }: { data: Loaded; category: Categor
           <div className="tonight-info">
             <TitleText title={picked} credits />
             <ProviderLine title={picked} maxAge={WEEK} />
-            <p className="tonight-overview">{picked.overview || 'Pas de résumé disponible.'}</p>
+            <p className="tonight-overview">{picked.overview || T.common.noOverview}</p>
             <div className="row">
-              <button className="btn small" onClick={() => openFiche(picked)} title="Durée, note, bande-annonce, où regarder…">
-                📄 Fiche
+              <button className="btn small" onClick={() => openFiche(picked)} title={T.tonightPage.ficheTip}>
+                {T.tonightPage.fiche}
               </button>
             </div>
           </div>

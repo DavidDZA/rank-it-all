@@ -1,5 +1,7 @@
 import type { MediaType, Title } from './db';
 import { GENRES } from './genres';
+import { langLabel } from './language';
+import { LOCALE, num, T } from '../i18n';
 
 /** Filtre sur une personne : sa filmographie (clés des titres) est retenue avec le filtre. */
 export interface PersonFilter {
@@ -26,38 +28,30 @@ export const NO_THEME: Theme = { period: 'all', genre: null, lang: 'all', minRat
 const YEAR = new Date().getFullYear();
 
 export const PERIODS: { id: string; label: string; match: (y: number) => boolean }[] = [
-  { id: 'all', label: 'Toutes', match: () => true },
-  { id: 'recent', label: '🆕 Sorties récentes', match: (y) => y >= YEAR - 1 },
+  { id: 'all', label: T.filters.allPeriods, match: () => true },
+  { id: 'recent', label: T.filters.recent, match: (y) => y >= YEAR - 1 },
   { id: '2020', label: '2020s', match: (y) => y >= 2020 },
   { id: '2010', label: '2010s', match: (y) => y >= 2010 && y < 2020 },
   { id: '2000', label: '2000s', match: (y) => y >= 2000 && y < 2010 },
   { id: '1990', label: '90s', match: (y) => y >= 1990 && y < 2000 },
   { id: '1980', label: '80s', match: (y) => y >= 1980 && y < 1990 },
   { id: '1970', label: '70s', match: (y) => y >= 1970 && y < 1980 },
-  { id: 'old', label: 'Avant 1970', match: (y) => y < 1970 },
+  { id: 'old', label: T.filters.before(1970), match: (y) => y < 1970 },
 ];
 
 /** Langues proposées (code TMDB → libellé) ; « Autres langues » couvre toutes celles qui n'y sont pas. */
-const NAMED_LANGS: [string, string][] = [
-  ['fr', '🇫🇷 Français'],
-  ['en', '🇬🇧 Anglais'],
-  ['es', '🇪🇸 Espagnol'],
-  ['it', '🇮🇹 Italien'],
-  ['de', '🇩🇪 Allemand'],
-  ['ko', '🇰🇷 Coréen'],
-  ['ja', '🇯🇵 Japonais'],
-];
+const NAMED_LANGS: [string, string][] = ['fr', 'en', 'es', 'it', 'de', 'ko', 'ja'].map((code) => [code, langLabel(code)]);
 
 export const LANGS: { id: string; label: string; match: (l: string) => boolean }[] = [
-  { id: 'all', label: 'Toutes', match: () => true },
+  { id: 'all', label: T.filters.allLangs, match: () => true },
   ...NAMED_LANGS.map(([id, label]) => ({ id, label, match: (l: string) => l === id })),
-  { id: 'other', label: '🌍 Autres langues', match: (l) => !NAMED_LANGS.some(([id]) => id === l) },
+  { id: 'other', label: T.filters.otherLangs, match: (l) => !NAMED_LANGS.some(([id]) => id === l) },
 ];
 
 export const genreOptions = (type: MediaType) =>
   Object.entries(GENRES[type])
     .map(([id, label]) => ({ id: Number(id), label }))
-    .sort((a, b) => a.label.localeCompare(b.label, 'fr'));
+    .sort((a, b) => a.label.localeCompare(b.label, LOCALE));
 
 export const isNoTheme = (t: Theme) => t.period === 'all' && t.genre === null && t.lang === 'all' && !t.minRating && !t.director && !t.actor;
 
@@ -108,15 +102,15 @@ export function matchesTheme(title: Title, theme: Theme): boolean {
 
 /** Résumé du filtre (« Comédie · 90s · ⭐ 7+ »). Sans type (films et séries mélangés), pas de genre. */
 export function themeLabel(type: MediaType | null, theme: Theme): string {
-  if (isNoTheme(theme)) return 'Aucun filtre';
+  if (isNoTheme(theme)) return T.filters.none;
   const parts: string[] = [];
   if (type && theme.genre !== null) parts.push(GENRES[type][theme.genre] ?? '');
   if (theme.period !== 'all') parts.push(PERIODS.find((p) => p.id === theme.period)?.label ?? '');
   if (theme.director) parts.push(`🎥 ${theme.director.name}`);
   if (theme.actor) parts.push(`🎭 ${theme.actor.name}`);
   if (theme.lang !== 'all') parts.push(LANGS.find((l) => l.id === theme.lang)?.label ?? '');
-  if (theme.minRating > 0) parts.push(`⭐ ${theme.minRating.toLocaleString('fr-FR')}+`);
-  return parts.filter(Boolean).join(' · ') || 'Aucun filtre';
+  if (theme.minRating > 0) parts.push(`⭐ ${num(theme.minRating)}+`);
+  return parts.filter(Boolean).join(' · ') || T.filters.none;
 }
 
 /** Filtre utilisable sur une liste : null si aucun filtre (tout passe). */

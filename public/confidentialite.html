@@ -61,7 +61,7 @@
   <body>
     <main>
       <h1>Politique de confidentialité</h1>
-      <p class="muted">Rank It All (anciennement Sort my stuffs) · mise à jour le 11 novembre 2026</p>
+      <p class="muted">Rank It All (anciennement Sort my stuffs) · mise à jour le 13 novembre 2026</p>
 
       <p>
         Rank It All est une application gratuite, sans publicité et open source, pour trier les films, séries et animes
@@ -161,5 +161,438 @@
 
       <p class="muted"><a href="./">← Retour à l’application</a></p>
     </main>
+    <template id="lang-en" data-title="Privacy · Rank It All">
+      <h1>Privacy policy</h1>
+      <p class="muted">Rank It All (formerly Sort my stuffs) · updated November 13, 2026</p>
+      <p>
+        Rank It All is a free, ad-free, open-source app to sort the movies, TV shows and anime you’ve watched, your
+        wishlist and your rankings. It exists as a website
+        (<a href="https://daviddza.github.io/rank-it-all/">daviddza.github.io/rank-it-all</a>) and as an Android app
+        that shows this same website: this page covers both. It explains which data the app uses and how to delete it.
+      </p>
+      <h2>Without an account</h2>
+      <p>All your data (watched titles, wishlist, rankings, settings) stays in your browser or on your device. Nothing is sent to a server of the app.</p>
+      <h2>With an account</h2>
+      <p>The account is optional. It syncs your data between your devices. The following is then stored:</p>
+      <ul>
+        <li>your email address and password (encrypted), or your Google account ID if you sign in with Google;</li>
+        <li>your nickname (by default, the name of your Google account; you can change it);</li>
+        <li>your answers (watched, not watched, wishlist, “liked” / “meh”), your rankings and your activity in the app.</li>
+      </ul>
+      <p>With Google, the app only receives your name, email address and profile picture. It never posts on your behalf and has no access to your contacts or posts.</p>
+      <p>
+        This data is hosted by <a href="https://supabase.com/privacy">Supabase</a>. Each account can only access its own
+        data. If you add friends in the app, they only see what you choose to share (by default your wishlist and your
+        ranking).
+      </p>
+      <h2>What the app does not do</h2>
+      <ul>
+        <li>no ads, no trackers, no audience measurement;</li>
+        <li>no selling or sharing of your data with third parties.</li>
+      </ul>
+      <h2>Services used</h2>
+      <ul>
+        <li>
+          <a href="https://www.themoviedb.org/privacy-policy">TMDB</a> provides the catalog, posters and title details.
+          Requests go through a relay hosted by <a href="https://www.cloudflare.com/privacypolicy/">Cloudflare</a>, which
+          keeps the TMDB access key: it sees your IP address (only used to prevent abuse, never stored by Rank It All),
+          but not your answers. Posters are downloaded directly from TMDB, which then sees your IP address.
+        </li>
+        <li>JustWatch (through TMDB) provides the streaming platforms.</li>
+        <li>Supabase hosts the accounts and the synced data.</li>
+        <li>Gmail (Google) sends the password reset emails.</li>
+        <li>GitHub Pages hosts the website.</li>
+      </ul>
+      <h2 id="suppression">Deleting your data</h2>
+      <ul>
+        <li>
+          <strong>Your account and all its data</strong>: in the app, <em>Settings → Account → Delete my account</em>.
+          Deletion is immediate and permanent (profile, answers, rankings). This also applies to an account created with
+          Google.
+        </li>
+        <li>
+          <strong>Without the Android app</strong>: open the website
+          <a href="https://daviddza.github.io/rank-it-all/#/settings">daviddza.github.io/rank-it-all</a> in a browser,
+          sign in with the same account, then <em>Settings → Account → Delete my account</em>.
+        </li>
+        <li id="suppression-partielle">
+          <strong>Part of your data, without deleting your account</strong>:
+          <ul>
+            <li>
+              all your choices (watched and not watched titles, wishlist, rankings, activity): <em>Settings → Danger zone
+              → Erase all my choices</em>. With an account, they are also erased from the server and from all your
+              devices; your account, nickname and friends are kept;
+            </li>
+            <li>a specific title: <em>My lists</em>, then change your answer (watched, wishlist, not watched);</li>
+            <li>a friend: <em>Friends</em>, then remove them (you no longer see each other’s data);</li>
+            <li>any other request: write to <a href="mailto:rankitall.app@gmail.com">rankitall.app@gmail.com</a>, answer within 30 days.</li>
+          </ul>
+        </li>
+        <li><strong>Without an account</strong>, everything is on your device: <em>Settings → Danger zone → Erase all my choices</em>, or clear the website’s data in your browser.</li>
+        <li>You can also remove the app’s access from your Google account settings.</li>
+      </ul>
+      <h2>Contact</h2>
+      <p>
+        For any question or request about your data: <a href="mailto:rankitall.app@gmail.com">rankitall.app@gmail.com</a>.
+        To report a bug, you can also open a (public) issue on the
+        <a href="https://github.com/DavidDZA/rank-it-all/issues">project’s GitHub repository</a>.
+      </p>
+      <p class="muted"><a href="./">← Back to the app</a></p>
+    </template>
+
+    <template id="lang-es" data-title="Privacidad · Rank It All">
+      <h1>Política de privacidad</h1>
+      <p class="muted">Rank It All (antes Sort my stuffs) · actualizada el 13 de noviembre de 2026</p>
+      <p>
+        Rank It All es una app gratuita, sin anuncios y de código abierto para ordenar las películas, series y animes que
+        has visto, tu wishlist y tus clasificaciones. Existe como sitio web
+        (<a href="https://daviddza.github.io/rank-it-all/">daviddza.github.io/rank-it-all</a>) y como app de Android, que
+        muestra este mismo sitio: esta página vale para ambos. Explica qué datos usa la app y cómo borrarlos.
+      </p>
+      <h2>Sin cuenta</h2>
+      <p>Todos tus datos (títulos vistos, wishlist, clasificaciones, ajustes) se quedan en tu navegador o en tu dispositivo. No se envía nada a ningún servidor de la app.</p>
+      <h2>Con una cuenta</h2>
+      <p>La cuenta es opcional. Sirve para sincronizar tus datos entre tus dispositivos. En ese caso se guardan:</p>
+      <ul>
+        <li>tu correo electrónico y tu contraseña (cifrada), o el identificador de tu cuenta de Google si entras con ella;</li>
+        <li>tu apodo (por defecto, el nombre de tu cuenta de Google; puedes cambiarlo);</li>
+        <li>tus respuestas (visto, no visto, wishlist, «me gustó» / «regular»), tus clasificaciones y tu actividad en la app.</li>
+      </ul>
+      <p>Con Google, la app solo recibe tu nombre, tu correo y tu foto de perfil. No publica nada en tu nombre y no accede a tus contactos ni a tus publicaciones.</p>
+      <p>
+        Estos datos están alojados en <a href="https://supabase.com/privacy">Supabase</a>. Cada cuenta solo tiene acceso
+        a sus propios datos. Si añades amigos en la app, solo ven lo que decidas compartir (por defecto tu wishlist y tu
+        clasificación).
+      </p>
+      <h2>Lo que la app no hace</h2>
+      <ul>
+        <li>ningún anuncio, ningún rastreador, ninguna medición de audiencia;</li>
+        <li>ninguna venta ni cesión de tus datos a terceros.</li>
+      </ul>
+      <h2>Servicios utilizados</h2>
+      <ul>
+        <li>
+          <a href="https://www.themoviedb.org/privacy-policy">TMDB</a> proporciona el catálogo, los pósteres y las fichas
+          de los títulos. Las peticiones pasan por un relé alojado en
+          <a href="https://www.cloudflare.com/privacypolicy/">Cloudflare</a>, que guarda la clave de acceso a TMDB: ve tu
+          dirección IP (usada solo para evitar abusos, nunca guardada por Rank It All), pero no tus respuestas. Los pósteres
+          se descargan directamente de TMDB, que entonces ve tu dirección IP.
+        </li>
+        <li>JustWatch (a través de TMDB) proporciona las plataformas de streaming.</li>
+        <li>Supabase aloja las cuentas y los datos sincronizados.</li>
+        <li>Gmail (Google) envía los correos para restablecer la contraseña.</li>
+        <li>GitHub Pages aloja el sitio.</li>
+      </ul>
+      <h2 id="suppression">Borrar tus datos</h2>
+      <ul>
+        <li>
+          <strong>Tu cuenta y todos sus datos</strong>: en la app, <em>Ajustes → Cuenta → Eliminar mi cuenta</em>. El
+          borrado es inmediato y definitivo (perfil, respuestas, clasificaciones). También vale para una cuenta creada con
+          Google.
+        </li>
+        <li>
+          <strong>Sin la app de Android</strong>: abre el sitio
+          <a href="https://daviddza.github.io/rank-it-all/#/settings">daviddza.github.io/rank-it-all</a> en un navegador,
+          entra con la misma cuenta y luego <em>Ajustes → Cuenta → Eliminar mi cuenta</em>.
+        </li>
+        <li id="suppression-partielle">
+          <strong>Una parte de tus datos, sin eliminar tu cuenta</strong>:
+          <ul>
+            <li>
+              todas tus elecciones (títulos vistos y no vistos, wishlist, clasificaciones, actividad): <em>Ajustes → Zona de
+              peligro → Borrar todas mis elecciones</em>. Con una cuenta, también se borran del servidor y de todos tus
+              dispositivos; tu cuenta, tu apodo y tus amigos se conservan;
+            </li>
+            <li>un título concreto: <em>Mis listas</em>, y luego cambia tu respuesta (visto, wishlist, no visto);</li>
+            <li>un amigo: <em>Amigos</em>, y luego quítalo (dejáis de ver los datos del otro);</li>
+            <li>otra petición: escribe a <a href="mailto:rankitall.app@gmail.com">rankitall.app@gmail.com</a>, respuesta en un plazo de 30 días.</li>
+          </ul>
+        </li>
+        <li><strong>Sin cuenta</strong>, todo está en tu dispositivo: <em>Ajustes → Zona de peligro → Borrar todas mis elecciones</em>, o borra los datos del sitio en tu navegador.</li>
+        <li>También puedes quitar el acceso de la app desde los ajustes de tu cuenta de Google.</li>
+      </ul>
+      <h2>Contacto</h2>
+      <p>
+        Para cualquier pregunta o petición sobre tus datos: <a href="mailto:rankitall.app@gmail.com">rankitall.app@gmail.com</a>.
+        Para informar de un error, también puedes abrir una incidencia (pública) en el
+        <a href="https://github.com/DavidDZA/rank-it-all/issues">repositorio de GitHub del proyecto</a>.
+      </p>
+      <p class="muted"><a href="./">← Volver a la app</a></p>
+    </template>
+
+    <template id="lang-de" data-title="Datenschutz · Rank It All">
+      <h1>Datenschutzerklärung</h1>
+      <p class="muted">Rank It All (früher Sort my stuffs) · aktualisiert am 13. November 2026</p>
+      <p>
+        Rank It All ist eine kostenlose, werbefreie Open-Source-App, um die Filme, Serien und Animes, die du gesehen hast,
+        deine Wishlist und deine Rankings zu sortieren. Es gibt sie als Website
+        (<a href="https://daviddza.github.io/rank-it-all/">daviddza.github.io/rank-it-all</a>) und als Android-App, die
+        genau diese Website anzeigt: Diese Seite gilt für beide. Sie erklärt, welche Daten die App nutzt und wie du sie
+        löschst.
+      </p>
+      <h2>Ohne Konto</h2>
+      <p>Alle deine Daten (gesehene Titel, Wishlist, Rankings, Einstellungen) bleiben in deinem Browser oder auf deinem Gerät. Nichts wird an einen Server der App gesendet.</p>
+      <h2>Mit einem Konto</h2>
+      <p>Das Konto ist freiwillig. Es synchronisiert deine Daten zwischen deinen Geräten. Gespeichert werden dann:</p>
+      <ul>
+        <li>deine E-Mail-Adresse und dein Passwort (verschlüsselt) oder die Kennung deines Google-Kontos, wenn du dich damit anmeldest;</li>
+        <li>dein Spitzname (standardmäßig der Name deines Google-Kontos, änderbar);</li>
+        <li>deine Antworten (gesehen, nicht gesehen, Wishlist, „gut“ / „naja“), deine Rankings und deine Aktivität in der App.</li>
+      </ul>
+      <p>Bei Google erhält die App nur deinen Namen, deine E-Mail-Adresse und dein Profilbild. Sie veröffentlicht nichts in deinem Namen und hat keinen Zugriff auf deine Kontakte oder Beiträge.</p>
+      <p>
+        Diese Daten werden bei <a href="https://supabase.com/privacy">Supabase</a> gespeichert. Jedes Konto hat nur
+        Zugriff auf seine eigenen Daten. Wenn du in der App Freunde hinzufügst, sehen sie nur, was du teilen möchtest
+        (standardmäßig deine Wishlist und dein Ranking).
+      </p>
+      <h2>Was die App nicht tut</h2>
+      <ul>
+        <li>keine Werbung, keine Tracker, keine Reichweitenmessung;</li>
+        <li>kein Verkauf und keine Weitergabe deiner Daten an Dritte.</li>
+      </ul>
+      <h2>Genutzte Dienste</h2>
+      <ul>
+        <li>
+          <a href="https://www.themoviedb.org/privacy-policy">TMDB</a> liefert den Katalog, die Poster und die Infos zu den
+          Titeln. Die Anfragen laufen über ein Relais bei <a href="https://www.cloudflare.com/privacypolicy/">Cloudflare</a>,
+          das den TMDB-Zugangsschlüssel aufbewahrt: Es sieht deine IP-Adresse (nur zum Schutz vor Missbrauch genutzt, von
+          Rank It All nie gespeichert), aber nicht deine Antworten. Die Poster werden direkt bei TMDB geladen, das dann deine
+          IP-Adresse sieht.
+        </li>
+        <li>JustWatch (über TMDB) liefert die Streaming-Plattformen.</li>
+        <li>Supabase hostet die Konten und die synchronisierten Daten.</li>
+        <li>Gmail (Google) verschickt die E-Mails zum Zurücksetzen des Passworts.</li>
+        <li>GitHub Pages hostet die Website.</li>
+      </ul>
+      <h2 id="suppression">Deine Daten löschen</h2>
+      <ul>
+        <li>
+          <strong>Dein Konto und alle seine Daten</strong>: in der App unter <em>Einstellungen → Konto → Mein Konto löschen</em>.
+          Die Löschung erfolgt sofort und endgültig (Profil, Antworten, Rankings). Das gilt auch für ein mit Google erstelltes
+          Konto.
+        </li>
+        <li>
+          <strong>Ohne die Android-App</strong>: Öffne die Website
+          <a href="https://daviddza.github.io/rank-it-all/#/settings">daviddza.github.io/rank-it-all</a> in einem Browser,
+          melde dich mit demselben Konto an, dann <em>Einstellungen → Konto → Mein Konto löschen</em>.
+        </li>
+        <li id="suppression-partielle">
+          <strong>Einen Teil deiner Daten, ohne dein Konto zu löschen</strong>:
+          <ul>
+            <li>
+              alle deine Auswahlen (gesehene und nicht gesehene Titel, Wishlist, Rankings, Aktivität): <em>Einstellungen →
+              Gefahrenzone → Alle meine Auswahlen löschen</em>. Mit einem Konto werden sie auch auf dem Server und auf allen
+              deinen Geräten gelöscht; dein Konto, dein Spitzname und deine Freunde bleiben erhalten;
+            </li>
+            <li>einen bestimmten Titel: <em>Meine Listen</em>, dann deine Antwort ändern (gesehen, Wishlist, nicht gesehen);</li>
+            <li>einen Freund: <em>Freunde</em>, dann ihn entfernen (ihr seht die Daten des anderen nicht mehr);</li>
+            <li>andere Anfragen: schreib an <a href="mailto:rankitall.app@gmail.com">rankitall.app@gmail.com</a>, Antwort innerhalb von 30 Tagen.</li>
+          </ul>
+        </li>
+        <li><strong>Ohne Konto</strong> ist alles auf deinem Gerät: <em>Einstellungen → Gefahrenzone → Alle meine Auswahlen löschen</em>, oder lösche die Website-Daten in deinem Browser.</li>
+        <li>Du kannst der App den Zugriff auch in den Einstellungen deines Google-Kontos entziehen.</li>
+      </ul>
+      <h2>Kontakt</h2>
+      <p>
+        Für Fragen oder Anliegen zu deinen Daten: <a href="mailto:rankitall.app@gmail.com">rankitall.app@gmail.com</a>.
+        Um einen Fehler zu melden, kannst du auch ein (öffentliches) Issue im
+        <a href="https://github.com/DavidDZA/rank-it-all/issues">GitHub-Repository des Projekts</a> eröffnen.
+      </p>
+      <p class="muted"><a href="./">← Zurück zur App</a></p>
+    </template>
+
+    <template id="lang-it" data-title="Privacy · Rank It All">
+      <h1>Informativa sulla privacy</h1>
+      <p class="muted">Rank It All (prima Sort my stuffs) · aggiornata il 13 novembre 2026</p>
+      <p>
+        Rank It All è un’app gratuita, senza pubblicità e open source per ordinare i film, le serie e gli anime che hai
+        visto, la tua wishlist e le tue classifiche. Esiste come sito web
+        (<a href="https://daviddza.github.io/rank-it-all/">daviddza.github.io/rank-it-all</a>) e come app Android, che
+        mostra lo stesso sito: questa pagina vale per entrambi. Spiega quali dati usa l’app e come cancellarli.
+      </p>
+      <h2>Senza account</h2>
+      <p>Tutti i tuoi dati (titoli visti, wishlist, classifiche, impostazioni) restano nel tuo browser o sul tuo dispositivo. Nulla viene inviato a un server dell’app.</p>
+      <h2>Con un account</h2>
+      <p>L’account è facoltativo. Serve a sincronizzare i tuoi dati tra i tuoi dispositivi. In questo caso vengono salvati:</p>
+      <ul>
+        <li>il tuo indirizzo email e la tua password (cifrata), oppure l’identificativo del tuo account Google se accedi con Google;</li>
+        <li>il tuo nickname (di default il nome del tuo account Google, modificabile);</li>
+        <li>le tue risposte (visto, non visto, wishlist, «bello» / «così così»), le tue classifiche e la tua attività nell’app.</li>
+      </ul>
+      <p>Con Google, l’app riceve solo il tuo nome, il tuo indirizzo email e la tua foto profilo. Non pubblica nulla a tuo nome e non accede ai tuoi contatti né ai tuoi post.</p>
+      <p>
+        Questi dati sono ospitati da <a href="https://supabase.com/privacy">Supabase</a>. Ogni account ha accesso solo ai
+        propri dati. Se aggiungi amici nell’app, vedono solo ciò che scegli di condividere (di default la tua wishlist e
+        la tua classifica).
+      </p>
+      <h2>Cosa l’app non fa</h2>
+      <ul>
+        <li>nessuna pubblicità, nessun tracker, nessuna misurazione dell’audience;</li>
+        <li>nessuna vendita né cessione dei tuoi dati a terzi.</li>
+      </ul>
+      <h2>Servizi utilizzati</h2>
+      <ul>
+        <li>
+          <a href="https://www.themoviedb.org/privacy-policy">TMDB</a> fornisce il catalogo, le locandine e le schede dei
+          titoli. Le richieste passano da un relay ospitato da
+          <a href="https://www.cloudflare.com/privacypolicy/">Cloudflare</a>, che custodisce la chiave di accesso a TMDB:
+          vede il tuo indirizzo IP (usato solo per limitare gli abusi, mai conservato da Rank It All), ma non le tue
+          risposte. Le locandine vengono scaricate direttamente da TMDB, che vede quindi il tuo indirizzo IP.
+        </li>
+        <li>JustWatch (tramite TMDB) fornisce le piattaforme di streaming.</li>
+        <li>Supabase ospita gli account e i dati sincronizzati.</li>
+        <li>Gmail (Google) invia le email per reimpostare la password.</li>
+        <li>GitHub Pages ospita il sito.</li>
+      </ul>
+      <h2 id="suppression">Cancellare i tuoi dati</h2>
+      <ul>
+        <li>
+          <strong>Il tuo account e tutti i suoi dati</strong>: nell’app, <em>Impostazioni → Account → Elimina il mio account</em>.
+          La cancellazione è immediata e definitiva (profilo, risposte, classifiche). Vale anche per un account creato con
+          Google.
+        </li>
+        <li>
+          <strong>Senza l’app Android</strong>: apri il sito
+          <a href="https://daviddza.github.io/rank-it-all/#/settings">daviddza.github.io/rank-it-all</a> in un browser,
+          accedi con lo stesso account, poi <em>Impostazioni → Account → Elimina il mio account</em>.
+        </li>
+        <li id="suppression-partielle">
+          <strong>Una parte dei tuoi dati, senza eliminare l’account</strong>:
+          <ul>
+            <li>
+              tutte le tue scelte (titoli visti e non visti, wishlist, classifiche, attività): <em>Impostazioni → Zona
+              pericolosa → Cancella tutte le mie scelte</em>. Con un account vengono cancellate anche dal server e da tutti
+              i tuoi dispositivi; account, nickname e amici restano;
+            </li>
+            <li>un titolo preciso: <em>Le mie liste</em>, poi cambia la tua risposta (visto, wishlist, non visto);</li>
+            <li>un amico: <em>Amici</em>, poi rimuovilo (non vedete più i dati l’uno dell’altro);</li>
+            <li>altre richieste: scrivi a <a href="mailto:rankitall.app@gmail.com">rankitall.app@gmail.com</a>, risposta entro 30 giorni.</li>
+          </ul>
+        </li>
+        <li><strong>Senza account</strong>, tutto è sul tuo dispositivo: <em>Impostazioni → Zona pericolosa → Cancella tutte le mie scelte</em>, oppure cancella i dati del sito nel browser.</li>
+        <li>Puoi anche revocare l’accesso dell’app dalle impostazioni del tuo account Google.</li>
+      </ul>
+      <h2>Contatti</h2>
+      <p>
+        Per qualsiasi domanda o richiesta sui tuoi dati: <a href="mailto:rankitall.app@gmail.com">rankitall.app@gmail.com</a>.
+        Per segnalare un bug puoi anche aprire una issue (pubblica) nel
+        <a href="https://github.com/DavidDZA/rank-it-all/issues">repository GitHub del progetto</a>.
+      </p>
+      <p class="muted"><a href="./">← Torna all’app</a></p>
+    </template>
+
+    <template id="lang-pt" data-title="Privacidade · Rank It All">
+      <h1>Política de privacidade</h1>
+      <p class="muted">Rank It All (antes Sort my stuffs) · atualizada em 13 de novembro de 2026</p>
+      <p>
+        Rank It All é um app gratuito, sem anúncios e de código aberto para organizar os filmes, séries e animes que você
+        já viu, sua wishlist e seus rankings. Ele existe como site
+        (<a href="https://daviddza.github.io/rank-it-all/">daviddza.github.io/rank-it-all</a>) e como app Android, que
+        mostra esse mesmo site: esta página vale para os dois. Ela explica quais dados o app usa e como apagá-los.
+      </p>
+      <h2>Sem conta</h2>
+      <p>Todos os seus dados (títulos vistos, wishlist, rankings, configurações) ficam no seu navegador ou no seu aparelho. Nada é enviado a um servidor do app.</p>
+      <h2>Com uma conta</h2>
+      <p>A conta é opcional. Ela serve para sincronizar seus dados entre seus aparelhos. Nesse caso, são guardados:</p>
+      <ul>
+        <li>seu e-mail e sua senha (criptografada), ou o identificador da sua conta Google se você entrar com ela;</li>
+        <li>seu apelido (por padrão, o nome da sua conta Google; dá para mudar);</li>
+        <li>suas respostas (vi, não vi, wishlist, “gostei” / “mais ou menos”), seus rankings e sua atividade no app.</li>
+      </ul>
+      <p>Com o Google, o app só recebe seu nome, seu e-mail e sua foto de perfil. Ele não publica nada em seu nome e não acessa seus contatos nem suas publicações.</p>
+      <p>
+        Esses dados ficam hospedados no <a href="https://supabase.com/privacy">Supabase</a>. Cada conta só tem acesso aos
+        próprios dados. Se você adicionar amigos no app, eles só veem o que você escolher compartilhar (por padrão sua
+        wishlist e seu ranking).
+      </p>
+      <h2>O que o app não faz</h2>
+      <ul>
+        <li>nenhum anúncio, nenhum rastreador, nenhuma medição de audiência;</li>
+        <li>nenhuma venda nem repasse dos seus dados a terceiros.</li>
+      </ul>
+      <h2>Serviços usados</h2>
+      <ul>
+        <li>
+          O <a href="https://www.themoviedb.org/privacy-policy">TMDB</a> fornece o catálogo, os pôsteres e as fichas dos
+          títulos. As solicitações passam por um relay hospedado pela
+          <a href="https://www.cloudflare.com/privacypolicy/">Cloudflare</a>, que guarda a chave de acesso ao TMDB: ele vê
+          seu endereço IP (usado só para evitar abusos, nunca guardado pelo Rank It All), mas não suas respostas. Os
+          pôsteres são baixados direto do TMDB, que então vê seu endereço IP.
+        </li>
+        <li>A JustWatch (via TMDB) fornece as plataformas de streaming.</li>
+        <li>O Supabase hospeda as contas e os dados sincronizados.</li>
+        <li>O Gmail (Google) envia os e-mails de redefinição de senha.</li>
+        <li>O GitHub Pages hospeda o site.</li>
+      </ul>
+      <h2 id="suppression">Apagar seus dados</h2>
+      <ul>
+        <li>
+          <strong>Sua conta e todos os dados dela</strong>: no app, <em>Configurações → Conta → Excluir minha conta</em>. A
+          exclusão é imediata e definitiva (perfil, respostas, rankings). Isso vale também para uma conta criada com o
+          Google.
+        </li>
+        <li>
+          <strong>Sem o app Android</strong>: abra o site
+          <a href="https://daviddza.github.io/rank-it-all/#/settings">daviddza.github.io/rank-it-all</a> em um navegador,
+          entre com a mesma conta e depois <em>Configurações → Conta → Excluir minha conta</em>.
+        </li>
+        <li id="suppression-partielle">
+          <strong>Uma parte dos seus dados, sem excluir sua conta</strong>:
+          <ul>
+            <li>
+              todas as suas escolhas (títulos vistos e não vistos, wishlist, rankings, atividade): <em>Configurações → Zona
+              de perigo → Apagar todas as minhas escolhas</em>. Com uma conta, elas também são apagadas do servidor e de
+              todos os seus aparelhos; sua conta, seu apelido e seus amigos são mantidos;
+            </li>
+            <li>um título específico: <em>Minhas listas</em>, depois mude sua resposta (vi, wishlist, não vi);</li>
+            <li>um amigo: <em>Amigos</em>, depois remova (vocês deixam de ver os dados um do outro);</li>
+            <li>outro pedido: escreva para <a href="mailto:rankitall.app@gmail.com">rankitall.app@gmail.com</a>, resposta em até 30 dias.</li>
+          </ul>
+        </li>
+        <li><strong>Sem conta</strong>, tudo fica no seu aparelho: <em>Configurações → Zona de perigo → Apagar todas as minhas escolhas</em>, ou apague os dados do site no seu navegador.</li>
+        <li>Você também pode remover o acesso do app nas configurações da sua conta Google.</li>
+      </ul>
+      <h2>Contato</h2>
+      <p>
+        Para qualquer dúvida ou pedido sobre seus dados: <a href="mailto:rankitall.app@gmail.com">rankitall.app@gmail.com</a>.
+        Para relatar um bug, você também pode abrir uma issue (pública) no
+        <a href="https://github.com/DavidDZA/rank-it-all/issues">repositório do projeto no GitHub</a>.
+      </p>
+      <p class="muted"><a href="./">← Voltar ao app</a></p>
+    </template>
+
+    <script>
+      // Langue de la page : ?lang= (lien depuis l'appli), sinon celle choisie dans l'appli, sinon celle du navigateur ;
+      // français par défaut (et sans JavaScript), anglais pour une langue non traduite.
+      (function () {
+        var langs = ['fr', 'en', 'es', 'de', 'it', 'pt'];
+        var lang = new URLSearchParams(location.search).get('lang');
+        if (langs.indexOf(lang) === -1) {
+          try {
+            lang = localStorage.getItem('app-lang');
+          } catch (e) {}
+        }
+        if (langs.indexOf(lang) === -1) {
+          var prefs = navigator.languages && navigator.languages.length ? navigator.languages : [navigator.language || 'fr'];
+          lang = 'en';
+          for (var i = 0; i < prefs.length; i++) {
+            var base = String(prefs[i]).toLowerCase().split(/[-_]/)[0];
+            if (langs.indexOf(base) !== -1) {
+              lang = base;
+              break;
+            }
+          }
+        }
+        if (lang === 'fr') return;
+        var tpl = document.getElementById('lang-' + lang);
+        document.querySelector('main').replaceChildren(tpl.content.cloneNode(true));
+        document.documentElement.lang = lang;
+        document.title = tpl.getAttribute('data-title');
+        if (location.hash) {
+          var target = document.getElementById(location.hash.slice(1));
+          if (target) target.scrollIntoView();
+        }
+      })();
+    </script>
   </body>
 </html>

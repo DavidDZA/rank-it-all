@@ -1,4 +1,5 @@
 import { downloadCatalogue, useCatalogueDownload } from '../lib/catalogueDownload';
+import { T } from '../i18n';
 
 /** Barre de progression (0 à 1), avec le pourcentage pour les lecteurs d'écran. */
 export function ProgressBar({ done }: { done: number }) {
@@ -20,11 +21,11 @@ export function CatalogueProgress({ compact = false }: { compact?: boolean }) {
     return (
       <div className="banner-soft catalogue-progress">
         <p>
-          <b>📦 Le catalogue n’a pas pu être téléchargé</b>
+          <b>{T.progress.failed}</b>
         </p>
         <p className="small muted">✕ {d.error}</p>
-        <button className="btn small primary" onClick={() => downloadCatalogue()} title="Relancer le téléchargement du catalogue">
-          Réessayer
+        <button className="btn small primary" onClick={() => downloadCatalogue()} title={T.progress.retryTip}>
+          {T.common.retry}
         </button>
       </div>
     );
@@ -32,13 +33,13 @@ export function CatalogueProgress({ compact = false }: { compact?: boolean }) {
   return (
     <div className="banner-soft catalogue-progress" aria-live="polite">
       <p className="catalogue-progress-head">
-        <b>📦 Préparation du catalogue</b>
+        <b>{T.progress.preparing}</b>
         <span className="muted">{Math.round(d.done * 100)} %</span>
       </p>
       <ProgressBar done={d.done} />
       <p className="small muted">
         {d.message}
-        {!compact && <> · Environ une minute, la première fois seulement.</>}
+        {!compact && T.progress.firstTime}
       </p>
     </div>
   );

@@ -7,6 +7,7 @@ import { splitAnimeRankings } from './ranking';
 import { supabase } from './supabase';
 import type { Json } from './database.types';
 import { toast } from './fun';
+import { T } from '../i18n';
 
 /*
  * Compte et synchro. L'appli lit et écrit toujours dans la base locale (rapide, hors ligne) ;
@@ -240,11 +241,11 @@ export function useCloud(): CloudState {
  * sont ceux de Supabase : une lettre accentuée ne compte pas.
  */
 export const PASSWORD_RULES: { label: string; test: (p: string) => boolean }[] = [
-  { label: '8 caractères', test: (p) => p.length >= 8 },
-  { label: 'une minuscule', test: (p) => /[a-z]/.test(p) },
-  { label: 'une majuscule', test: (p) => /[A-Z]/.test(p) },
-  { label: 'un chiffre', test: (p) => /[0-9]/.test(p) },
-  { label: 'un symbole (!?@#…)', test: (p) => /[!@#$%^&*()_+\-=[\]{};':"|<>?,./`~\\]/.test(p) },
+  { label: T.account.rules.length, test: (p) => p.length >= 8 },
+  { label: T.account.rules.lower, test: (p) => /[a-z]/.test(p) },
+  { label: T.account.rules.upper, test: (p) => /[A-Z]/.test(p) },
+  { label: T.account.rules.digit, test: (p) => /[0-9]/.test(p) },
+  { label: T.account.rules.symbol, test: (p) => /[!@#$%^&*()_+\-=[\]{};':"|<>?,./`~\\]/.test(p) },
 ];
 
 export const passwordOk = (p: string) => PASSWORD_RULES.every((r) => r.test(p));
@@ -252,18 +253,18 @@ export const passwordOk = (p: string) => PASSWORD_RULES.every((r) => r.test(p));
 export function frError(e: unknown): string {
   const msg = (e as { message?: string })?.message ?? String(e);
   const known: [RegExp, string][] = [
-    [/invalid login credentials/i, 'E-mail ou mot de passe incorrect.'],
-    [/already registered|already exists/i, 'Un compte existe déjà avec cet e-mail.'],
-    [/password should be at least (\d+)/i, 'Le mot de passe doit faire au moins 8 caractères.'],
-    [/password should contain at least one character of each/i, 'Le mot de passe doit contenir une minuscule, une majuscule, un chiffre et un symbole.'],
-    [/known to be weak|easy to guess|pwned|leaked/i, 'Ce mot de passe est trop courant (on le trouve dans des fuites de données) : choisis-en un autre.'],
-    [/email not confirmed/i, 'Confirme d’abord ton adresse e-mail (lien reçu par e-mail).'],
-    [/unable to validate email|invalid email|email address .* is invalid/i, 'Adresse e-mail invalide.'],
-    [/rate limit|too many requests/i, 'Trop de tentatives : réessaie dans quelques minutes.'],
-    [/failed to fetch|network/i, 'Pas de connexion au serveur.'],
-    [/same password|different from the old/i, 'Choisis un mot de passe différent de l’ancien.'],
-    [/unknown_code/, 'Code ami inconnu : vérifie les 8 caractères.'],
-    [/own_code/, 'C’est ton propre code ami !'],
+    [/invalid login credentials/i, T.account.errors.credentials],
+    [/already registered|already exists/i, T.account.errors.exists],
+    [/password should be at least (\d+)/i, T.account.errors.tooShort],
+    [/password should contain at least one character of each/i, T.account.errors.characters],
+    [/known to be weak|easy to guess|pwned|leaked/i, T.account.errors.weak],
+    [/email not confirmed/i, T.account.errors.notConfirmed],
+    [/unable to validate email|invalid email|email address .* is invalid/i, T.account.errors.invalidEmail],
+    [/rate limit|too many requests/i, T.account.errors.rateLimit],
+    [/failed to fetch|network/i, T.account.errors.network],
+    [/same password|different from the old/i, T.account.errors.samePassword],
+    [/unknown_code/, T.account.errors.unknownCode],
+    [/own_code/, T.account.errors.ownCode],
   ];
   return known.find(([re]) => re.test(msg))?.[1] ?? msg;
 }
@@ -424,7 +425,7 @@ export async function signUp(email: string, password: string, pseudo: string): P
   });
   if (error) throw new Error(frError(error));
   // Adresse déjà inscrite (Supabase ne le dit pas, pour ne pas révéler les comptes existants).
-  if (data.user && !data.user.identities?.length) throw new Error('Un compte existe déjà avec cet e-mail.');
+  if (data.user && !data.user.identities?.length) throw new Error(T.account.errors.exists);
   return !!data.session;
 }
 

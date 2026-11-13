@@ -4,6 +4,7 @@ import type { MinVotes } from './settings';
 import { forgetCategories, isAnimeTitle } from './category';
 import { customImportLabel, getCustomImports, type CustomImport } from './customImports';
 import { langName } from './language';
+import { num, T, TMDB_LANGUAGE } from '../i18n';
 
 const MAX_PAGES = 500; // limite imposée par TMDB sur /discover
 const CONCURRENCY = 6;
@@ -78,7 +79,7 @@ interface Prepared {
 }
 
 async function prepare(q: Query, onProgress: Progress): Promise<Prepared> {
-  onProgress(`Préparation des ${q.label}…`, 0);
+  onProgress(T.sync.preparing(q.label), 0);
   const ranges = await splitRanges(q, since(q), until(q));
   return { q, ranges, pages: ranges.reduce((n, r) => n + Math.min(r.first.total_pages, MAX_PAGES), 0) };
 }
@@ -92,7 +93,7 @@ async function fetchQueries(queries: Query[], onProgress: Progress, seen: Set<st
   for (const p of prepared) {
     await fetchPrepared(p, seen, onlyNew, (count) => {
       fetched++;
-      onProgress(`${count.toLocaleString('fr-FR')} ${p.q.label} récupérés…`, fetched / total);
+      onProgress(T.sync.fetched(num(count), p.q.label), fetched / total);
     });
   }
 }
@@ -154,17 +155,17 @@ export const OLD_MOVIES_BEFORE = 1980;
 export function catalogueQueries(v: MinVotes): Query[] {
   const local = v.lang ? { with_original_language: v.lang } : null;
   return [
-    { type: 'movie', minVotes: v.movie, label: 'films' },
-    ...(local ? [{ type: 'movie' as const, minVotes: v.langMovie, label: `films en ${langName(v.lang!)}`, extra: local }] : []),
-    { type: 'movie', minVotes: v.oldMovie, label: `films d’avant ${OLD_MOVIES_BEFORE}`, until: Date.UTC(OLD_MOVIES_BEFORE - 1, 11, 31) },
+    { type: 'movie', minVotes: v.movie, label: T.sync.movies },
+    ...(local ? [{ type: 'movie' as const, minVotes: v.langMovie, label: T.sync.moviesIn(langName(v.lang!)), extra: local }] : []),
+    { type: 'movie', minVotes: v.oldMovie, label: T.sync.oldMovies(OLD_MOVIES_BEFORE), until: Date.UTC(OLD_MOVIES_BEFORE - 1, 11, 31) },
     // Séries et animes viennent de la même liste TMDB : le plus bas des deux seuils, puis tri.
     {
       type: 'tv',
       minVotes: Math.min(v.tv, v.anime),
-      label: 'séries et animes',
+      label: T.sync.seriesAndAnimes,
       accept: (r) => (r.vote_count ?? 0) >= (isAnimeResult(r) ? v.anime : v.tv),
     },
-    ...(local ? [{ type: 'tv' as const, minVotes: v.langTv, label: `séries en ${langName(v.lang!)}`, extra: local }] : []),
+    ...(local ? [{ type: 'tv' as const, minVotes: v.langTv, label: T.sync.seriesIn(langName(v.lang!)), extra: local }] : []),
   ];
 }
 
@@ -177,7 +178,7 @@ export function customQuery(c: CustomImport): Query {
   return {
     type: 'movie',
     minVotes: c.minVotes,
-    label: `films « ${customImportLabel(c)} »`,
+    label: T.sync.custom(customImportLabel(c)),
     extra,
     since: c.from !== null ? Date.UTC(c.from, 0, 1) : undefined,
     until: c.to !== null ? Date.UTC(c.to, 11, 31) : undefined,
@@ -219,6 +220,19 @@ async function removeMissing(seen: Set<string>): Promise<number> {
  * Télécharge ou met à jour le catalogue, imports sur mesure compris. Les titres qui n'en font plus partie
  * sont supprimés, sauf ceux déjà vus ou dans la wishlist (ajouts manuels compris).
  */
+/**
+ * Langue des titres et résumés du catalogue (meta propre à l'appareil, pas synchronisée) : quand la langue de
+ * l'interface change, le catalogue est retéléchargé au démarrage pour les retraduire (catalogueDownload.ts).
+ * Absente : catalogue téléchargé avant la traduction, donc en français.
+ */
+export const CATALOGUE_LANGUAGE_META = 'catalogue-language';
+
+/** Le catalogue est-il dans une autre langue que celle de l'interface ? */
+export async function catalogueLanguageOutdated(): Promise<boolean> {
+  const row = await db.meta.get(CATALOGUE_LANGUAGE_META);
+  return ((row?.value as string | undefined) ?? 'fr-FR') !== TMDB_LANGUAGE;
+}
+
 export async function syncCatalogue(minVotes: MinVotes, onProgress: Progress): Promise<{ movie: number; tv: number; anime: number; removed: number }> {
   const seen = new Set<string>();
   const queries = [...catalogueQueries(minVotes), ...(await getCustomImports()).map(customQuery)];
@@ -226,6 +240,7 @@ export async function syncCatalogue(minVotes: MinVotes, onProgress: Progress): P
   const removed = await removeMissing(seen);
   forgetCategories();
   await setMeta('lastSync', Date.now());
+  await db.meta.put({ key: CATALOGUE_LANGUAGE_META, value: TMDB_LANGUAGE }); // titres et résumés dans cette langue
   await db.meta.put({ key: NEW_TITLES_META, value: { checkedAt: Date.now(), addedAt: Date.now() } satisfies NewTitlesCheck });
   // Décompte par catégorie, sur les titres gardés.
   const series = await db.titles.where('type').equals('tv').toArray();
