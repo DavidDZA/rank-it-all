@@ -251,7 +251,10 @@ Restaurer (dans un projet Supabase neuf, ou le même vidé) :
 
 ## 5. Tests et vérifications
 
-- `npx tsc -b`, `npm test` (Vitest), `npm run build` avant chaque push.
+- `npx tsc -b`, `npm test` (Vitest), `npm run build` avant chaque push. Le déploiement relance `npm test` sur une
+  machine GitHub **en anglais** : `tests/setup.ts` fixe la langue de l'appareil au français pour tous les tests
+  (sinon un test qui passe ici y échoue et bloque le déploiement, comme le 13/11) ; Playwright fixe la sienne
+  (`locale: 'fr-FR'`, sauf `langue.spec.ts`).
 - `node worker/test.mjs` : le relais TMDB, avec Cloudflare et TMDB simulés. `tests/relais.test.ts` (Vitest) branche
   l'appli sur le code du relais : chaque appel TMDB du code est accepté, la fiche revient complète (réalisateur,
   acteurs, plateformes, bande-annonce), fiches vides redemandées, clé personnelle refusée remplacée par le relais.
