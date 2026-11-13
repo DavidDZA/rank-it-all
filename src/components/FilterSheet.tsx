@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import type { MediaType, Title } from '../lib/db';
 import { genreOptions, LANGS, NO_THEME, PERIODS, type PersonFilter, type Theme } from '../lib/themes';
 import { personFilmography, searchPeople, type Person, type PersonRole } from '../lib/tmdb';
-import { getMinVotes, readPref, writePref } from '../lib/settings';
+import { fixMinVotes, readPref, writePref } from '../lib/settings';
 import { requestPersistentStorage } from '../lib/db';
 import { syncCatalogue } from '../lib/sync';
 import { syncAndWait } from '../lib/cloud';
@@ -43,7 +43,7 @@ export function FilterSheet(props: {
     await requestPersistentStorage();
     try {
       await syncAndWait(); // seuils de votes du compte
-      const { movie, tv, anime } = await syncCatalogue(await getMinVotes(), setSync);
+      const { movie, tv, anime } = await syncCatalogue(await fixMinVotes(), setSync);
       setSync(`✓ Catalogue à jour (${(movie + tv + anime).toLocaleString('fr-FR')} titres) : les notes sont là.`);
       props.onCatalogueUpdated?.();
     } catch (e) {

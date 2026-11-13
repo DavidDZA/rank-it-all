@@ -1,5 +1,6 @@
 import { getMeta, setMeta } from './db';
 import { GENRES } from './genres';
+import { ORIGINAL_LANGS } from './language';
 
 /**
  * Import sur mesure (films seulement) : une requête /discover de plus, avec ses critères et son propre seuil de
@@ -19,39 +20,8 @@ export interface CustomImport {
 
 export const DEFAULT_IMPORT_VOTES = 150;
 
-/** Langues originales proposées (code TMDB → libellé). */
-export const IMPORT_LANGS: [string, string][] = [
-  ['fr', '🇫🇷 Français'],
-  ['en', '🇬🇧 Anglais'],
-  ['es', '🇪🇸 Espagnol'],
-  ['it', '🇮🇹 Italien'],
-  ['de', '🇩🇪 Allemand'],
-  ['pt', '🇵🇹 Portugais'],
-  ['nl', '🇳🇱 Néerlandais'],
-  ['sv', '🇸🇪 Suédois'],
-  ['da', '🇩🇰 Danois'],
-  ['no', '🇳🇴 Norvégien'],
-  ['fi', '🇫🇮 Finnois'],
-  ['pl', '🇵🇱 Polonais'],
-  ['cs', '🇨🇿 Tchèque'],
-  ['hu', '🇭🇺 Hongrois'],
-  ['ro', '🇷🇴 Roumain'],
-  ['el', '🇬🇷 Grec'],
-  ['ru', '🇷🇺 Russe'],
-  ['tr', '🇹🇷 Turc'],
-  ['ar', '🇸🇦 Arabe'],
-  ['he', '🇮🇱 Hébreu'],
-  ['fa', '🇮🇷 Persan'],
-  ['hi', '🇮🇳 Hindi'],
-  ['ta', '🇮🇳 Tamoul'],
-  ['te', '🇮🇳 Télougou'],
-  ['ja', '🇯🇵 Japonais'],
-  ['ko', '🇰🇷 Coréen'],
-  ['zh', '🇨🇳 Chinois (mandarin)'],
-  ['cn', '🇭🇰 Cantonais'],
-  ['th', '🇹🇭 Thaï'],
-  ['id', '🇮🇩 Indonésien'],
-];
+/** Langues originales proposées (code TMDB → libellé) : la liste commune (language.ts). */
+export const IMPORT_LANGS = ORIGINAL_LANGS;
 
 /** Pays de production proposés (code TMDB → libellé). */
 export const IMPORT_COUNTRIES: [string, string][] = [

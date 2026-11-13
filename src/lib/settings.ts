@@ -1,4 +1,5 @@
 import { db, getMeta, setMeta } from './db';
+import { detectCatalogueLang, isCatalogueLang } from './language';
 
 const TOKEN_KEY = 'tmdb-token';
 const VOTES_KEY = 'min-votes';
@@ -8,12 +9,35 @@ export interface MinVotes {
   movie: number;
   tv: number;
   anime: number;
-  frMovie: number; // films en français (langue originale)
-  frTv: number; // séries en français
+  /** Langue originale qui a son propre seuil, plus bas (celle de l'utilisateur, voir language.ts) ; null : aucune. */
+  lang: string | null;
+  langMovie: number; // films dans cette langue
+  langTv: number; // séries dans cette langue
   oldMovie: number; // films sortis avant 1980
 }
 
-export const DEFAULT_MIN_VOTES: MinVotes = { movie: 1000, tv: 50, anime: 50, frMovie: 150, frTv: 20, oldMovie: 150 };
+/** Les seuils (nombres) de MinVotes, dans l'ordre des réglages. */
+export const VOTE_FIELDS = ['movie', 'tv', 'anime', 'langMovie', 'langTv', 'oldMovie'] as const;
+export type VoteField = (typeof VOTE_FIELDS)[number];
+
+/** Seuils par défaut (les mêmes quelle que soit la langue) ; la langue, elle, vient de l'appareil (getMinVotes). */
+export const DEFAULT_MIN_VOTES: MinVotes = { movie: 1000, tv: 50, anime: 50, lang: 'fr', langMovie: 150, langTv: 20, oldMovie: 150 };
+
+/** Seuils enregistrés avant le 13/11 : « titres en français » (frMovie, frTv), sans langue choisie. */
+type StoredMinVotes = Partial<MinVotes> & { frMovie?: number; frTv?: number };
+
+/**
+ * Seuils enregistrés (base, compte, sauvegarde), complétés. L'ancien format (sans langue) voulait dire « en
+ * français » : la langue reste le français. Une langue inconnue devient « aucune ».
+ */
+export function normalizeMinVotes(stored: StoredMinVotes): MinVotes {
+  const { frMovie, frTv, ...rest } = stored;
+  const v: MinVotes = { ...DEFAULT_MIN_VOTES, ...rest };
+  if (rest.langMovie === undefined && frMovie !== undefined) v.langMovie = frMovie;
+  if (rest.langTv === undefined && frTv !== undefined) v.langTv = frTv;
+  v.lang = !('lang' in stored) ? 'fr' : isCatalogueLang(stored.lang) ? stored.lang : null;
+  return v;
+}
 
 function read(key: string): string | null {
   try {
@@ -59,11 +83,30 @@ export function forgetToken(): void {
 // Deux appareils avec des seuils différents s'effaceraient l'un l'autre des titres à chaque mise à jour.
 const VOTES_META = 'min-votes';
 
+/**
+ * Seuils du catalogue. Jamais enregistrés : ceux par défaut, avec la langue de l'appareil (détectée dès l'ouverture,
+ * avant le premier téléchargement) — sauf sur un appareil dont le catalogue est déjà téléchargé (avant le 13/11, la
+ * langue était toujours le français : on ne change pas son catalogue).
+ */
 export async function getMinVotes(): Promise<MinVotes> {
-  return { ...DEFAULT_MIN_VOTES, ...(await getMeta<Partial<MinVotes> | null>(VOTES_META, null)) };
+  const stored = await getMeta<StoredMinVotes | null>(VOTES_META, null);
+  if (stored) return normalizeMinVotes(stored);
+  const downloaded = (await getMeta<number | null>('lastSync', null)) !== null;
+  return { ...DEFAULT_MIN_VOTES, lang: downloaded ? 'fr' : detectCatalogueLang() };
 }
 
 export const setMinVotes = (v: MinVotes) => setMeta(VOTES_META, v);
+
+/**
+ * Fixe les seuils (et donc la langue détectée) s'ils n'ont jamais été enregistrés : appelé au téléchargement du
+ * catalogue, une fois les réglages du compte reçus. Changer ensuite la langue de l'appareil ne change plus le
+ * catalogue (seulement Réglages → Catalogue), et les autres appareils du compte reçoivent la même langue.
+ */
+export async function fixMinVotes(): Promise<MinVotes> {
+  const votes = await getMinVotes();
+  if (!(await db.meta.get(VOTES_META))) await setMinVotes(votes);
+  return votes;
+}
 
 // Afficher la catégorie Animes (tuiles, onglets) : synchronisé avec le compte. Les animes restent au catalogue.
 const SHOW_ANIME_META = 'show-anime';
@@ -76,7 +119,7 @@ export async function migrateMinVotes(): Promise<void> {
   const raw = read(VOTES_KEY);
   if (!raw) return;
   try {
-    if (!(await db.meta.get(VOTES_META))) await setMinVotes({ ...DEFAULT_MIN_VOTES, ...JSON.parse(raw) });
+    if (!(await db.meta.get(VOTES_META))) await setMinVotes(normalizeMinVotes(JSON.parse(raw)));
     localStorage.removeItem(VOTES_KEY);
   } catch {
     // Valeur illisible ou stockage indisponible : les seuils par défaut s'appliquent.

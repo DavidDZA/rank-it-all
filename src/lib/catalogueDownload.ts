@@ -1,6 +1,6 @@
 import { useSyncExternalStore } from 'react';
 import { getMeta, requestPersistentStorage } from './db';
-import { getMinVotes, hasTmdbAccess } from './settings';
+import { fixMinVotes, getMinVotes, hasTmdbAccess } from './settings';
 import { addNewTitles, NEW_TITLES_EVERY, NEW_TITLES_META, syncCatalogue, type NewTitlesCheck } from './sync';
 import { syncAndWait, whenCloudReady } from './cloud';
 import { toast } from './fun';
@@ -50,7 +50,8 @@ export async function downloadCatalogue(): Promise<void> {
     await requestPersistentStorage();
     await whenCloudReady();
     await syncAndWait().catch(() => undefined); // seuils du compte ; sans réseau vers le compte, ceux de l'appareil
-    const { movie, tv, anime } = await syncCatalogue(await getMinVotes(), (message, done) =>
+    // Seuils fixés (avec la langue de l'appareil) s'ils ne l'étaient pas : après ceux du compte, pour ne pas les écraser.
+    const { movie, tv, anime } = await syncCatalogue(await fixMinVotes(), (message, done) =>
       setState({ message, ...(done !== undefined ? { done } : {}) }),
     );
     setState({ running: false, message: null, done: 1, version: state.version + 1 });

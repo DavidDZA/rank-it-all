@@ -3,6 +3,7 @@ import { EXCLUDED_GENRES, isAnimeResult, isExcluded, tmdb, toTitle, type Page, t
 import type { MinVotes } from './settings';
 import { forgetCategories, isAnimeTitle } from './category';
 import { customImportLabel, getCustomImports, type CustomImport } from './customImports';
+import { langName } from './language';
 
 const MAX_PAGES = 500; // limite imposée par TMDB sur /discover
 const CONCURRENCY = 6;
@@ -147,14 +148,14 @@ export const OLD_MOVIES_BEFORE = 1980;
 
 /**
  * Requêtes du catalogue : chaque seuil a la sienne, et un titre est gardé s'il passe l'une d'elles.
- * Les titres en français et les vieux films ont un seuil plus bas : ils ont moins de votes sur TMDB,
- * surtout utilisé par un public international.
+ * Les titres dans la langue de l'utilisateur (`v.lang`, aucune pour l'anglais) et les vieux films ont un seuil plus
+ * bas : ils ont moins de votes sur TMDB, surtout utilisé par un public anglophone.
  */
 export function catalogueQueries(v: MinVotes): Query[] {
-  const fr = { with_original_language: 'fr' };
+  const local = v.lang ? { with_original_language: v.lang } : null;
   return [
     { type: 'movie', minVotes: v.movie, label: 'films' },
-    { type: 'movie', minVotes: v.frMovie, label: 'films en français', extra: fr },
+    ...(local ? [{ type: 'movie' as const, minVotes: v.langMovie, label: `films en ${langName(v.lang!)}`, extra: local }] : []),
     { type: 'movie', minVotes: v.oldMovie, label: `films d’avant ${OLD_MOVIES_BEFORE}`, until: Date.UTC(OLD_MOVIES_BEFORE - 1, 11, 31) },
     // Séries et animes viennent de la même liste TMDB : le plus bas des deux seuils, puis tri.
     {
@@ -163,7 +164,7 @@ export function catalogueQueries(v: MinVotes): Query[] {
       label: 'séries et animes',
       accept: (r) => (r.vote_count ?? 0) >= (isAnimeResult(r) ? v.anime : v.tv),
     },
-    { type: 'tv', minVotes: v.frTv, label: 'séries en français', extra: fr },
+    ...(local ? [{ type: 'tv' as const, minVotes: v.langTv, label: `séries en ${langName(v.lang!)}`, extra: local }] : []),
   ];
 }
 

@@ -124,8 +124,18 @@ classements de séries sans perdre leur ordre (au démarrage, après chaque sync
 ### 3.3 Catalogue
 
 `syncCatalogue` lance une requête `/discover` par seuil de votes (`catalogueQueries`) : films (1 000), séries
-(50), animes (50), titres en français (films 150, séries 20), films d'avant 1980 (150). Un titre est gardé s'il
-passe l'un des seuils qui le concernent. Les titres absents du nouveau téléchargement sont **supprimés** — sauf
+(50), animes (50), titres dans la langue de l'utilisateur (films 150, séries 20, quelle que soit la langue), films
+d'avant 1980 (150). Un titre est gardé s'il passe l'un des seuils qui le concernent.
+
+**Langue du catalogue** (13/11, `language.ts`, champ `lang` des seuils) : celle du téléphone ou du PC
+(`navigator.languages[0]`, convertie en code TMDB : « pt-BR » → `pt`, « nb » → `no`, « zh-HK » → `cn`…), si elle
+fait partie des langues originales de l'import sur mesure (`ORIGINAL_LANGS`) ; aucune pour l'anglais (ses titres
+passent déjà le seuil général) ou une langue absente de la liste — pas de requête de langue alors. Détectée dès
+l'ouverture (`getMinVotes`), puis **fixée** au premier téléchargement (`fixMinVotes`, après la lecture des seuils du
+compte pour ne pas les écraser) : changer ensuite la langue de l'appareil ne change plus le catalogue, et tous les
+appareils du compte ont la même. Modifiable dans Réglages → Catalogue (liste déroulante, dont « Aucune »). Les
+appareils au catalogue déjà téléchargé et les seuils à l'ancienne (`frMovie`, `frTv`, sans langue : compte,
+sauvegardes) restent en français (`normalizeMinVotes`). Les titres absents du nouveau téléchargement sont **supprimés** — sauf
 ceux **vus ou en wishlist** (ajouts manuels compris), qui restent avec leur place dans les classements. Les titres
 jamais triés ou « pas vu / pas envie » partent avec leur réponse, donc aussi sur le compte. Les seuils sont
 synchronisés pour que deux appareils ne s'effacent pas des titres.
@@ -249,7 +259,9 @@ Restaurer (dans un projet Supabase neuf, ou le même vidé) :
   `backup.test.ts`), les stats et badges (`stats.test.ts` : chiffres de découverte, jours actifs, titres aimés,
   wishlist priorisée, nanars ; 51 badges aux noms et emojis uniques, nouveaux badges débloqués aux bons chiffres), la
   décision du démarrage (premier téléchargement ou nouveautés, au plus une fois par jour : `demarrage.test.ts`), les
-  sagas du swipe (films restant à écarter) et les genres sous l'affiche (`swipe.test.ts`).
+  sagas du swipe (films restant à écarter) et les genres sous l'affiche (`swipe.test.ts`), la langue du catalogue
+  (détection de la langue de l'appareil, langue fixée, ancien format, requêtes et téléchargement en espagnol,
+  japonais, français ou sans langue : `langue.test.ts`).
 - `npm run e2e` : Playwright sur l'appli construite, dans le Chrome installé, formats téléphone (tactile) et PC.
   Parcours couverts : swipe (4 coins et 2 directions, boutons, vrais gestes, clavier, annuler / passer, « Annuler »
   une fois tout trié, repères pendant le glissement et tampon masqué, plus d'étiquette « Comme … » ; « Pas envie de
@@ -261,7 +273,9 @@ Restaurer (dans un projet Supabase neuf, ou le même vidé) :
   duels, Mes listes, « Ce soir ? », sauvegarde exportée puis réimportée (`parcours.spec.ts`), stats (6 cases, aussi
   sans les animes, plus de rubrique « Sagas complètes ») et 51 badges à 3 par ligne, tier list, partage en image
   (partage du téléphone simulé, ou téléchargement), filtres du swipe (`ecrans.spec.ts`), astuces à jour
-  (`tutoriel.spec.ts`). Outils communs dans `e2e/helpers.ts`
+  (`tutoriel.spec.ts`), langue du catalogue avec un navigateur en espagnol, portugais, japonais, français, allemand,
+  anglais ou swahili : premier téléchargement, réglages, langue choisie à la main, utilisateurs actuels restés en
+  français (`langue.spec.ts`, option `locale` de Playwright). Outils communs dans `e2e/helpers.ts`
   (`seed`, `readAnswers`, `readMeta`, `mockTmdbApi`).
 - **Performances** : `tests/perf.test.ts` (file des demandes, pause commune sur 429, nouvel essai sans la mémoire du
   navigateur, écritures groupées, échecs pas redemandés en boucle ; budgets de temps des calculs sur 14 000 titres :

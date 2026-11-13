@@ -22,11 +22,13 @@
 > (sauf en touchant le bas de l'affiche) corrigée ; 51 badges, 6ᵉ case « classés » dans les stats, plus de rubrique
 > « Sagas complètes » ; bouton saga en bas de l'affiche, rouge transparent, texte lisible ; tests de toute la session
 > ajoutés (ARCHITECTURE § 5), et deux tests de la file TMDB qui échouaient parfois rendus fiables.
+> Multilingue, 1re étape (13/11) : la langue des « titres dans ta langue » du catalogue suit celle de l'appareil
+> (ARCHITECTURE § 3.3), testée en plusieurs langues (`tests/langue.test.ts`, `e2e/langue.spec.ts`).
 >
 > **Reprendre ici** — test fermé en cours depuis le 11/11 (12 testeurs inscrits le 12/11) : 14 jours écoulés vers le
 > 26/11 (§ 2 étapes 5-6), puis demander la production. D'abord : demander à l'utilisateur ce que les testeurs pensent
-> des changements du 13/11 (repères du swipe surtout), et s'il a d'autres retours. Ensuite : **traduction**
-> (§ 4, décisions à prendre au début de la session), puis musique et jeux vidéo (§ 5). Faire connaître l'appli après la sortie : [PROMOTION.md](PROMOTION.md).
+> des changements du 13/11 (repères du swipe surtout), et s'il a d'autres retours. Ensuite : suite de la
+> **traduction** (§ 4 : textes de l'appli, langue TMDB, pays des plateformes ; décisions à prendre au début), puis musique et jeux vidéo (§ 5). Faire connaître l'appli après la sortie : [PROMOTION.md](PROMOTION.md).
 
 ## 1. Décisions en attente
 
@@ -131,9 +133,10 @@ libres (TMDB, Supabase) — c'est autorisé. Utile aussi si le Play Store est bl
   Proposition : un dictionnaire par langue, le français en référence, typé pour que la compilation échoue s'il
   manque une traduction ; langue et pays détectés depuis le téléphone, modifiables dans les réglages. Au-delà des
   textes : langue des titres et résumés TMDB (`language: 'fr-FR'` dans `tmdb.ts` ; changer de langue demande une
-  mise à jour du catalogue), **pays** des plateformes de streaming (`watch_region: 'FR'`, `results.FR`), seuils
-  « titres en français » à généraliser (langue / pays de l'utilisateur), fiche du Play Store et page de
-  confidentialité. **À décider** : les langues à la sortie (recommandé : français + anglais, d'autres ensuite) et
+  mise à jour du catalogue), **pays** des plateformes de streaming (`watch_region: 'FR'`, `results.FR`), fiche du
+  Play Store et page de confidentialité. ~~Seuils « titres en français » à généraliser~~ — fait le 13/11 : langue de
+  l'appareil, fixée au premier téléchargement, modifiable (ARCHITECTURE § 3.3). Reste à adapter ensuite : le badge
+  « Cocorico » (titres en français), et l'ordre des langues dans les filtres (le français en premier). **À décider** : les langues à la sortie (recommandé : français + anglais, d'autres ensuite) et
   le pays (recommandé : détecté depuis le téléphone, modifiable).
 
 - **Code ami** : nouvel essai automatique si le code tiré existe déjà (risque infime aujourd'hui : l'inscription

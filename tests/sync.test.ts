@@ -42,7 +42,7 @@ vi.mock('../src/lib/tmdb', async (importOriginal) => {
 });
 
 /** Seuils du test : ceux donnés, les autres trop hauts pour laisser passer quoi que ce soit. */
-const votes = (v: Partial<MinVotes>): MinVotes => ({ movie: 1000, tv: 10_000, anime: 10_000, frMovie: 10_000, frTv: 10_000, oldMovie: 10_000, ...v });
+const votes = (v: Partial<MinVotes>): MinVotes => ({ movie: 1000, tv: 10_000, anime: 10_000, lang: 'fr', langMovie: 10_000, langTv: 10_000, oldMovie: 10_000, ...v });
 
 beforeEach(async () => {
   await Promise.all([db.titles.clear(), db.answers.clear(), db.meta.clear()]);
@@ -96,7 +96,7 @@ describe('titres en français et vieux films', () => {
   });
 
   it('un titre trouvé par deux requêtes ne compte qu’une fois', async () => {
-    const r = await syncCatalogue(votes({ frMovie: 100, oldMovie: 100, movie: 100 }), () => {});
+    const r = await syncCatalogue(votes({ langMovie: 100, oldMovie: 100, movie: 100 }), () => {});
     expect(r.movie).toBe(4);
   });
 });

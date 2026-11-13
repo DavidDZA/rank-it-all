@@ -1,22 +1,18 @@
 import { useEffect, useRef, useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db, getMeta, requestPersistentStorage } from '../../lib/db';
-import { DEFAULT_MIN_VOTES, getMinVotes, getShowAnime, hasTmdbAccess, setMinVotes, setShowAnime, type MinVotes } from '../../lib/settings';
+import { DEFAULT_MIN_VOTES, getMinVotes, getShowAnime, hasTmdbAccess, setMinVotes, setShowAnime, VOTE_FIELDS, type MinVotes, type VoteField } from '../../lib/settings';
+import { CATALOGUE_LANGS, langFlag, langName } from '../../lib/language';
 import { OLD_MOVIES_BEFORE, syncCatalogue } from '../../lib/sync';
 import { isAnimeTitle } from '../../lib/category';
 import { syncAndWait } from '../../lib/cloud';
 import { useCatalogueDownload } from '../../lib/catalogueDownload';
 import { CatalogueProgress, ProgressBar } from '../../components/CatalogueProgress';
 
-const VOTE_KEYS = Object.keys(DEFAULT_MIN_VOTES) as (keyof MinVotes)[];
-const asText = (v: MinVotes) => Object.fromEntries(VOTE_KEYS.map((k) => [k, String(v[k])])) as Record<keyof MinVotes, string>;
+const asText = (v: MinVotes) => Object.fromEntries(VOTE_FIELDS.map((k) => [k, String(v[k])])) as Record<VoteField, string>;
 
-/** Champs des seuils, par ligne : un titre est gardé s'il passe l'un des seuils qui le concernent. */
-const VOTE_ROWS: { title: string; fields: [keyof MinVotes, string][] }[] = [
-  { title: 'Votes minimum :', fields: [['movie', '🎬 Films'], ['tv', '📺 Séries'], ['anime', '🎌 Animes']] },
-  { title: '🇫🇷 Titres en français (langue originale) :', fields: [['frMovie', '🎬 Films'], ['frTv', '📺 Séries']] },
-  { title: `🎞️ Films sortis avant ${OLD_MOVIES_BEFORE} :`, fields: [['oldMovie', '🎬 Films']] },
-];
+/** Titre de la ligne des titres dans la langue de l'utilisateur (« 🇪🇸 Titres en espagnol (langue originale) »). */
+const langRowTitle = (lang: string | null) => (lang ? `${langFlag(lang)} Titres en ${langName(lang)} (langue originale) :` : '🗣️ Titres dans ta langue :');
 
 /** Réglages → Catalogue : seuils de votes, catégorie Animes, téléchargement depuis TMDB. */
 export function CatalogueSetting() {
@@ -24,10 +20,15 @@ export function CatalogueSetting() {
   const saved = useLiveQuery(getMinVotes);
   const showAnime = useLiveQuery(getShowAnime);
   // Saisie brute (le champ peut être vidé pendant la frappe) ; valeur par défaut remise à la sortie du champ.
-  const [votes, setVotes] = useState<Record<keyof MinVotes, string>>(() => asText(DEFAULT_MIN_VOTES));
+  const [votes, setVotes] = useState<Record<VoteField, string>>(() => asText(DEFAULT_MIN_VOTES));
+  // Langue des titres qui ont leur propre seuil : celle de l'appareil au départ (voir getMinVotes) ; null : aucune.
+  const [lang, setLang] = useState<string | null>(null);
   const edited = useRef(false);
   useEffect(() => {
-    if (saved && !edited.current) setVotes(asText(saved));
+    if (saved && !edited.current) {
+      setVotes(asText(saved));
+      setLang(saved.lang);
+    }
   }, [saved && JSON.stringify(saved)]);
   const [syncing, setSyncing] = useState(false);
   const [syncMsg, setSyncMsg] = useState<string | null>(null);
@@ -41,15 +42,26 @@ export function CatalogueSetting() {
     lastSync: await getMeta<number | null>('lastSync', null),
   }));
 
-  const editVotes = (field: keyof MinVotes, value: string) => {
+  const editVotes = (field: VoteField, value: string) => {
     edited.current = true;
     setVotes((v) => ({ ...v, [field]: value }));
   };
-  const minVotes = (field: keyof MinVotes) => {
+  const editLang = (value: string) => {
+    edited.current = true;
+    setLang(value || null);
+  };
+  const minVotes = (field: VoteField) => {
     const n = Math.floor(Number(votes[field]));
     return votes[field].trim() !== '' && n >= 1 ? n : DEFAULT_MIN_VOTES[field];
   };
-  const resetIfInvalid = (field: keyof MinVotes) => setVotes((v) => ({ ...v, [field]: String(minVotes(field)) }));
+  const resetIfInvalid = (field: VoteField) => setVotes((v) => ({ ...v, [field]: String(minVotes(field)) }));
+
+  /** Champs des seuils, par ligne : un titre est gardé s'il passe l'un des seuils qui le concernent. */
+  const voteRows: { title: string; fields: [VoteField, string][]; lang?: true }[] = [
+    { title: 'Votes minimum :', fields: [['movie', '🎬 Films'], ['tv', '📺 Séries'], ['anime', '🎌 Animes']] },
+    { title: langRowTitle(lang), fields: lang ? [['langMovie', '🎬 Films'], ['langTv', '📺 Séries']] : [], lang: true },
+    { title: `🎞️ Films sortis avant ${OLD_MOVIES_BEFORE} :`, fields: [['oldMovie', '🎬 Films']] },
+  ];
 
   const sync = async () => {
     setSyncing(true);
@@ -59,8 +71,11 @@ export function CatalogueSetting() {
     try {
       // Sans saisie ici : les seuils du compte, à jour (ceux d'un autre appareil ont pu changer).
       if (!edited.current) await syncAndWait();
-      const chosen = edited.current ? (Object.fromEntries(VOTE_KEYS.map((k) => [k, minVotes(k)])) as unknown as MinVotes) : await getMinVotes();
+      const chosen: MinVotes = edited.current
+        ? { ...(Object.fromEntries(VOTE_FIELDS.map((k) => [k, minVotes(k)])) as Record<VoteField, number>), lang }
+        : await getMinVotes();
       setVotes(asText(chosen));
+      setLang(chosen.lang);
       edited.current = false;
       await setMinVotes(chosen);
       const { movie, tv, anime, removed } = await syncCatalogue(chosen, (message, done) => {
@@ -94,19 +109,39 @@ export function CatalogueSetting() {
         {info?.lastSync ? `Dernière mise à jour : ${new Date(info.lastSync).toLocaleString('fr-FR')}` : 'Jamais téléchargé'}
       </p>
       <p className="muted small">
-        Seuls les titres ayant un minimum de votes sur TMDB sont récupérés (pour éviter les titres introuvables). Baisse ces seuils pour en avoir plus. Les titres en français et les vieux films ont moins de votes : ils ont leur propre seuil, plus bas. Avec un compte, ils sont les mêmes sur tous tes appareils.
+        Seuls les titres ayant un minimum de votes sur TMDB sont récupérés (pour éviter les titres introuvables). Baisse ces seuils pour en avoir plus. Les titres dans ta langue et les vieux films ont moins de votes : ils ont leur propre seuil, plus bas. Avec un compte, ils sont les mêmes sur tous tes appareils.
       </p>
-      {VOTE_ROWS.map((row) => (
-        <div key={row.title} className="vote-row">
+      {voteRows.map((row) => (
+        <div key={row.lang ? 'lang' : row.title} className="vote-row">
           <p className="small">{row.title}</p>
-          <div className="row">
-            {row.fields.map(([key, label]) => (
-              <label key={key} className="field">
-                {label}
-                <input className="input" type="number" min={1} value={votes[key]} onChange={(e) => editVotes(key, e.target.value)} onBlur={() => resetIfInvalid(key)} />
-              </label>
-            ))}
-          </div>
+          {row.lang && (
+            <label className="field">
+              Langue originale
+              <select
+                className="input"
+                value={lang ?? ''}
+                onChange={(e) => editLang(e.target.value)}
+                title="Langue des titres qui ont leur propre seuil, plus bas. Par défaut, celle de ton téléphone ou de ton PC."
+              >
+                <option value="">Aucune</option>
+                {CATALOGUE_LANGS.map(([code, label]) => (
+                  <option key={code} value={code}>
+                    {label}
+                  </option>
+                ))}
+              </select>
+            </label>
+          )}
+          {row.fields.length > 0 && (
+            <div className="row">
+              {row.fields.map(([key, label]) => (
+                <label key={key} className="field">
+                  {label}
+                  <input className="input" type="number" min={1} value={votes[key]} onChange={(e) => editVotes(key, e.target.value)} onBlur={() => resetIfInvalid(key)} />
+                </label>
+              ))}
+            </div>
+          )}
         </div>
       ))}
       <div className="chips">
