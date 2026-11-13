@@ -173,7 +173,7 @@ export function RankedList({
   );
 }
 
-/** Ligne déplaçable : seule la poignée ⠿ attrape (toucher le reste de la ligne affiche le résumé, comme avant). */
+/** Ligne déplaçable : seule la poignée ⠿ attrape (toucher le reste de la ligne ouvre la fiche). */
 function SortableRow({ title, badge, below, children }: { title: Title; badge: ReactNode; below?: ReactNode; children: ReactNode }) {
   const { attributes, listeners, setNodeRef, setActivatorNodeRef, transform, transition, isDragging } = useSortable({ id: title.key });
   return (

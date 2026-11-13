@@ -3,15 +3,9 @@ import { useLongPress } from '../lib/hooks';
 import { Poster, RatingBadge, TitleText } from './common';
 import { openFiche } from './Fiche';
 
-/** Une des deux affiches d'un duel : toucher pour choisir, appui long pour la fiche, ℹ pour les résumés. */
-export function DuelCard(props: {
-  title: Title;
-  state: string;
-  showInfo: boolean;
-  onPick: (el: HTMLElement) => void;
-  onToggleInfo: () => void;
-}) {
-  const { title: t, showInfo } = props;
+/** Une des deux affiches d'un duel : toucher pour choisir ; ℹ (ou appui long) pour la fiche complète. */
+export function DuelCard(props: { title: Title; state: string; onPick: (el: HTMLElement) => void }) {
+  const { title: t } = props;
   const longPress = useLongPress(() => openFiche(t));
   return (
     <div
@@ -26,45 +20,22 @@ export function DuelCard(props: {
           props.onPick(e.currentTarget);
         }
       }}
-      title={`Choisir « ${t.title} » · Appui long : fiche complète`}
+      title={`Choisir « ${t.title} » · ℹ : fiche complète`}
     >
       <div className="duel-poster">
         <Poster title={t} size="w342" />
         <RatingBadge title={t} className="corner-left" />
-        {showInfo && (
-          <div
-            className="duel-overview"
-            onClick={(e) => {
-              e.stopPropagation();
-              props.onToggleInfo();
-            }}
-            title="Toucher pour masquer les résumés"
-          >
-            <div className="overview-text">
-              <p>{t.overview || 'Pas de résumé disponible.'}</p>
-            </div>
-            <button
-              className="btn small overview-fiche"
-              onClick={(e) => {
-                e.stopPropagation();
-                openFiche(t);
-              }}
-              title="Ouvrir la fiche complète"
-            >
-              📄 Fiche
-            </button>
-          </div>
-        )}
         <button
           className="info-btn"
+          onPointerDown={(e) => e.stopPropagation()}
           onClick={(e) => {
             e.stopPropagation();
-            props.onToggleInfo();
+            openFiche(t);
           }}
-          title={showInfo ? 'Masquer les résumés' : 'Afficher les résumés des deux titres'}
-          aria-label={showInfo ? 'Masquer les résumés' : 'Afficher les résumés'}
+          title="Fiche complète : résumé, durée, bande-annonce, où regarder…"
+          aria-label={`Fiche de « ${t.title} »`}
         >
-          {showInfo ? '✕' : 'ℹ'}
+          ℹ
         </button>
       </div>
       <TitleText title={t} credits />

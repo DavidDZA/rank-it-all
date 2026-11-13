@@ -38,7 +38,8 @@ const CONTENT: Record<TutorialId, { title: string; body: ReactNode }> = {
           <li>
             <b>👍 / 😐</b> pré-classe tes titres vus : moins de duels ensuite. Un 👍 fait aussi remonter des titres proches.
           </li>
-          <li>Touche l’affiche pour lire le résumé. Pas sûr ? « Passer » : il reviendra plus tard.</li>
+          <li>Touche l’affiche pour sa fiche complète (résumé, bande-annonce, où regarder). Pas sûr ? « Passer » : il reviendra plus tard.</li>
+          <li>Les films d’une saga s’enchaînent dans l’ordre ; « 💤 Pas envie de la saga » les écarte tous d’un coup.</li>
           <li>L’entonnoir filtre par genre, époque, note, ou par acteur et réalisateur.</li>
         </ul>
         <p className="muted small">Préfère deux gestes simples (vu / pas vu) ? Réglages → Mode de swipe.</p>
@@ -52,7 +53,8 @@ const CONTENT: Record<TutorialId, { title: string; body: ReactNode }> = {
         <li>
           <b>→ Vu</b>, <b>← Pas vu</b>. Puis une deuxième question : aimé ou bof si tu l’as vu, envie ou pas sinon.
         </li>
-        <li>Touche l’affiche pour lire le résumé. Pas sûr ? « Passer » : il reviendra plus tard.</li>
+        <li>Touche l’affiche pour sa fiche complète (résumé, bande-annonce, où regarder). Pas sûr ? « Passer » : il reviendra plus tard.</li>
+        <li>Les films d’une saga s’enchaînent dans l’ordre ; « 💤 Pas envie de la saga » les écarte tous d’un coup.</li>
         <li>L’entonnoir filtre par genre, époque, note, ou par acteur et réalisateur.</li>
       </ul>
     ),
@@ -62,6 +64,9 @@ const CONTENT: Record<TutorialId, { title: string; body: ReactNode }> = {
     body: (
       <ul>
         <li>Choisis ton préféré entre deux titres : chacun trouve sa place en quelques duels, même avec des centaines de titres.</li>
+        <li>
+          <b>ℹ</b> sur une affiche : sa fiche complète (résumé, bande-annonce…).
+        </li>
         <li>
           <b>Égalité</b> si tu ne sais pas départager, <b>Passer</b> pour le garder pour plus tard.
         </li>

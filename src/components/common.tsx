@@ -2,11 +2,12 @@ import { useEffect, useState, type CSSProperties, type ReactNode } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { getDetails, type Answer, type Tier, type Title } from '../lib/db';
 import { CATEGORY_LABEL, categoryOf } from '../lib/category';
+import { cardGenres } from '../lib/genres';
 import { changeStatus } from '../lib/ranking';
 import { boostFrom } from '../lib/recommend';
 import { ensureDetails, posterUrl, profileUrl, providerLogo } from '../lib/tmdb';
 import { groupProviders, hasMyProviders, isMineGroup, loadMyProviders } from '../lib/providers';
-import { useCloseOnBack, useLongPress } from '../lib/hooks';
+import { useCloseOnBack } from '../lib/hooks';
 import { openFiche } from './Fiche';
 
 /** Bouton retour à l'accueil : chevron dessiné (centré exactement, contrairement au caractère « ‹ »). */
@@ -39,17 +40,23 @@ export function Poster({ title, size = 'w342', className = '' }: { title: Title;
   );
 }
 
-/** Titre français, titre original en dessous s'il est différent, année et (option) casting. */
+/**
+ * Titre français, titre original en dessous s'il est différent, année. Avec `credits` (cartes du swipe et des
+ * duels) : année et genres sur une ligne, réalisateur et acteurs principaux sur la suivante.
+ */
 export function TitleText({ title, showType = false, credits = false }: { title: Title; showType?: boolean; credits?: boolean }) {
   return (
     <div className="title-text">
       <div className="title-main">{title.title}</div>
       {title.originalTitle && title.originalTitle !== title.title && <div className="title-original">{title.originalTitle}</div>}
-      <div className="title-meta">
-        {showType && <span className="badge">{CATEGORY_LABEL[categoryOf(title)].badge}</span>}
-        {title.year ?? ''}
-      </div>
-      {credits && <CreditsLines title={title} />}
+      {credits ? (
+        <CardLines title={title} />
+      ) : (
+        <div className="title-meta">
+          {showType && <span className="badge">{CATEGORY_LABEL[categoryOf(title)].badge}</span>}
+          {title.year ?? ''}
+        </div>
+      )}
     </div>
   );
 }
@@ -80,18 +87,21 @@ export function RatingBadge({ title, className = '' }: { title: Title; className
   );
 }
 
-/** Réalisateur (ou créateur) et 2 acteurs principaux. */
-function CreditsLines({ title }: { title: Title }) {
+/** Sous l'affiche : « 1999 · Drame, Thriller », puis « De David Fincher · Avec Edward Norton, Brad Pitt ». */
+function CardLines({ title }: { title: Title }) {
   const d = useDetails(title);
+  const meta = [title.year, cardGenres(title, d).join(', ')].filter(Boolean).join(' · ');
+  const credits = [
+    d?.directors.length ? `${title.type === 'movie' ? 'De' : 'Créée par'} ${d.directors.join(', ')}` : '',
+    d?.cast.length ? `Avec ${d.cast.join(', ')}` : '',
+  ]
+    .filter(Boolean)
+    .join(' · ');
   return (
-    <div className="title-credits">
-      {d?.directors.length ? (
-        <div>
-          {title.type === 'movie' ? 'De' : 'Créée par'} {d.directors.join(', ')}
-        </div>
-      ) : null}
-      {d?.cast.length ? <div>Avec {d.cast.join(', ')}</div> : null}
-    </div>
+    <>
+      <div className="title-meta">{meta}</div>
+      <div className="title-credits">{credits}</div>
+    </>
   );
 }
 
@@ -137,10 +147,7 @@ export function MineChip({ value, onChange, title }: { value: boolean; onChange:
   );
 }
 
-/**
- * Ligne de liste : toucher l'affiche ou le titre affiche le résumé,
- * un appui long ouvre la fiche complète.
- */
+/** Ligne de liste : toucher l'affiche ou le titre ouvre la fiche complète (résumé compris). */
 export function TitleRow({
   title,
   prefix,
@@ -161,9 +168,7 @@ export function TitleRow({
   itemStyle?: CSSProperties;
   itemClass?: string;
 }) {
-  const [open, setOpen] = useState(false);
-  const toggle = () => setOpen((o) => !o);
-  const longPress = useLongPress(() => openFiche(title));
+  const open = () => openFiche(title);
   return (
     <li className={`list-item ${itemClass}`} ref={itemRef} style={itemStyle}>
       {prefix}
@@ -171,10 +176,9 @@ export function TitleRow({
         className="row-main"
         role="button"
         tabIndex={0}
-        {...longPress}
-        onClick={toggle}
-        onKeyDown={(e) => e.key === 'Enter' && toggle()}
-        title="Toucher : résumé · Appui long : fiche complète"
+        onClick={open}
+        onKeyDown={(e) => e.key === 'Enter' && open()}
+        title="Fiche complète : résumé, durée, bande-annonce, où regarder…"
       >
         <Poster title={title} size="w92" className="thumb" />
         <div className="row-text">
@@ -183,14 +187,6 @@ export function TitleRow({
         </div>
       </div>
       {children && <div className="item-actions">{children}</div>}
-      {open && (
-        <div className="row-overview">
-          <p>{title.overview || 'Pas de résumé disponible.'}</p>
-          <button className="btn small" onClick={() => openFiche(title)} title="Ouvrir la fiche complète">
-            📄 Fiche complète
-          </button>
-        </div>
-      )}
     </li>
   );
 }

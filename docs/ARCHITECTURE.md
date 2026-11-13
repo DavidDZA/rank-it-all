@@ -1,6 +1,6 @@
 # Architecture — comment marche Rank It All
 
-> **À lire en premier par toute nouvelle session de travail.** État au 12/11/2026. Ce qui reste à faire est dans
+> **À lire en premier par toute nouvelle session de travail.** État au 13/11/2026. Ce qui reste à faire est dans
 > [ROADMAP.md](ROADMAP.md).
 
 ## 1. L'appli
@@ -9,8 +9,13 @@ Web app (PWA) en français pour trier petit à petit les **films**, **séries** 
 wishlist et ses classements, par sessions courtes. Gratuite, sans publicité, open source.
 
 - **Swipe** (deux modes : 4 coins par défaut — ↗ vu 👍, ↘ vu 😐, ↖ envie, ↙ pas envie — ou 2 directions).
-  Tirage pondéré par les votes TMDB, filtres (période, genre, langue, note, personne), recommandations des titres
-  aimés (« ✨ Comme … »), sagas enchaînées dans l'ordre.
+  Dès qu'on appuie sur la carte, des repères fixes et transparents montrent chaque direction (celle visée s'allume :
+  `SwipeCard`, `.swipe-guide`). Tirage pondéré par les votes TMDB, filtres (période, genre, langue, note, personne),
+  recommandations des titres aimés (tirées plus souvent, sans étiquette depuis le 13/11), sagas enchaînées dans
+  l'ordre, avec « 💤 Pas envie de la saga » (tous ses films restant à trier en « pas envie », annulable d'un coup).
+- **Fiche complète** d'un titre : en touchant la carte du swipe ou une ligne de liste, ou ℹ sur une affiche de duel
+  (plus de résumé intermédiaire depuis le 13/11). Sous l'affiche du swipe et des duels : année et genres sur une
+  ligne, réalisateur et acteurs sur la suivante (`TitleText credits`, `cardGenres`).
 - **Classement** par duels (insertion dichotomique), vérifications entre voisins, **déplacement à la main**
   (poignée ⠿ ou numéro), tier list, partage en image, filtre « dispo sur mes abonnements » (ce qu'on peut revoir).
   Même chose pour prioriser la wishlist.
@@ -240,9 +245,11 @@ Restaurer (dans un projet Supabase neuf, ou le même vidé) :
   `backup.test.ts`), les stats et badges (`stats.test.ts`), la décision du démarrage (premier téléchargement ou
   nouveautés, au plus une fois par jour : `demarrage.test.ts`).
 - `npm run e2e` : Playwright sur l'appli construite, dans le Chrome installé, formats téléphone (tactile) et PC.
-  Parcours couverts : swipe (4 coins et 2 directions, boutons, vrais gestes, clavier, annuler / passer :
-  `swipe.spec.ts`), fiche et ajout manuel avec TMDB simulé (réalisateur, acteurs, bande-annonce, plateformes, fiche
-  vide complétée, recherche par titre et par réalisateur : `fiche.spec.ts`), duels, Mes listes, « Ce soir ? »,
+  Parcours couverts : swipe (4 coins et 2 directions, boutons, vrais gestes, clavier, annuler / passer, repères
+  pendant le glissement, « Pas envie de la saga » et son annulation : `swipe.spec.ts`), fiche et ajout manuel avec
+  TMDB simulé (fiche ouverte directement depuis le swipe, une liste ou ℹ d'un duel ; réalisateur, acteurs,
+  bande-annonce, plateformes, genres sous l'affiche, fiche vide complétée, recherche par titre et par réalisateur :
+  `fiche.spec.ts`), duels, Mes listes, « Ce soir ? »,
   sauvegarde exportée puis réimportée (`parcours.spec.ts`), stats et badges, tier list, partage en image (partage du
   téléphone simulé, ou téléchargement), filtres du swipe (`ecrans.spec.ts`). Outils communs dans `e2e/helpers.ts`
   (`seed`, `readAnswers`, `readMeta`, `mockTmdbApi`).

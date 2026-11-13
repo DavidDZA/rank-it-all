@@ -105,6 +105,7 @@ export function chainSaga(queue: Title[], index: number, parts: Title[], keepFir
 
 /** Étiquette affichée sur l'affiche d'un film de saga : « 🎞️ Harry Potter · 2/8 ». */
 export interface SagaTag {
+  id: number; // saga TMDB
   name: string;
   position: number; // place du film dans la saga complète (ordre de sortie)
   total: number;
@@ -121,5 +122,10 @@ export const shortSagaName = (name: string) =>
 export function sagaTags(saga: SagaInfo): Record<string, SagaTag> {
   if (saga.parts.length < 2) return {};
   const name = shortSagaName(saga.name);
-  return Object.fromEntries(saga.parts.map((p, i) => [p.key, { name, position: i + 1, total: saga.parts.length }]));
+  return Object.fromEntries(saga.parts.map((p, i) => [p.key, { id: saga.id, name, position: i + 1, total: saga.parts.length }]));
+}
+
+/** Films de la saga `id` encore dans la file (donc pas encore triés), dans l'ordre de la file. */
+export function sagaInQueue(queue: Title[], tags: Record<string, SagaTag>, id: number): Title[] {
+  return queue.filter((t) => tags[t.key]?.id === id);
 }

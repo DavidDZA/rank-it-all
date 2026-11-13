@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
-import { details, mockTmdbApi, openRanking, readAnswers, seed, title } from './helpers';
+import { details, mockTmdbApi, openRanking, readAnswers, readMeta, seed, title } from './helpers';
 
 /**
  * Fiche d'un titre et ajout manuel, TMDB simulé (clé de test dans les réglages). Les fiches avaient perdu réalisateur,
@@ -45,14 +45,65 @@ async function expectFullFiche(page: Page) {
   await expect(f.getByRole('link', { name: 'Voir toutes les offres →' })).toBeVisible();
 }
 
-test('fiche complète : réalisateur, acteurs, durée, note, bande-annonce, plateformes', async ({ page }) => {
+test('liste : toucher une ligne ouvre directement la fiche complète (réalisateur, acteurs, durée, note, bande-annonce, plateformes)', async ({ page }) => {
   await withTmdb(page, { '/movie/550': FULL });
   await seed(page, { titles: [fightClub], answers: [{ key: fightClub.key, status: 'seen', tier: 'good' }], meta: { 'ranking:movie': [fightClub.key], lastSync: Date.now() } }, '#/rank/movie');
   await openRanking(page);
   await page.locator('.row-text', { hasText: 'Fight Club' }).click();
-  await page.getByRole('button', { name: 'Fiche complète' }).click();
   await expectFullFiche(page);
+  await expect(fiche(page)).toContainText('Résumé de test.');
   await expect(fiche(page)).toContainText('✓ Vu · 👍 bien');
+});
+
+test('swipe : toucher l’affiche ouvre directement la fiche complète, sans rien enregistrer', async ({ page, isMobile }) => {
+  await withTmdb(page, { '/movie/550': FULL });
+  await seed(page, { titles: [fightClub], meta: { lastSync: Date.now() } }, '#/swipe/movie');
+  await page.locator('.swipe-card:not(.card-behind) .card-poster').click();
+  await expectFullFiche(page);
+  await expect(fiche(page)).toContainText('Résumé de test.');
+  if (!isMobile) await page.keyboard.press('9'); // fiche ouverte : les touches du swipe ne répondent pas
+  await page.getByRole('button', { name: 'Fermer' }).click();
+  await expect(fiche(page)).toHaveCount(0);
+  await expect(page.locator('.swipe-card:not(.card-behind) .title-main')).toHaveText('Fight Club');
+  expect(await readAnswers(page)).toEqual({});
+});
+
+test('duel : ℹ ouvre la fiche de ce titre, sans le choisir', async ({ page }) => {
+  const drive = title('movie', 1, 'Drive');
+  await withTmdb(page, { '/movie/550': FULL });
+  await seed(
+    page,
+    {
+      titles: [fightClub, drive],
+      answers: [fightClub, drive].map((t) => ({ key: t.key, status: 'seen' as const, tier: 'good' as const })),
+      meta: { 'ranking:movie': [drive.key], lastSync: Date.now() },
+    },
+    '#/rank/movie',
+  );
+  await page.getByRole('button', { name: 'Fiche de « Fight Club »', exact: true }).click();
+  await expectFullFiche(page);
+  await page.getByRole('button', { name: 'Fermer' }).click();
+  await expect(page.getByText('Lequel préfères-tu ?')).toBeVisible(); // même duel, rien de choisi
+  await expect(page.locator('.duel-card')).toHaveCount(2);
+  expect(await readMeta(page, 'ranking:movie')).toEqual([drive.key]);
+});
+
+test('sous l’affiche : année et genres sur une ligne, réalisateur et acteurs sur la suivante (swipe et duels)', async ({ page }) => {
+  const thriller = { ...fightClub, genreIds: [18, 53] };
+  await withTmdb(page, { '/movie/550': FULL });
+  await seed(page, { titles: [thriller], meta: { lastSync: Date.now() } }, '#/swipe/movie');
+  const card = page.locator('.swipe-card:not(.card-behind)');
+  await expect(card.locator('.title-meta')).toHaveText('1999 · Drame, Thriller');
+  await expect(card.locator('.title-credits')).toHaveText('De David Fincher · Avec Edward Norton, Brad Pitt');
+
+  const drive = title('movie', 1, 'Drive', { genreIds: [80] });
+  await seed(
+    page,
+    { titles: [thriller, drive], answers: [thriller, drive].map((t) => ({ key: t.key, status: 'seen' as const })), meta: { 'ranking:movie': [drive.key], lastSync: Date.now() } },
+    '#/rank/movie',
+  );
+  await expect(page.locator('.duel-card', { hasText: 'Fight Club' }).locator('.title-meta')).toHaveText('1999 · Drame, Thriller');
+  await expect(page.locator('.duel-card', { hasText: 'Drive' }).locator('.title-meta')).toHaveText(`${drive.year} · Crime`);
 });
 
 test('fiche enregistrée vide (appareil déjà utilisé) : redemandée et complétée', async ({ page }) => {

@@ -1,6 +1,6 @@
 # Feuille de route — ce qui reste à faire
 
-> État au 12/11/2026. Comment l'appli marche aujourd'hui : [ARCHITECTURE.md](ARCHITECTURE.md).
+> État au 13/11/2026. Comment l'appli marche aujourd'hui : [ARCHITECTURE.md](ARCHITECTURE.md).
 > Fait : comptes et synchro, amis et « À deux », catégorie Animes, seuils français / vieux films, classement à
 > la main, refonte (fiches à part, chargement découpé, types Supabase, tests de bout en bout) ; puis (01-02/11)
 > renommage en **Rank It All** (base locale migrée, ancienne adresse redirigée), filtre « dispo sur mes
@@ -15,11 +15,14 @@
 > fiches sans réalisateur, acteurs, plateformes ni bande-annonce (ancienne clé TMDB refusée, fiches vides), recherche
 > par personne refusée par le relais, lenteurs (classement figé, « Annuler » des duels, stats lentes : ARCHITECTURE
 > § 3.5) ; nouveautés ajoutées au catalogue au démarrage (une fois par jour) ; tests : sauvegarde, stats, démarrage,
-> tous les parcours de bout en bout, « À deux » et synchro avec Supabase simulé, tests de perf (ARCHITECTURE § 5).
+> tous les parcours de bout en bout, « À deux » et synchro avec Supabase simulé, tests de perf (ARCHITECTURE § 5) ;
+> (13/11) appli fluide d'après l'utilisateur, version 3 validée ; 2ᵉ série de retours des testeurs : fiche complète
+> ouverte directement (swipe, listes, ℹ des duels), genres sous l'affiche, repères des directions pendant le swipe,
+> « 💤 Pas envie de la saga », plus d'étiquette « ✨ Comme … » (ARCHITECTURE § 1).
 >
-> **Reprendre ici** — test fermé en cours depuis le 11/11 (12 testeurs inscrits le 12/11) : attendre les 14 jours
-> (§ 2 étapes 5-6), puis demander la production. D'abord : demander à l'utilisateur si l'appli est fluide sur son
-> téléphone depuis les correctifs du 12/11 au soir, et s'il a d'autres retours de testeurs. Ensuite : **traduction**
+> **Reprendre ici** — test fermé en cours depuis le 11/11 (12 testeurs inscrits le 12/11) : 14 jours écoulés vers le
+> 26/11 (§ 2 étapes 5-6), puis demander la production. D'abord : demander à l'utilisateur ce que les testeurs pensent
+> des changements du 13/11 (repères du swipe surtout), et s'il a d'autres retours. Ensuite : **traduction**
 > (§ 4, décisions à prendre au début de la session), puis musique et jeux vidéo (§ 5). Faire connaître l'appli après la sortie : [PROMOTION.md](PROMOTION.md).
 
 ## 1. Décisions en attente
@@ -171,4 +174,5 @@ libres (TMDB, Supabase) — c'est autorisé. Utile aussi si le Play Store est bl
   pas de sauvegarde dans l'offre gratuite : sauvegarde nocturne chiffrée par GitHub Actions (ARCHITECTURE § 4.3).
 - **Mise à jour du catalogue** : les titres absents qui ne sont ni vus ni en wishlist sont supprimés, et ces suppressions se propagent à tous les appareils : garder les seuils
   synchronisés.
-- **Clé TMDB** lisible dans le site (§ 4) ; **téléphone pro** : le Play Store peut y être restreint, garder la PWA.
+- **Téléphone pro** : le Play Store peut y être restreint, garder la PWA. (La clé TMDB n'est plus dans le site
+  depuis le relais du 11/11.)

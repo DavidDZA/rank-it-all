@@ -429,21 +429,6 @@ button.link {
   }
 }
 
-/* ---------- Résumés (swipe, duels) : texte qui défile, bouton « Fiche » fixe ---------- */
-
-.overview-text {
-  flex: 1 1 auto;
-  min-height: 0;
-  overflow: auto;
-  touch-action: pan-y;
-  overscroll-behavior: contain;
-}
-.overview-fiche {
-  flex-shrink: 0;
-  align-self: flex-start;
-  margin-top: 10px;
-}
-
 /* ---------- Filtres ---------- */
 
 .filter-btn {

@@ -10,6 +10,9 @@ const CORNER_X = 70; // et pour un coin : en largeur…
 const CORNER_Y = 50; // … et en hauteur
 const FLY_MS = 220;
 
+/** Flèche de chaque direction, sur les repères affichés pendant le glissement. */
+const ARROW: Record<Dir, string> = { left: '←', right: '→', ul: '↖', ur: '↗', dl: '↙', dr: '↘' };
+
 const VECTOR: Record<Dir, [number, number]> = {
   left: [-1, 0],
   right: [1, 0],
@@ -47,12 +50,14 @@ interface Props {
 }
 
 /**
- * Carte à swiper. Pendant le glissement, la position et le tampon sont modifiés directement
- * dans le DOM (une fois par image) : aucun rendu React, pour rester fluide sur téléphone.
+ * Carte à swiper. Dès qu'on appuie dessus, des repères fixes (un par direction, en transparence) montrent où
+ * glisser et ce que ça fait ; celui qui est visé s'allume. Pendant le glissement, la position et les repères sont
+ * modifiés directement dans le DOM (une fois par image) : aucun rendu React, pour rester fluide sur téléphone.
  */
 export default function SwipeCard({ mode, labels, fling, onSwipe, onTap, onAmbiguous, stay = [], className = '', children }: Props) {
   const card = useRef<HTMLDivElement>(null);
   const stamp = useRef<HTMLSpanElement>(null);
+  const guide = useRef<HTMLDivElement>(null);
   const start = useRef<{ x: number; y: number } | null>(null);
   const delta = useRef({ x: 0, y: 0 });
   const frame = useRef(0);
@@ -82,6 +87,14 @@ export default function SwipeCard({ mode, labels, fling, onSwipe, onTap, onAmbig
     el.style.opacity = String(opacity);
   };
 
+  /** Repères : visibles tant que le doigt appuie, avec la direction visée (ou aucune). */
+  const showGuide = (visible: boolean, dir: Dir | null = null) => {
+    const el = guide.current;
+    if (!el) return;
+    el.classList.toggle('visible', visible);
+    if ((el.dataset.aim ?? '') !== (dir ?? '')) el.dataset.aim = dir ?? '';
+  };
+
   const leave = (dir: Dir) => {
     if (stay.includes(dir)) {
       place(0, 0, false);
@@ -109,6 +122,7 @@ export default function SwipeCard({ mode, labels, fling, onSwipe, onTap, onAmbig
     start.current = { x: e.clientX, y: e.clientY };
     delta.current = { x: 0, y: 0 };
     card.current?.classList.add('dragging');
+    showGuide(true);
     e.currentTarget.setPointerCapture(e.pointerId);
   };
 
@@ -121,7 +135,9 @@ export default function SwipeCard({ mode, labels, fling, onSwipe, onTap, onAmbig
       if (!start.current) return;
       const { x, y } = delta.current;
       place(x, mode === 'horizontal' ? y * 0.3 : y, false);
-      showStamp(aim(mode, x, y), progressOf(mode, x, y));
+      const dir = aim(mode, x, y);
+      showStamp(dir, progressOf(mode, x, y));
+      showGuide(true, dir);
     });
   };
 
@@ -131,6 +147,7 @@ export default function SwipeCard({ mode, labels, fling, onSwipe, onTap, onAmbig
     cancelAnimationFrame(frame.current);
     frame.current = 0;
     card.current?.classList.remove('dragging');
+    showGuide(false);
     const { x: dx, y: dy } = delta.current;
     const target = aim(mode, dx, dy);
     const valid = mode === 'horizontal' ? Math.abs(dx) > THRESHOLD : Math.abs(dx) > CORNER_X && Math.abs(dy) > CORNER_Y;
@@ -145,7 +162,15 @@ export default function SwipeCard({ mode, labels, fling, onSwipe, onTap, onAmbig
   };
 
   return (
-    <div
+    <>
+      <div ref={guide} className={`swipe-guide ${mode}`} aria-hidden>
+        {(Object.keys(labels) as Dir[]).map((d) => (
+          <span key={d} className={`guide-zone guide-${d} tone-${labels[d]!.tone}`}>
+            {d === 'left' || d.endsWith('l') ? `${ARROW[d]} ${labels[d]!.text}` : `${labels[d]!.text} ${ARROW[d]}`}
+          </span>
+        ))}
+      </div>
+      <div
       ref={card}
       className={`swipe-card ${className}`}
       onPointerDown={onPointerDown}
@@ -155,6 +180,7 @@ export default function SwipeCard({ mode, labels, fling, onSwipe, onTap, onAmbig
     >
       {children}
       <span ref={stamp} className="stamp" style={{ opacity: 0 }} aria-hidden />
-    </div>
+      </div>
+    </>
   );
 }

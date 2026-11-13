@@ -107,9 +107,10 @@ test.describe('performances', () => {
       const row = page.locator('ol.list > li .row-main').nth(i * 4);
       const t = Date.now();
       await row.click();
-      await expect(page.locator('.row-overview')).toBeVisible();
+      await expect(page.getByRole('dialog', { name: /^Fiche de / })).toBeVisible();
       expect(Date.now() - t).toBeLessThan(1500);
-      await row.click();
+      await page.keyboard.press('Escape');
+      await expect(page.getByRole('dialog')).toHaveCount(0);
     }
   });
 

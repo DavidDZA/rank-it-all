@@ -16,6 +16,7 @@ export interface SeedTitle {
   genreIds: number[];
   originalLanguage: string;
   rating?: number;
+  collectionId?: number | null;
 }
 
 /** Un titre de test (sans affiche : rien à télécharger). */

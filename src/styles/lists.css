@@ -36,18 +36,6 @@
   flex-direction: column;
   gap: 4px;
 }
-/* Résumé déplié sous la ligne. */
-.row-overview {
-  flex-basis: 100%;
-  margin: 2px 4px 4px;
-  font-size: 0.85rem;
-  line-height: 1.4;
-  color: color-mix(in srgb, var(--text) 85%, transparent);
-  animation: pop 0.2s;
-}
-.row-overview p {
-  margin: 0 0 8px;
-}
 .thumb {
   width: 46px;
   flex-shrink: 0;

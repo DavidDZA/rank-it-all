@@ -6,7 +6,7 @@ import { recordActivity } from '../../lib/activity';
 import { boostFactor, boostFrom, loadBoosts, type Boosts } from '../../lib/recommend';
 import { getSwipeMode, readPref, writePref } from '../../lib/settings';
 import { isNoTheme, matchesTheme, NO_THEME, ratingMissing, themeLabel, type Theme } from '../../lib/themes';
-import { BackLink, CloseOnBack, Poster, RatingBadge, TitleText } from '../../components/common';
+import { BackLink, Poster, RatingBadge, TitleText } from '../../components/common';
 import SwipeCard, { type Dir, type Tone } from '../../components/SwipeCard';
 import { openFiche } from '../../components/Fiche';
 import { ARROWS, CORNERS, isCorner, PHASES, TONES, type Corner, type Phase } from './config';
@@ -17,6 +17,7 @@ import {
   prefetch,
   QUEUE_SIZE,
   removeFromPool,
+  sagaInQueue,
   sagaKnownLocally,
   sagaOf,
   sagaTags,
@@ -65,9 +66,9 @@ export default function Swipe({ category }: { category: Category }) {
   };
   const [phase, setPhase] = useState<Phase>('seen');
   const [fling, setFling] = useState<Dir | null>(null);
-  const [history, setHistory] = useState<Title[]>([]);
+  // Réponses à pouvoir annuler : un titre, ou toute une saga écartée d'un coup.
+  const [history, setHistory] = useState<Title[][]>([]);
   const [count, setCount] = useState(0);
-  const [showInfo, setShowInfo] = useState(false);
   // Sagas déjà enchaînées, et étiquette « 🎞️ saga · n/N » de chacun de leurs films.
   const chainedSagas = useRef(new Set<number>());
   const [tags, setTags] = useState<Record<string, SagaTag>>({});
@@ -177,7 +178,6 @@ export default function Swipe({ category }: { category: Category }) {
       .map((title) => ({ title, w: weightOf(title) }));
     pool.current = { items, total: items.reduce((s, i) => s + i.w, 0) };
     setPhase('seen');
-    setShowInfo(false);
     // Avant d'afficher la 1re carte, on regarde si c'est un film de saga, pour commencer par le 1er film.
     // Seulement si sa fiche le dit déjà : on n'attend pas le réseau pour afficher la 1re carte
     // (sinon la saga s'enchaînera juste derrière elle).
@@ -203,8 +203,20 @@ export default function Swipe({ category }: { category: Category }) {
 
   const advance = (rest: Title[]) => {
     setPhase('seen');
-    setShowInfo(false);
     setQueue(fill(rest));
+  };
+
+  /** Titres triés (un seul, ou une saga) : compteur, activité, paliers, et de quoi annuler. */
+  const counted = (group: Title[]) => {
+    for (const t of group) answered.current.add(t.key);
+    recordActivity(group.length);
+    const n = count + group.length;
+    if (Math.floor(n / 25) > Math.floor(count / 25)) {
+      toast(`${pick(MILESTONES)} ${Math.floor(n / 25) * 25} titres triés`);
+      burst(['🎉', '🎊', '✨', '🥳'], undefined, 28);
+    }
+    setHistory((h) => [...h.slice(-49), group]);
+    setCount(n);
   };
 
   const onSwipe = async (dir: Dir) => {
@@ -226,18 +238,10 @@ export default function Swipe({ category }: { category: Category }) {
     } else status = dir === 'right' ? 'wish' : 'unseen';
     await setStatus(current, status, tier);
     if (tier === 'good') boostRecommendations(current);
-    answered.current.add(current.key);
-    recordActivity();
     const origin = centerOf(cardArea.current);
     if (status === 'seen') burst(['✅', '🍿', '⭐'], origin, 10);
     else if (status === 'wish') burst(['💖', '💕', '✨'], origin, 14);
-    const n = count + 1;
-    if (n % 25 === 0) {
-      toast(`${pick(MILESTONES)} ${n} titres triés`);
-      burst(['🎉', '🎊', '✨', '🥳'], undefined, 28);
-    }
-    setHistory((h) => [...h.slice(-49), current]);
-    setCount(n);
+    counted([current]);
 
     // La file à jour : une saga a pu s'y enchaîner pendant que la carte était affichée.
     advance((queueRef.current ?? queue).slice(1));
@@ -260,6 +264,22 @@ export default function Swipe({ category }: { category: Category }) {
     pool.current.total = pool.current.items.reduce((s, i) => s + i.w, 0);
   };
 
+  // Saga en cours : ses films encore à trier (la carte affichée comprise).
+  const saga = current ? tags[current.key] : undefined;
+  const sagaLeft = saga && queue ? sagaInQueue(queue, tags, saga.id) : [];
+  const canDropSaga = sagaLeft.length >= 2 && !(mode === 'horizontal' && phase === 'rate');
+
+  /** « Pas envie de la saga » : tous ses films restant à trier en « pas vu, pas envie », d'un coup. */
+  const dropSaga = async () => {
+    if (busy || !saga || !canDropSaga) return;
+    const group = sagaInQueue(queueRef.current ?? queue!, tags, saga.id);
+    for (const t of group) await setStatus(t, 'unseen');
+    counted(group);
+    toast(`💤 Saga ${saga.name} : ${group.length} films écartés`);
+    const dropped = new Set(group.map((t) => t.key));
+    advance((queueRef.current ?? queue!).filter((t) => !dropped.has(t.key)));
+  };
+
   const skip = () => {
     if (!busy && queue?.length) advance((queueRef.current ?? queue).slice(1));
   };
@@ -272,13 +292,14 @@ export default function Swipe({ category }: { category: Category }) {
     }
     const last = history.at(-1);
     if (!last) return;
-    await clearStatus(last.key);
-    answered.current.delete(last.key);
-    recordActivity(-1);
+    for (const t of last) {
+      await clearStatus(t.key);
+      answered.current.delete(t.key);
+    }
+    recordActivity(-last.length);
     setHistory((h) => h.slice(0, -1));
-    setCount((c) => Math.max(0, c - 1));
-    setShowInfo(false);
-    setQueue([last, ...queue]);
+    setCount((c) => Math.max(0, c - last.length));
+    setQueue([...last, ...queue]);
   };
 
   const press = (dir: Dir) => {
@@ -300,7 +321,7 @@ export default function Swipe({ category }: { category: Category }) {
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (showThemes) return;
+      if (showThemes || document.querySelector('.sheet-backdrop')) return; // fiche ou astuce ouverte
       const corner = (Object.keys(CORNERS) as Corner[]).find((c) => CORNERS[c].key === e.key);
       if (mode === 'corners' && corner) press(corner);
       else if (mode === 'horizontal' && e.key === 'ArrowRight') press('right');
@@ -402,6 +423,11 @@ export default function Swipe({ category }: { category: Category }) {
               <p>Tout est trié ! Mets à jour le catalogue de temps en temps pour récupérer les nouveautés.</p>
             </>
           )}
+          {history.length > 0 && (
+            <button className="btn" onClick={undo} title="Revenir sur la dernière réponse (touche Retour arrière)">
+              ↶ Annuler
+            </button>
+          )}
         </div>
       ) : (
         <>
@@ -409,7 +435,7 @@ export default function Swipe({ category }: { category: Category }) {
             {behind && (
               <div key={behind.key} className="swipe-card card-behind" aria-hidden>
                 <Poster title={behind} size="w500" className="card-poster" />
-                <CardTag saga={tags[behind.key]} boost={boosts.current[behind.key]} />
+                <CardTag saga={tags[behind.key]} />
                 <RatingBadge title={behind} />
                 <TitleText title={behind} credits />
               </div>
@@ -423,25 +449,11 @@ export default function Swipe({ category }: { category: Category }) {
               onAmbiguous={() => toast('↖ ↗ ↙ ↘ Swipe en diagonale, vers un coin')}
               stay={mode === 'horizontal' && phase === 'seen' ? ['left', 'right'] : []}
               className={phase !== 'seen' ? 'flip-in' : ''}
-              onTap={() => setShowInfo((s) => !s)}
+              onTap={() => openFiche(current)}
             >
               <Poster title={current} size="w500" className="card-poster" />
-              <CardTag saga={tags[current.key]} boost={boosts.current[current.key]} />
+              <CardTag saga={saga} left={sagaLeft.length} onDrop={canDropSaga ? dropSaga : undefined} />
               <RatingBadge title={current} />
-              {showInfo && (
-                <div className="card-overview" onPointerDown={(e) => e.stopPropagation()}>
-                  <CloseOnBack onClose={() => setShowInfo(false)} />
-                  <button className="overview-close" onClick={() => setShowInfo(false)} aria-label="Fermer le résumé" title="Fermer le résumé">
-                    ✕
-                  </button>
-                  <div className="overview-text">
-                    <p>{current.overview || 'Pas de résumé disponible.'}</p>
-                  </div>
-                  <button className="btn small overview-fiche" onClick={() => openFiche(current)} title="Durée, note, bande-annonce, où regarder…">
-                    📄 Fiche complète
-                  </button>
-                </div>
-              )}
               <TitleText title={current} credits />
             </SwipeCard>
           </div>

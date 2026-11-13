@@ -18,7 +18,6 @@ import {
 import { burst, centerOf, toast } from '../lib/fun';
 import { recordActivity } from '../lib/activity';
 import { DuelCard } from './DuelCard';
-import { CloseOnBack } from './common';
 
 interface DuelState {
   ranking: string[];
@@ -68,7 +67,6 @@ export function Duel({
   const [st, setSt] = useState<DuelState | null>(null);
   const [placed, setPlaced] = useState(0);
   const [picked, setPicked] = useState<string | null>(null);
-  const [showInfo, setShowInfo] = useState(false);
   const skipped = useRef(new Set<string>());
   const undoStack = useRef<Snapshot[]>([]);
   const busy = useRef(false);
@@ -343,7 +341,6 @@ export function Duel({
         {question}
       </p>
       <div className="duel">
-        {showInfo && <CloseOnBack onClose={() => setShowInfo(false)} />}
         <span className="vs" aria-hidden>
           VS
         </span>
@@ -352,9 +349,7 @@ export function Duel({
             key={t.key}
             title={t}
             state={picked === t.key ? 'winner' : picked ? 'loser' : ''}
-            showInfo={showInfo}
             onPick={(el) => pick(t, el)}
-            onToggleInfo={() => setShowInfo((s) => !s)}
           />
         ))}
       </div>

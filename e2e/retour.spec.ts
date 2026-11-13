@@ -30,8 +30,7 @@ test('fermée avec ✕, la fenêtre ne laisse rien dans l’historique', async (
 });
 
 test('Retour ferme la fiche d’un titre', async ({ page }) => {
-  await page.locator('.row-text', { hasText: 'Parasite' }).click(); // résumé
-  await page.getByRole('button', { name: 'Fiche complète' }).click();
+  await page.locator('.row-text', { hasText: 'Parasite' }).click(); // la fiche, directement
   await expect(page.getByRole('dialog', { name: 'Fiche de Parasite' })).toBeVisible();
   await back(page);
   await expect(page.getByRole('dialog')).toHaveCount(0);

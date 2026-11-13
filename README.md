@@ -16,7 +16,7 @@ Web app (PWA) pour construire petit à petit la liste des films et séries qu'on
 8. **Stats & badges** : décennies, genres, réalisateurs, acteurs, temps passé, couverture des titres populaires, activité, badges.
 
 Autres fonctions : filtres (période, réalisateur, acteur, genre, langue, note TMDB minimum) sur le swipe, le classement, la tier list et la wishlist, sagas enchaînées en entier dans l’ordre de sortie,
-fiche complète d'un titre (appui long : durée, note, bande-annonce, où regarder), partage de son top 10 en image,
+fiche complète d'un titre (en le touchant, ou ℹ dans les duels : résumé, durée, note, bande-annonce, où regarder), partage de son top 10 en image,
 rappels de sauvegarde et de mise à jour du catalogue, « Ce soir, je regarde quoi ? » (tirage dans la wishlist),
 tier list partageable, duels de vérification (les titres « bien » classés en priorité), recommandations d'après les titres aimés, note TMDB sur les cartes.
 
