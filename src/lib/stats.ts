@@ -34,7 +34,23 @@ export interface Stats {
   bestDay: number;
   totalActions: number;
   last30: { date: Date; count: number }[];
-  sagas: string[]; // sagas entièrement vues
+  sagas: string[]; // sagas entièrement vues (badges)
+  activeDays: number; // jours avec au moins un tri
+  good: number; // titres vus et aimés (👍)
+  wishRanked: number; // titres priorisés dans la wishlist
+  /** Pour les badges : découverte et curiosités, sur tous les titres vus. */
+  discovery: {
+    languages: number; // langues originales différentes
+    french: number; // titres en français
+    movieGenres: number; // genres de films différents
+    oldFilms: number; // films d'avant 1960
+    recent: number; // titres sortis cette année ou l'an dernier
+    highRated: number; // titres notés 8 ou plus sur TMDB
+    longFilms: number; // films de 3 h ou plus
+    episodes: number; // épisodes de séries et d'animes
+    maxDirector: number; // films du réalisateur le plus vu
+    maxActor: number; // titres de l'acteur le plus vu (une catégorie)
+  };
   missingDetails: Title[]; // titres vus sans fiche, ou fiche ancienne (pour compléter les stats)
 }
 
@@ -105,10 +121,11 @@ async function categoryStats(category: Category, seen: Title[]): Promise<Categor
 }
 
 export async function computeStats(): Promise<Stats> {
-  const [answers, activity, sagaRows] = await Promise.all([
+  const [answers, activity, sagaRows, wishRankings] = await Promise.all([
     db.answers.toArray(),
     loadActivity(),
     db.meta.where('key').startsWith('saga:').toArray(),
+    Promise.all((['movie', 'tv', 'anime'] as const).map((category) => readRanking({ category, list: 'wish' }))),
   ]);
   const seenAnswers = answers.filter((a) => a.status === 'seen');
   const seenTitles = await withDetails((await db.titles.bulkGet(seenAnswers.map((a) => a.key))).filter((t): t is Title => !!t));
@@ -121,6 +138,22 @@ export async function computeStats(): Promise<Stats> {
     .map((r) => r.value as { name: string; keys: string[] })
     .filter((s) => s.keys.length >= 2 && s.keys.every((k) => seenKeys.has(k)))
     .map((s) => s.name);
+
+  const year = new Date().getFullYear();
+  const movies = seenTitles.filter((t) => t.type === 'movie');
+  const language = (t: Title) => t.originalLanguage ?? t.details?.originalLanguage;
+  const discovery: Stats['discovery'] = {
+    languages: new Set(seenTitles.map(language).filter(Boolean)).size,
+    french: seenTitles.filter((t) => language(t) === 'fr').length,
+    movieGenres: new Set(movies.flatMap((t) => t.genreIds ?? t.details?.genreIds ?? [])).size,
+    oldFilms: movies.filter((t) => t.year && t.year < 1960).length,
+    recent: seenTitles.filter((t) => t.year && t.year >= year - 1).length,
+    highRated: seenTitles.filter((t) => (t.rating ?? t.details?.rating ?? 0) >= 8).length,
+    longFilms: movies.filter((t) => (t.details?.runtime ?? 0) >= 180).length,
+    episodes: seenTitles.reduce((n, t) => n + (t.type === 'tv' ? (t.details?.episodes ?? 0) : 0), 0),
+    maxDirector: movie.people[0]?.count ?? 0,
+    maxActor: Math.max(0, ...[movie, tv, anime].map((c) => c.actors[0]?.count ?? 0)),
+  };
 
   return {
     movie,
@@ -135,6 +168,10 @@ export async function computeStats(): Promise<Stats> {
     totalActions: Object.values(activity).reduce((s, n) => s + n, 0),
     last30: lastDays(activity, 30),
     sagas,
+    activeDays: Object.values(activity).filter((n) => n > 0).length,
+    good: seenAnswers.filter((a) => a.tier === 'good').length,
+    wishRanked: wishRankings.reduce((n, r) => n + r.length, 0),
+    discovery,
     missingDetails: seenTitles.filter((t) => detailsOutdated(t.details)),
   };
 }

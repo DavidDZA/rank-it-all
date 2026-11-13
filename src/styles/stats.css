@@ -114,11 +114,6 @@
   background: linear-gradient(90deg, var(--violet), var(--cyan));
 }
 
-.badge.saga {
-  font-size: 0.82rem;
-  padding: 3px 10px;
-  margin: 0;
-}
 .badge-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));

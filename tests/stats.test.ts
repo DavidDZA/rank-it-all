@@ -107,6 +107,44 @@ describe('stats', () => {
     expect(s.last30.at(-1)?.count).toBe(5);
   });
 
+  it('pour les badges : jours actifs, titres aimés, wishlist priorisée', async () => {
+    await setMeta('activity', { [day(0)]: 5, [day(-3)]: 2, [day(-9)]: 0 });
+    await setStatus(makeTitle(1), 'seen', 'good');
+    await setStatus(makeTitle(2), 'seen', 'meh');
+    await setStatus(makeTitle(3), 'wish');
+    await setStatus(makeTitle(4, {}, 'tv'), 'wish');
+    await saveRanking({ category: 'movie', list: 'wish' }, ['movie:3']);
+    await saveRanking({ category: 'tv', list: 'wish' }, ['tv:4']);
+    expect(await computeStats()).toMatchObject({ activeDays: 2, good: 1, wishRanked: 2 });
+  });
+
+  it('pour les badges : langues, français, genres, vieux films, récents, bien notés, films longs, épisodes, réalisateur et acteur favoris', async () => {
+    const year = new Date().getFullYear();
+    await setStatus(makeTitle(1, { year: 1955, originalLanguage: 'fr', genreIds: [18, 35], rating: 8.4 }), 'seen');
+    await setStatus(makeTitle(2, { year: 1999, originalLanguage: 'ja', genreIds: [16] }), 'seen');
+    await setStatus(makeTitle(3, { year, originalLanguage: 'en', genreIds: [18] }), 'seen');
+    await setStatus(makeTitle(10, { year: year - 1, originalLanguage: 'fr' }, 'tv'), 'seen');
+    await setStatus(makeTitle(4, { year: 1950, originalLanguage: 'fr' }), 'wish'); // pas vu : ne compte pas
+    await db.details.bulkPut([
+      { key: 'movie:1', ...fiche({ directors: ['Melville'], topCast: ['Delon'], runtime: 185 }) },
+      { key: 'movie:2', ...fiche({ directors: ['Melville'], topCast: ['Delon'], runtime: 100, rating: 9 }) },
+      { key: 'movie:3', ...fiche({ directors: ['Nolan'], topCast: ['Delon'], runtime: 180 }) },
+      { key: 'tv:10', ...fiche({ runtime: 50, episodes: 24 }) },
+    ]);
+    expect((await computeStats()).discovery).toEqual({
+      languages: 3,
+      french: 2,
+      movieGenres: 3, // Drame, Comédie, Animation
+      oldFilms: 1,
+      recent: 2,
+      highRated: 2, // film 1 : 8,4 au catalogue ; film 2 : pas de note au catalogue, 9 dans sa fiche
+      longFilms: 2,
+      episodes: 24,
+      maxDirector: 2,
+      maxActor: 3,
+    });
+  });
+
   it('titres vus à compléter : sans fiche, ou fiche vide', async () => {
     await setStatus(makeTitle(1), 'seen'); // sans fiche
     await setStatus(makeTitle(2), 'seen');
@@ -139,8 +177,21 @@ describe('badges', () => {
     expect(toasts).toEqual(['🏅 Badge débloqué : 🎬 Premier pas (+1)']);
   });
 
-  it('chaque badge a un identifiant unique et un objectif atteignable', () => {
-    expect(new Set(BADGES.map((b) => b.id)).size).toBe(BADGES.length);
+  it('50 badges, chacun avec un identifiant, un nom et un emoji uniques, et un objectif atteignable', () => {
+    expect(BADGES).toHaveLength(50);
+    for (const field of ['id', 'name', 'emoji'] as const) expect(new Set(BADGES.map((b) => b[field])).size).toBe(50);
     expect(BADGES.every((b) => b.target >= 1)).toBe(true);
+  });
+
+  it('les nouveaux badges se débloquent sur les bons chiffres', async () => {
+    await setMeta('activity', { [day(0)]: 60, [day(-1)]: 30, [day(-2)]: 20 }); // 110 tris, 3 jours d'affilée, 60 un jour
+    for (let i = 1; i <= 5; i++) await setStatus(makeTitle(i, { originalLanguage: ['fr', 'en', 'ja', 'ko', 'it'][i - 1] }), 'seen', 'good');
+    for (let i = 1; i <= 5; i++) await db.details.put({ key: `movie:${i}`, ...fiche({ directors: ['Kurosawa'] }) });
+    await saveRanking({ category: 'movie', list: 'seen' }, [1, 2, 3, 4, 5].map((i) => `movie:${i}`));
+    await checkBadges();
+    const unlocked = await getMeta<string[]>('badges', []);
+    expect(unlocked).toEqual(expect.arrayContaining(['first', 'sort100', 'day50', 'streak3', 'langs5', 'director5']));
+    expect(unlocked).not.toContain('day100');
+    expect(unlocked).not.toContain('ranked10'); // 5 classés sur 10
   });
 });

@@ -66,8 +66,13 @@ export default function StatsPage() {
       <div className="stat-tiles">
         <StatTile emoji="🎬" value={stats.movie.seen} label="films vus" />
         <StatTile emoji="📺" value={stats.tv.seen} label="séries vues" />
-        {categories.includes('anime') && <StatTile emoji="🎌" value={stats.anime.seen} label="animes vus" />}
+        {categories.includes('anime') ? (
+          <StatTile emoji="🎌" value={stats.anime.seen} label="animes vus" />
+        ) : (
+          <StatTile emoji="👍" value={stats.good} label="aimés" /> // toujours 6 cases, même sans les animes
+        )}
         <StatTile emoji="💖" value={stats.wish} label="en wishlist" />
+        <StatTile emoji="🏆" value={all.reduce((s, x) => s + x.ranked, 0)} label="classés" />
         <StatTile emoji="⏱️" value={formatHours(minutes)} label={`devant l’écran${coverage < 100 ? ` (sur ${coverage} % des titres)` : ''}`} />
       </div>
       {completing > 0 && <p className="muted small center">⏳ Complément des infos de {completing} titres…</p>}
@@ -135,19 +140,6 @@ export default function StatsPage() {
           })}
         </div>
       </section>
-
-      {stats.sagas.length > 0 && (
-        <section className="card">
-          <h3>🧩 Sagas complètes ({stats.sagas.length})</h3>
-          <div className="chips">
-            {stats.sagas.map((s) => (
-              <span key={s} className="badge saga">
-                {s}
-              </span>
-            ))}
-          </div>
-        </section>
-      )}
     </main>
   );
 }

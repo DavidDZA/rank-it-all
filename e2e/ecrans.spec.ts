@@ -10,7 +10,16 @@ const seenAll = { titles: films, answers: films.map((t) => ({ key: t.key, status
 
 const tab = (page: Page, name: string) => page.getByRole('button', { name, exact: true }).click();
 
-test('stats : chiffres, activité, décennies, réalisateurs, badges et sagas', async ({ page }) => {
+test('stats sans la catégorie Animes : toujours 6 cases, « aimés » à la place des animes', async ({ page }) => {
+  await seed(page, { ...seenAll, meta: { ...seenAll.meta, 'show-anime': false } }, '#/stats');
+  const tile = (label: string) => page.locator('.stat-tile', { hasText: label }).locator('.stat-value');
+  await expect(page.locator('.stat-tile')).toHaveCount(6);
+  await expect(tile('aimés')).toHaveText('10');
+  await expect(tile('classés')).toHaveText('10');
+  await expect(page.locator('.stat-tile', { hasText: 'animes vus' })).toHaveCount(0);
+});
+
+test('stats : chiffres, activité, décennies, réalisateurs, badges', async ({ page }) => {
   const [a, b, c] = [title('movie', 1, 'Pulp Fiction', { year: 1994 }), title('movie', 2, 'Jackie Brown', { year: 1997 }), title('movie', 3, 'Inception', { year: 2010 })];
   const serie = title('tv', 10, 'The Office', { year: 2005 });
   const today = new Date();
@@ -35,6 +44,8 @@ test('stats : chiffres, activité, décennies, réalisateurs, badges et sagas', 
   await expect(tile('séries vues')).toHaveText('1');
   await expect(tile('en wishlist')).toHaveText('1');
   await expect(tile('devant l’écran')).toHaveText('44 h'); // 154 + 154 + 148 + 22 × 100 = 2 656 minutes
+  await expect(tile('classés')).toHaveText('0');
+  await expect(page.locator('.stat-tile')).toHaveCount(6); // 3 lignes pleines de 2 cases
   await expect(page.getByText('🔥 Série : 1 j')).toBeVisible();
   await expect(page.getByText('⚡ Meilleur jour : 12')).toBeVisible();
   const bars = (heading: string) => page.locator('section.card', { has: page.getByRole('heading', { name: heading }) }).locator('.hbar');
@@ -44,7 +55,11 @@ test('stats : chiffres, activité, décennies, réalisateurs, badges et sagas', 
   await expect(page.locator('.badge-card.done', { hasText: 'Premier pas' })).toBeVisible();
   await expect(page.locator('.badge-card.done', { hasText: 'Saga complète' })).toBeVisible();
   await expect(page.locator('.badge-card:not(.done)', { hasText: 'Cinéphile' })).toContainText('3/100');
-  await expect(page.getByText('Tarantino Collection')).toBeVisible();
+  await expect(page.locator('.badge-card')).toHaveCount(50);
+  await expect(page.getByRole('heading', { name: /🏅 Badges \(\d+\/50\)/ })).toBeVisible();
+  // Plus de rubrique « Sagas complètes » (le badge reste).
+  await expect(page.getByRole('heading', { name: /Sagas complètes/ })).toHaveCount(0);
+  await expect(page.getByText('Tarantino Collection')).toHaveCount(0);
   // Séries : leurs propres stats.
   await page.getByRole('button', { name: /Séries/ }).first().click();
   await expect(bars('🕰️ Par décennie')).toHaveText([/2000s\s*1/]);
