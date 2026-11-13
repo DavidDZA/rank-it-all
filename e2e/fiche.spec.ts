@@ -98,6 +98,25 @@ test('swipe : toucher n’importe où sur l’affiche ouvre la fiche, et elle re
   expect(await readAnswers(page)).toEqual({});
 });
 
+test('un message affiché (badge, palier) laisse passer le toucher : carte sur téléphone, boutons sur PC', async ({ page, isMobile }) => {
+  await seed(page, { titles: [fightClub], meta: { lastSync: Date.now() } }, '#/swipe/movie');
+  await page.locator('.swipe-card:not(.card-behind) .card-poster').waitFor(); // appli chargée : les messages sont écoutés
+  await page.evaluate(() => dispatchEvent(new CustomEvent('app-toast', { detail: '🏅 Badge débloqué : test' })));
+  const toast = page.locator('.toast');
+  await expect(toast).toBeVisible();
+  const box = (await toast.boundingBox())!;
+  const [x, y] = [box.x + box.width / 2, box.y + box.height / 2];
+  // Sous le doigt, c'est ce qu'il y a derrière le message qui répond, pas le message.
+  const under = await page.evaluate(([x, y]) => document.elementFromPoint(x, y)?.closest('.toast, .swipe-card, .swipe-actions')?.className ?? '', [x, y]);
+  expect(under).not.toContain('toast');
+  if (isMobile) {
+    // Sur téléphone, le message passe sur le bas de la carte (titre, année, genres) : la toucher ouvre la fiche.
+    expect(under).toContain('swipe-card');
+    await page.mouse.click(x, y);
+    await expect(fiche(page)).toBeVisible();
+  }
+});
+
 test('duel : ℹ ouvre la fiche de ce titre, sans le choisir', async ({ page }) => {
   const drive = title('movie', 1, 'Drive');
   await withTmdb(page, { '/movie/550': FULL });

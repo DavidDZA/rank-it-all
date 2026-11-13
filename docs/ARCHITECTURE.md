@@ -22,7 +22,7 @@ wishlist et ses classements, par sessions courtes. Gratuite, sans publicité, op
   (poignée ⠿ ou numéro), tier list, partage en image, filtre « dispo sur mes abonnements » (ce qu'on peut revoir).
   Même chose pour prioriser la wishlist.
 - **Ce soir ?**, **Mes listes**, **ajout manuel**, **stats & badges** (6 cases en tête : films, séries, animes —
-  ou « aimés » si la catégorie est masquée —, wishlist, classés, temps ; **50 badges** par thème dans `badges.ts`,
+  ou « aimés » si la catégorie est masquée —, wishlist, classés, temps ; **51 badges** (3 par ligne) par thème dans `badges.ts`,
   calculés depuis `computeStats`, dont `discovery` pour les badges de découverte).
 - **Compte optionnel** (Google ou e-mail) : synchro entre appareils ; **amis** (code ou lien d'invitation) et page
   **« À deux »** : son top, wishlist commune, tirage à deux, conseils croisés, compatibilité.
@@ -246,23 +246,32 @@ Restaurer (dans un projet Supabase neuf, ou le même vidé) :
   l'appli sur le code du relais : chaque appel TMDB du code est accepté, la fiche revient complète (réalisateur,
   acteurs, plateformes, bande-annonce), fiches vides redemandées, clé personnelle refusée remplacée par le relais.
 - Vitest couvre aussi la sauvegarde (aller-retour, anciennes sauvegardes « Sort my stuffs », fichier refusé :
-  `backup.test.ts`), les stats et badges (`stats.test.ts`), la décision du démarrage (premier téléchargement ou
-  nouveautés, au plus une fois par jour : `demarrage.test.ts`).
+  `backup.test.ts`), les stats et badges (`stats.test.ts` : chiffres de découverte, jours actifs, titres aimés,
+  wishlist priorisée, nanars ; 51 badges aux noms et emojis uniques, nouveaux badges débloqués aux bons chiffres), la
+  décision du démarrage (premier téléchargement ou nouveautés, au plus une fois par jour : `demarrage.test.ts`), les
+  sagas du swipe (films restant à écarter) et les genres sous l'affiche (`swipe.test.ts`).
 - `npm run e2e` : Playwright sur l'appli construite, dans le Chrome installé, formats téléphone (tactile) et PC.
-  Parcours couverts : swipe (4 coins et 2 directions, boutons, vrais gestes, clavier, annuler / passer, repères
-  pendant le glissement, « Pas envie de la saga » et son annulation : `swipe.spec.ts`), fiche et ajout manuel avec
-  TMDB simulé (fiche ouverte directement depuis le swipe, une liste ou ℹ d'un duel ; réalisateur, acteurs,
-  bande-annonce, plateformes, genres sous l'affiche, fiche vide complétée, recherche par titre et par réalisateur :
-  `fiche.spec.ts`), duels, Mes listes, « Ce soir ? »,
-  sauvegarde exportée puis réimportée (`parcours.spec.ts`), stats et badges, tier list, partage en image (partage du
-  téléphone simulé, ou téléchargement), filtres du swipe (`ecrans.spec.ts`). Outils communs dans `e2e/helpers.ts`
+  Parcours couverts : swipe (4 coins et 2 directions, boutons, vrais gestes, clavier, annuler / passer, « Annuler »
+  une fois tout trié, repères pendant le glissement et tampon masqué, plus d'étiquette « Comme … » ; « Pas envie de
+  la saga » : place en bas de l'affiche, texte lisible, effacé pendant le glissement, compte des films, absent à
+  « aimé ? », annulation d'un coup : `swipe.spec.ts`), fiche et ajout manuel avec TMDB simulé (fiche ouverte
+  directement depuis le swipe, une liste ou ℹ d'un duel, et qui reste ouverte où qu'on touche l'affiche, doigt
+  immobile ou qui bouge un peu ; messages qui laissent passer le doigt ; réalisateur, acteurs, bande-annonce,
+  plateformes, genres sous l'affiche, fiche vide complétée, recherche par titre et par réalisateur : `fiche.spec.ts`),
+  duels, Mes listes, « Ce soir ? », sauvegarde exportée puis réimportée (`parcours.spec.ts`), stats (6 cases, aussi
+  sans les animes, plus de rubrique « Sagas complètes ») et 51 badges à 3 par ligne, tier list, partage en image
+  (partage du téléphone simulé, ou téléchargement), filtres du swipe (`ecrans.spec.ts`), astuces à jour
+  (`tutoriel.spec.ts`). Outils communs dans `e2e/helpers.ts`
   (`seed`, `readAnswers`, `readMeta`, `mockTmdbApi`).
 - **Performances** : `tests/perf.test.ts` (file des demandes, pause commune sur 429, nouvel essai sans la mémoire du
   navigateur, écritures groupées, échecs pas redemandés en boucle ; budgets de temps des calculs sur 14 000 titres :
   stats, filtres, tirage, « À deux », tier list, synchro) et `e2e/perf.spec.ts` (classement de 600 titres, classement
   pendant l'arrivée de 300 fiches, au plus 6 demandes à la fois, TMDB limité à 40/s, duels et « Annuler », stats
   progressives, gros catalogue). Budgets larges : ils attrapent une régression nette. Sur la version du 12/11 au
-  matin, 6 des 8 tests de bout en bout échouent.
+  matin, 6 des 8 tests de bout en bout échouent. Les tests de la file mesurent les vrais instants (refus vraiment
+  renvoyé, file d'arrière-plan vraiment pleine) au lieu de les supposer : avant le 13/11, deux d'entre eux échouaient
+  de temps en temps sur une machine chargée. Les budgets de temps, eux, peuvent échouer si on lance plusieurs suites
+  en même temps (ils mesurent la vitesse) : relancer seul.
 - **Mesurer finement** (à refaire après un changement qui touche les listes ou TMDB) : compiler avec
   `VITE_TMDB_RELAY` (le relais accepte `localhost:4173`), servir `dist` sur le port 4173, puis dans Playwright :
   profil persistant avec le vrai catalogue (≈ 14 000 titres) et des centaines de vus, `serviceWorkers: 'block'` (sinon

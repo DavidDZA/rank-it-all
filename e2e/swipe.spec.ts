@@ -150,6 +150,8 @@ test.describe('swipe 4 coins', () => {
     await expect(guide(page)).toHaveCSS('opacity', '1');
     await finger.move(40, -40); // vers ↗, sans aller jusqu'au bout
     await expect(guide(page)).toHaveAttribute('data-aim', 'ur');
+    // Pendant le glissement, les repères remplacent le tampon de la carte.
+    await expect(page.locator('.swipe-card:not(.card-behind) .stamp')).toHaveCSS('visibility', 'hidden');
     await finger.move(-40, 40); // vers ↙
     await expect(guide(page)).toHaveAttribute('data-aim', 'dl');
     await finger.release(); // trop court : la carte revient, rien n'est enregistré
@@ -185,9 +187,9 @@ test.describe('saga', () => {
     await page.goto('/');
     await page.evaluate(() => localStorage.setItem('tmdb-token', 'jeton-de-test'));
     await open(page, { titles: [...alien, ...others], meta: { lastSync: Date.now() } });
-    // Un film hors saga peut quand même sortir avant : on le trie, la saga suit.
+    // Un film hors saga peut quand même sortir avant : on le passe (bouton des deux modes), la saga suit.
     const otherNames = others.map((o) => o.title);
-    while (otherNames.includes((await current(page).textContent())!)) await answer(page, 'Vu · bien');
+    while (otherNames.includes((await current(page).textContent())!)) await answer(page, 'Passer');
     await expect(current(page)).toHaveText('Alien'); // la saga commence par son premier film
   }
 
@@ -226,6 +228,28 @@ test.describe('saga', () => {
     const tap = await press(page, isMobile);
     await expect(dropButton(page)).toHaveCSS('opacity', '1');
     await tap.release();
+  });
+
+  test('texte du bouton lisible : pas en gras, contour noir autour du blanc', async ({ page }) => {
+    await openSaga(page);
+    await expect(dropButton(page)).toHaveCSS('font-weight', '500');
+    await expect(dropButton(page)).toHaveCSS('color', 'rgb(255, 255, 255)');
+    expect(await dropButton(page).evaluate((el) => getComputedStyle(el).textShadow)).toContain('rgb(0, 0, 0)');
+    expect(await dropButton(page).evaluate((el) => getComputedStyle(el).backgroundColor)).toMatch(/rgba\(255, 95, 109, 0\.6\)/); // rouge transparent
+  });
+
+  test('mode 2 directions : bouton aux questions « vu ? » et « envie ? », pas à « aimé ? »', async ({ page }) => {
+    await page.goto('/');
+    await page.evaluate(() => localStorage.setItem('swipe-mode', 'horizontal'));
+    await openSaga(page);
+    await expect(dropButton(page)).toBeVisible(); // « Tu l'as vu ? »
+    await page.getByRole('button', { name: 'Pas vu', exact: true }).click();
+    await expect(page.getByRole('heading', { name: 'Pas vu… envie de le voir ?' })).toBeVisible();
+    await expect(dropButton(page)).toBeVisible();
+    await page.getByRole('button', { name: 'Annuler', exact: true }).click();
+    await page.getByRole('button', { name: 'Vu', exact: true }).click();
+    await expect(page.getByRole('heading', { name: 'Vu ! Tu as aimé ?' })).toBeVisible();
+    await expect(dropButton(page)).toHaveCount(0);
   });
 
   test('le bouton compte les films restant à trier, et disparaît au dernier', async ({ page }) => {

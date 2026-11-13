@@ -19,8 +19,9 @@
 > (13/11) appli fluide d'après l'utilisateur, version 3 validée ; 2ᵉ série de retours des testeurs : fiche complète
 > ouverte directement (swipe, listes, ℹ des duels), genres sous l'affiche, repères des directions pendant le swipe,
 > « 💤 Pas envie de la saga », plus d'étiquette « ✨ Comme … » (ARCHITECTURE § 1) ; fiche qui se refermait aussitôt
-> (sauf en touchant le bas de l'affiche) corrigée ; 50 badges, 6ᵉ case « classés » dans les stats, plus de rubrique
-> « Sagas complètes ».
+> (sauf en touchant le bas de l'affiche) corrigée ; 51 badges, 6ᵉ case « classés » dans les stats, plus de rubrique
+> « Sagas complètes » ; bouton saga en bas de l'affiche, rouge transparent, texte lisible ; tests de toute la session
+> ajoutés (ARCHITECTURE § 5), et deux tests de la file TMDB qui échouaient parfois rendus fiables.
 >
 > **Reprendre ici** — test fermé en cours depuis le 11/11 (12 testeurs inscrits le 12/11) : 14 jours écoulés vers le
 > 26/11 (§ 2 étapes 5-6), puis demander la production. D'abord : demander à l'utilisateur ce que les testeurs pensent

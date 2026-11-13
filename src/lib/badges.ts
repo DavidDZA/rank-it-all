@@ -15,7 +15,7 @@ const seenAll = (s: Stats) => s.movie.seen + s.tv.seen + s.anime.seen;
 const rankedAll = (s: Stats) => s.movie.ranked + s.tv.ranked + s.anime.ranked;
 const hours = (s: Stats) => Math.floor((s.movie.minutes + s.tv.minutes + s.anime.minutes) / 60);
 
-/** 50 badges, par thème (dans l'ordre d'affichage). */
+/** 51 badges (3 par ligne), par thème, dans l'ordre d'affichage. */
 export const BADGES: Badge[] = [
   // Films
   { id: 'first', emoji: '🎬', name: 'Premier pas', desc: '1 titre vu', target: 1, value: seenAll },
@@ -70,6 +70,7 @@ export const BADGES: Badge[] = [
   { id: 'langs15', emoji: '🌍', name: 'Globe-trotter', desc: 'Des titres en 15 langues', target: 15, value: (s) => s.discovery.languages },
   { id: 'french25', emoji: '🥖', name: 'Cocorico', desc: '25 titres en français', target: 25, value: (s) => s.discovery.french },
   { id: 'rated50', emoji: '💎', name: 'Fin palais', desc: '50 titres notés 8/10 ou plus', target: 50, value: (s) => s.discovery.highRated },
+  { id: 'nanar10', emoji: '🦆', name: 'Nanardeur', desc: '10 titres notés moins de 5/10', target: 10, value: (s) => s.discovery.lowRated },
   { id: 'director5', emoji: '🎥', name: 'Fan absolu', desc: '5 films du même réalisateur', target: 5, value: (s) => s.discovery.maxDirector },
   { id: 'actor10', emoji: '🌟', name: 'Groupie', desc: '10 titres avec le même acteur', target: 10, value: (s) => s.discovery.maxActor },
   // Sagas

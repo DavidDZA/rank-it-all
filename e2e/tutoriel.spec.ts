@@ -20,6 +20,10 @@ test.describe('astuces de première visite', () => {
     const tip = page.getByRole('dialog', { name: '🕹️ Swipe vers un coin' });
     await expect(tip).toBeVisible();
     await expect(tip.locator('.tuto-corners')).toContainText('↖ Envie');
+    // Astuces à jour (13/11) : l'affiche ouvre la fiche complète, et une saga s'écarte d'un coup.
+    await expect(tip).toContainText('Touche l’affiche pour sa fiche complète');
+    await expect(tip).toContainText('« 💤 Pas envie de la saga »');
+    await expect(tip).not.toContainText('lire le résumé');
     await tip.getByRole('button', { name: 'Fermer' }).click(); // la croix compte aussi
     await page.goto('/#/swipe/tv');
     await expect(page.locator('.swipe-page')).toBeVisible();
@@ -27,6 +31,19 @@ test.describe('astuces de première visite', () => {
     await expect(page.locator('.swipe-page')).toBeVisible();
     await page.waitForTimeout(500);
     await expect(page.getByRole('dialog', { name: /Swipe/ })).toHaveCount(0);
+  });
+
+  test('swipe 2 directions et duels : astuces à jour (fiche complète, ℹ)', async ({ page }) => {
+    await page.goto('/');
+    await page.evaluate(() => localStorage.setItem('swipe-mode', 'horizontal'));
+    await page.goto('/#/swipe/movie');
+    const swipeTip = page.getByRole('dialog', { name: '🕹️ Swipe' });
+    await expect(swipeTip).toContainText('Touche l’affiche pour sa fiche complète');
+    await expect(swipeTip).toContainText('« 💤 Pas envie de la saga »');
+    await swipeTip.getByRole('button', { name: 'Compris' }).click();
+    await page.goto('/#/rank/movie');
+    const rankTip = page.getByRole('dialog', { name: '🏆 Classer par duels' });
+    await expect(rankTip).toContainText('ℹ sur une affiche : sa fiche complète');
   });
 
   test('« Revoir les astuces » dans les réglages', async ({ page }) => {

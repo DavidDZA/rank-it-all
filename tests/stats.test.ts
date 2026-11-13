@@ -138,11 +138,22 @@ describe('stats', () => {
       oldFilms: 1,
       recent: 2,
       highRated: 2, // film 1 : 8,4 au catalogue ; film 2 : pas de note au catalogue, 9 dans sa fiche
+      lowRated: 0,
       longFilms: 2,
       episodes: 24,
       maxDirector: 2,
       maxActor: 3,
     });
+  });
+
+  it('nanars : titres vus notés moins de 5 (un titre sans note ne compte pas)', async () => {
+    await setStatus(makeTitle(1, { rating: 3.2 }), 'seen');
+    await setStatus(makeTitle(2, { rating: 4.9 }), 'seen');
+    await setStatus(makeTitle(3, { rating: 5 }), 'seen');
+    await setStatus(makeTitle(4), 'seen'); // sans note au catalogue…
+    await db.details.put({ key: 'movie:4', ...fiche({ rating: null }) }); // … ni dans sa fiche
+    await setStatus(makeTitle(5, { rating: 2 }), 'wish'); // pas vu
+    expect((await computeStats()).discovery.lowRated).toBe(2);
   });
 
   it('titres vus à compléter : sans fiche, ou fiche vide', async () => {
@@ -177,9 +188,10 @@ describe('badges', () => {
     expect(toasts).toEqual(['🏅 Badge débloqué : 🎬 Premier pas (+1)']);
   });
 
-  it('50 badges, chacun avec un identifiant, un nom et un emoji uniques, et un objectif atteignable', () => {
-    expect(BADGES).toHaveLength(50);
-    for (const field of ['id', 'name', 'emoji'] as const) expect(new Set(BADGES.map((b) => b[field])).size).toBe(50);
+  it('51 badges, chacun avec un identifiant, un nom et un emoji uniques, et un objectif atteignable', () => {
+    expect(BADGES).toHaveLength(51);
+    expect(BADGES.length % 3).toBe(0); // lignes pleines de 3
+    for (const field of ['id', 'name', 'emoji'] as const) expect(new Set(BADGES.map((b) => b[field])).size).toBe(51);
     expect(BADGES.every((b) => b.target >= 1)).toBe(true);
   });
 

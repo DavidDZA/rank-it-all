@@ -33,6 +33,8 @@ let maxInFlight = 0;
 let calls: { path: string; cache?: RequestCache; at: number }[] = [];
 /** Chemins refusés (429) la prochaine fois qu'ils sont demandés, avec ce Retry-After. */
 const refuseOnce = new Map<string, string>();
+/** Moment où chaque refus est vraiment renvoyé (et non pas supposé : machine chargée, réponses en retard). */
+let refusedAt: Record<string, number> = {};
 let delayMs = 20;
 let failAll = false;
 
@@ -56,6 +58,7 @@ vi.stubGlobal('fetch', async (input: string | URL, init?: RequestInit) => {
     const refuse = refuseOnce.get(path);
     if (refuse !== undefined) {
       refuseOnce.delete(path);
+      refusedAt[path] = Date.now();
       return new Response('{"status_code":25}', { status: 429, headers: { 'Retry-After': refuse } });
     }
     const id = Number(path.split('/').pop());
@@ -72,6 +75,7 @@ beforeEach(async () => {
   maxInFlight = 0;
   calls = [];
   refuseOnce.clear();
+  refusedAt = {};
   delayMs = 20;
   failAll = false;
 });
@@ -97,10 +101,14 @@ describe('file des demandes à TMDB', () => {
   });
 
   it('une fiche ouverte passe devant les fiches d’arrière-plan', async () => {
+    // Réponses lentes, et fiche ouverte une fois la file d'arrière-plan vraiment pleine : sinon, sur une machine
+    // chargée, des fiches d'arrière-plan finissaient pendant que la fiche ouverte lisait la base, et le test échouait
+    // sans que la file soit en cause.
+    delayMs = 150;
     const background = movies(60);
     const urgent = makeTitle(999);
     const all = prefetchDetails(background);
-    await new Promise((r) => setTimeout(r, 5));
+    await vi.waitFor(() => expect(queueState().waiting).toBeGreaterThan(0), { interval: 2 });
     const opened = ensureDetails(urgent); // fiche ouverte pendant le téléchargement de la wishlist
     await opened;
     const position = calls.findIndex((c) => c.path === '/movie/999');
@@ -115,9 +123,10 @@ describe('file des demandes à TMDB', () => {
     const t0 = Date.now();
     await Promise.all(titles.map((t) => ensureDetails(t)));
     expect(calls).toHaveLength(31); // 30 + un seul nouvel essai
-    // Aucune demande pendant la pause (hors celles déjà parties au moment du refus).
-    const refusedAt = calls.find((c) => c.path === '/movie/1')!.at + delayMs;
-    const during = calls.filter((c) => c.at > refusedAt + 20 && c.at < refusedAt + 250);
+    // Aucune demande pendant la pause (hors celles déjà parties au moment du refus). L'instant du refus est celui où
+    // la réponse a vraiment été renvoyée : le supposer (départ + 20 ms) faisait échouer le test sur une machine chargée.
+    const at = refusedAt['/movie/1'];
+    const during = calls.filter((c) => c.at > at + 5 && c.at < at + 280);
     expect(during).toEqual([]);
     expect(Date.now() - t0).toBeGreaterThanOrEqual(300);
   });

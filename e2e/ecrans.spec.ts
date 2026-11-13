@@ -55,8 +55,11 @@ test('stats : chiffres, activité, décennies, réalisateurs, badges', async ({ 
   await expect(page.locator('.badge-card.done', { hasText: 'Premier pas' })).toBeVisible();
   await expect(page.locator('.badge-card.done', { hasText: 'Saga complète' })).toBeVisible();
   await expect(page.locator('.badge-card:not(.done)', { hasText: 'Cinéphile' })).toContainText('3/100');
-  await expect(page.locator('.badge-card')).toHaveCount(50);
-  await expect(page.getByRole('heading', { name: /🏅 Badges \(\d+\/50\)/ })).toBeVisible();
+  await expect(page.locator('.badge-card')).toHaveCount(51);
+  // 3 badges par ligne, sur téléphone comme sur PC : 17 lignes pleines.
+  const columns = await page.locator('.badge-grid').evaluate((el) => getComputedStyle(el).gridTemplateColumns.split(' ').length);
+  expect(columns).toBe(3);
+  await expect(page.getByRole('heading', { name: /🏅 Badges \(\d+\/51\)/ })).toBeVisible();
   // Plus de rubrique « Sagas complètes » (le badge reste).
   await expect(page.getByRole('heading', { name: /Sagas complètes/ })).toHaveCount(0);
   await expect(page.getByText('Tarantino Collection')).toHaveCount(0);

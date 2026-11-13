@@ -46,6 +46,7 @@ export interface Stats {
     oldFilms: number; // films d'avant 1960
     recent: number; // titres sortis cette année ou l'an dernier
     highRated: number; // titres notés 8 ou plus sur TMDB
+    lowRated: number; // titres notés moins de 5 sur TMDB (nanars)
     longFilms: number; // films de 3 h ou plus
     episodes: number; // épisodes de séries et d'animes
     maxDirector: number; // films du réalisateur le plus vu
@@ -149,6 +150,10 @@ export async function computeStats(): Promise<Stats> {
     oldFilms: movies.filter((t) => t.year && t.year < 1960).length,
     recent: seenTitles.filter((t) => t.year && t.year >= year - 1).length,
     highRated: seenTitles.filter((t) => (t.rating ?? t.details?.rating ?? 0) >= 8).length,
+    lowRated: seenTitles.filter((t) => {
+      const r = t.rating ?? t.details?.rating ?? 0;
+      return r > 0 && r < 5; // 0 : pas de note
+    }).length,
     longFilms: movies.filter((t) => (t.details?.runtime ?? 0) >= 180).length,
     episodes: seenTitles.reduce((n, t) => n + (t.type === 'tv' ? (t.details?.episodes ?? 0) : 0), 0),
     maxDirector: movie.people[0]?.count ?? 0,
