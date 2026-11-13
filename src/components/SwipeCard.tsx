@@ -8,6 +8,8 @@ export type Tone = 'yes' | 'no' | 'wish' | 'meh';
 const THRESHOLD = 90; // px à parcourir pour valider un swipe horizontal
 const CORNER_X = 70; // et pour un coin : en largeur…
 const CORNER_Y = 50; // … et en hauteur
+const TAP_SLOP = 12; // px : un doigt bouge toujours un peu, c'est encore un simple toucher
+const CLICK_WAIT_MS = 400; // si le navigateur n'envoie pas de clic après le toucher
 const FLY_MS = 220;
 
 /** Flèche de chaque direction, sur les repères affichés pendant le glissement. */
@@ -62,6 +64,8 @@ export default function SwipeCard({ mode, labels, fling, onSwipe, onTap, onAmbig
   const delta = useRef({ x: 0, y: 0 });
   const frame = useRef(0);
   const leaving = useRef(false);
+  // Toucher en attente de son clic (voir onClick).
+  const tapTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   const place = (x: number, y: number, animate: boolean) => {
     const el = card.current;
@@ -97,12 +101,14 @@ export default function SwipeCard({ mode, labels, fling, onSwipe, onTap, onAmbig
 
   const leave = (dir: Dir) => {
     if (stay.includes(dir)) {
+      card.current?.classList.remove('moving');
       place(0, 0, false);
       showStamp(null, 0);
       onSwipe(dir);
       return;
     }
     leaving.current = true;
+    card.current?.classList.add('moving');
     const [vx, vy] = VECTOR[dir];
     const x = vx * window.innerWidth * 1.2;
     const y = vy ? vy * window.innerHeight * 0.7 : mode === 'horizontal' ? delta.current.y * 0.3 : delta.current.y;
@@ -115,7 +121,19 @@ export default function SwipeCard({ mode, labels, fling, onSwipe, onTap, onAmbig
     if (fling && !leaving.current) leave(fling);
   }, [fling]);
 
-  useEffect(() => () => cancelAnimationFrame(frame.current), []);
+  useEffect(
+    () => () => {
+      cancelAnimationFrame(frame.current);
+      clearTimeout(tapTimer.current);
+    },
+    [],
+  );
+
+  const tap = () => {
+    clearTimeout(tapTimer.current);
+    tapTimer.current = undefined;
+    onTap?.();
+  };
 
   const onPointerDown = (e: React.PointerEvent) => {
     if (leaving.current) return;
@@ -135,13 +153,15 @@ export default function SwipeCard({ mode, labels, fling, onSwipe, onTap, onAmbig
       if (!start.current) return;
       const { x, y } = delta.current;
       place(x, mode === 'horizontal' ? y * 0.3 : y, false);
+      // La carte bouge vraiment (pas un simple toucher) : les boutons posés dessus s'effacent (voir .moving).
+      card.current?.classList.toggle('moving', Math.abs(x) >= TAP_SLOP || Math.abs(y) >= TAP_SLOP);
       const dir = aim(mode, x, y);
       showStamp(dir, progressOf(mode, x, y));
       showGuide(true, dir);
     });
   };
 
-  const onPointerUp = () => {
+  const onPointerUp = (e: React.PointerEvent) => {
     if (!start.current) return;
     start.current = null;
     cancelAnimationFrame(frame.current);
@@ -155,7 +175,12 @@ export default function SwipeCard({ mode, labels, fling, onSwipe, onTap, onAmbig
       leave(target);
       return;
     }
-    if (Math.abs(dx) < 6 && Math.abs(dy) < 6) onTap?.();
+    card.current?.classList.remove('moving'); // lâchée sans choix : elle revient, ses boutons aussi
+    // Un toucher n'agit qu'au clic que le navigateur envoie juste après : agir avant, c'est ouvrir une fenêtre que ce
+    // clic referme aussitôt (il tombe sur le fond de la fenêtre). Sans clic (doigt un peu trop bougé), on agit quand même.
+    if (e.type === 'pointerup' && Math.abs(dx) < TAP_SLOP && Math.abs(dy) < TAP_SLOP) {
+      if (onTap) tapTimer.current = setTimeout(tap, CLICK_WAIT_MS);
+    }
     else if (mode === 'corners' && Math.hypot(dx, dy) > THRESHOLD) onAmbiguous?.();
     place(0, 0, true);
     showStamp(null, 0);
@@ -177,6 +202,7 @@ export default function SwipeCard({ mode, labels, fling, onSwipe, onTap, onAmbig
       onPointerMove={onPointerMove}
       onPointerUp={onPointerUp}
       onPointerCancel={onPointerUp}
+      onClick={() => tapTimer.current && tap()}
     >
       {children}
       <span ref={stamp} className="stamp" style={{ opacity: 0 }} aria-hidden />

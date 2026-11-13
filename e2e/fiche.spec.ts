@@ -68,6 +68,36 @@ test('swipe : toucher l’affiche ouvre directement la fiche complète, sans rie
   expect(await readAnswers(page)).toEqual({});
 });
 
+test('swipe : toucher n’importe où sur l’affiche ouvre la fiche, et elle reste ouverte (doigt immobile ou qui bouge un peu)', async ({ page, isMobile }) => {
+  // Bug du 13/11 : la fiche s'ouvrait au lever du doigt, et le clic envoyé juste après tombait sur le fond de la
+  // fenêtre et la refermait aussitôt, sauf en bas de l'affiche.
+  await seed(page, { titles: [fightClub, title('movie', 1, 'Drive')], meta: { lastSync: Date.now() } }, '#/swipe/movie');
+  const poster = page.locator('.swipe-card:not(.card-behind) .card-poster');
+  const box = (await poster.boundingBox())!;
+  const cdp = isMobile ? await page.context().newCDPSession(page) : null;
+  const name = (await page.locator('.swipe-card:not(.card-behind) .title-main').textContent())!;
+  for (const jitter of isMobile ? [0, 8] : [0]) {
+    for (const fx of [0.1, 0.5, 0.9]) {
+      for (const fy of [0.05, 0.3, 0.6, 0.9]) {
+        const x = box.x + box.width * fx;
+        const y = box.y + box.height * fy;
+        if (cdp) {
+          await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x, y }] });
+          if (jitter) await cdp.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{ x: x + jitter, y: y + jitter / 2 }] });
+          await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+        } else await page.mouse.click(x, y);
+        const dialog = page.getByRole('dialog', { name: `Fiche de ${name}` });
+        await expect(dialog, `toucher à ${fx} × ${fy} (doigt bougé de ${jitter} px)`).toBeVisible();
+        await page.waitForTimeout(300); // le clic qui suit le toucher ne la referme pas
+        await expect(dialog).toBeVisible();
+        await page.keyboard.press('Escape');
+        await expect(page.getByRole('dialog')).toHaveCount(0);
+      }
+    }
+  }
+  expect(await readAnswers(page)).toEqual({});
+});
+
 test('duel : ℹ ouvre la fiche de ce titre, sans le choisir', async ({ page }) => {
   const drive = title('movie', 1, 'Drive');
   await withTmdb(page, { '/movie/550': FULL });

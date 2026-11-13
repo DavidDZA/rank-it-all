@@ -14,7 +14,9 @@ wishlist et ses classements, par sessions courtes. Gratuite, sans publicité, op
   recommandations des titres aimés (tirées plus souvent, sans étiquette depuis le 13/11), sagas enchaînées dans
   l'ordre, avec « 💤 Pas envie de la saga » (tous ses films restant à trier en « pas envie », annulable d'un coup).
 - **Fiche complète** d'un titre : en touchant la carte du swipe ou une ligne de liste, ou ℹ sur une affiche de duel
-  (plus de résumé intermédiaire depuis le 13/11). Sous l'affiche du swipe et des duels : année et genres sur une
+  (plus de résumé intermédiaire depuis le 13/11). ⚠️ Une fenêtre s'ouvre au **clic**, jamais au lever du doigt : le
+  clic que le téléphone envoie juste après tomberait sur le fond de la fenêtre et la refermerait (bug du 13/11 : la
+  fiche ne restait ouverte qu'en touchant le bas de l'affiche ; `SwipeCard` attend ce clic, 400 ms au plus). Sous l'affiche du swipe et des duels : année et genres sur une
   ligne, réalisateur et acteurs sur la suivante (`TitleText credits`, `cardGenres`).
 - **Classement** par duels (insertion dichotomique), vérifications entre voisins, **déplacement à la main**
   (poignée ⠿ ou numéro), tier list, partage en image, filtre « dispo sur mes abonnements » (ce qu'on peut revoir).

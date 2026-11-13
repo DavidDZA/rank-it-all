@@ -148,17 +148,17 @@ body.rate-phase .swipe-card:not(.card-behind) {
   text-overflow: ellipsis;
   pointer-events: none;
 }
-/* « Pas envie de la saga » : un vrai bouton, plein, en bas de l'affiche (de la couleur de « Pas vu »). */
+/* « Pas envie de la saga » : un vrai bouton en bas de l'affiche, rouge (comme « Pas vu ») en transparence. */
 .saga-drop {
   position: absolute;
   left: 50%;
-  bottom: 14px;
+  bottom: 6px;
   transform: translateX(-50%);
-  max-width: calc(100% - 24px);
-  padding: 11px 20px;
-  border: 2px solid rgb(255 255 255 / 0.9);
+  max-width: calc(100% - 16px);
+  padding: 5px 13px;
+  border: 1.5px solid rgb(255 255 255 / 0.75);
   border-radius: 999px;
-  background: linear-gradient(135deg, #ff7a85, var(--red));
+  background: rgb(255 95 109 / 0.6);
   color: #fff;
   font-family: var(--display);
   font-size: 1.05rem;
@@ -166,12 +166,18 @@ body.rate-phase .swipe-card:not(.card-behind) {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  box-shadow: 0 6px 20px rgb(0 0 0 / 0.55);
+  text-shadow: 0 1px 3px rgb(0 0 0 / 0.5);
+  box-shadow: 0 4px 14px rgb(0 0 0 / 0.45);
   cursor: pointer;
-  transition: transform 0.12s;
+  transition: transform 0.12s, opacity 0.15s;
 }
 .saga-drop:active {
   transform: translateX(-50%) scale(0.95);
+}
+/* Pendant le glissement (et quand la carte part), le bouton s'efface ; lâchée sans choix, la carte le retrouve. */
+.swipe-card.moving .saga-drop {
+  opacity: 0;
+  pointer-events: none;
 }
 
 /* ---------- Tampons (couleur : tone-*, position : direction visée) ---------- */

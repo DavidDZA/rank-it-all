@@ -213,6 +213,21 @@ test.describe('saga', () => {
     await expect(dropButton(page)).toHaveText('💤 Pas envie de la saga (3)');
   });
 
+  test('le bouton s’efface pendant le glissement, et revient si on lâche sans choisir', async ({ page, isMobile }) => {
+    await openSaga(page);
+    await expect(dropButton(page)).toHaveCSS('opacity', '1');
+    const finger = await press(page, isMobile);
+    await finger.move(40, -40); // la carte bouge, sans aller jusqu'au coin
+    await expect(dropButton(page)).toHaveCSS('opacity', '0');
+    await finger.release();
+    await expect(dropButton(page)).toHaveCSS('opacity', '1');
+    await expect(current(page)).toHaveText('Alien');
+    // Un simple toucher (fiche) ne l'efface pas.
+    const tap = await press(page, isMobile);
+    await expect(dropButton(page)).toHaveCSS('opacity', '1');
+    await tap.release();
+  });
+
   test('le bouton compte les films restant à trier, et disparaît au dernier', async ({ page }) => {
     await openSaga(page);
     await answer(page, 'Vu · bien');
