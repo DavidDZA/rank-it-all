@@ -28,25 +28,14 @@
 > (14/11) **Traduction en 6 langues** livrée (ARCHITECTURE § 2.2).
 >
 > **Reprendre ici** (noté le 14/11 au soir) — test fermé en cours depuis le 11/11 (12 testeurs inscrits le 12/11) :
-> 14 jours écoulés vers le 26/11 (§ 2 étapes 5-6), puis demander la production. Deux choses en suspens :
+> 14 jours écoulés vers le 26/11 (§ 2 étapes 5-6), puis demander la production.
 >
-> **1. Bug : appli figée sur le logo au démarrage, revenue chez un testeur.** Il l'avait eu, c'était parti (version 3,
-> 11/11), et c'est revenu (signalé le 14/11). Rien n'est encore analysé. À demander à l'utilisateur, pour ce testeur :
-> - quel téléphone (le Pixel 10 Pro du 11/11 ou un autre ?) et quelle version de l'appli (Play Store → Rank It All →
->   « À propos de cette appli » : 1.0.2 attendu) ; Chrome à jour ?
-> - figé combien de temps : au bout de 8 s, la version 3 doit ouvrir le site dans un onglet Chrome (barre d'adresse) ;
->   voit-il au moins l'écran « Chargement… » (puis « Réessayer » au bout de 15 s) ? Rien de tout ça = blocage côté
->   Android/Chrome avant la page ; « Chargement… » qui reste = côté site (base locale, catalogue).
-> - depuis quand : depuis la mise en ligne de la traduction (14/11, nouvel `index.html` et manifestes par langue) ?
->   Langue de son téléphone ? Est-ce que vider le cache / forcer l'arrêt de l'appli, ou ouvrir le site dans Chrome,
->   marche ?
-> Pistes côté code : ARCHITECTURE § 2.1 (secours des 8 s, `generate.mjs`), écran « Chargement… » d'`index.html`
-> (dictionnaire BOOT, choix du manifeste), `main.tsx` (attente des reprises de la base, 4 s au plus), premier
-> téléchargement ou retéléchargement du catalogue si la langue a changé (`catalogueLanguageOutdated`).
-> Ajouter un test qui reproduit le cas une fois la cause trouvée.
+> **Bug « figé sur le logo » signalé le 14/11 : pas reproduit, abandonné le 14/11 au soir.** S'il revient, pistes :
+> ARCHITECTURE § 2.1 (secours des 8 s, `generate.mjs`), écran « Chargement… » d'`index.html` (BOOT, manifeste),
+> `main.tsx` (attente de la base, 4 s au plus), retéléchargement du catalogue si la langue a changé.
 >
-> **2. Fiches traduites du Play Store, à faire par l'utilisateur** (pas eu le temps le 14/11 ; aucune nouvelle version
-> de l'appli n'est nécessaire) :
+> **Fiches traduites du Play Store, en cours par l'utilisateur (14/11 au soir)** (aucune nouvelle version de l'appli
+> n'est nécessaire) :
 > 1. Play Console → **Accroître le nombre d'utilisateurs → Présence sur le Store → Fiche principale du Play Store**.
 > 2. En haut : **Gérer les traductions → Ajouter vos propres traductions** ; cocher **en-US, es-ES, de-DE, it-IT,
 >    pt-BR** ; valider.
