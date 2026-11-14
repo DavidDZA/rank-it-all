@@ -34,17 +34,8 @@
 > ARCHITECTURE § 2.1 (secours des 8 s, `generate.mjs`), écran « Chargement… » d'`index.html` (BOOT, manifeste),
 > `main.tsx` (attente de la base, 4 s au plus), retéléchargement du catalogue si la langue a changé.
 >
-> **Fiches traduites du Play Store, en cours par l'utilisateur (14/11 au soir)** (aucune nouvelle version de l'appli
-> n'est nécessaire) :
-> 1. Play Console → **Accroître le nombre d'utilisateurs → Présence sur le Store → Fiche principale du Play Store**.
-> 2. En haut : **Gérer les traductions → Ajouter vos propres traductions** ; cocher **en-US, es-ES, de-DE, it-IT,
->    pt-BR** ; valider.
-> 3. Pour chaque langue (liste déroulante en haut de la page) :
->    - nom, description courte, description complète : `store/fiche-play-store.md`, « Fiches dans les autres langues » ;
->    - **Image de présentation** : `store/bannieres/banniere-<langue>.png` (en, es, de, it, pt) ;
->    - **Captures d'écran du téléphone** : les 6 de `store/captures/<langue>/`, dans l'ordre 1 à 6 ;
->    - icône inchangée ; **Enregistrer**.
-> 4. **Vue d'ensemble de la publication → Envoyer les modifications pour examen**.
+> **Fiches traduites du Play Store** : les 5 langues ajoutées et envoyées pour examen le 14/11 au soir (déclaration
+> IA : « Ne pas signaler », comme le 08/11 : vraies captures, bannières assemblées par script).
 >
 > Ensuite : ce que les testeurs pensent des changements du 13-14/11, autres retours ; puis musique et jeux vidéo
 > (§ 5). Faire connaître l'appli après la sortie : [PROMOTION.md](PROMOTION.md).
@@ -150,9 +141,8 @@ libres (TMDB, Supabase) — c'est autorisé. Utile aussi si le Play Store est bl
 
 - ~~**Traduction**~~ — fait le 14/11 (ARCHITECTURE § 2.2) : 6 langues (français, anglais, espagnol, allemand,
   italien, portugais du Brésil), langue et pays de l'appareil modifiables dans les Réglages, titres TMDB et plateformes
-  du pays, page de confidentialité, manifestes et fiche du Play Store traduits. **À faire par l'utilisateur** : ajouter
-  les 5 traductions de la fiche dans la Play Console (`store/fiche-play-store.md`, § « Fiches dans les autres
-  langues », avec les captures de `store/captures/<langue>/` et la bannière de `store/bannieres/`). Plus tard : e-mails Supabase traduits (en anglais) ;
+  du pays, page de confidentialité, manifestes et fiche du Play Store traduits ; les 5 fiches traduites sont dans la
+  Play Console depuis le 14/11. Plus tard : e-mails Supabase traduits (aujourd'hui en anglais pour tous) ;
   relecture des traductions par des locuteurs natifs (faites par Claude).
 
 - **Code ami** : nouvel essai automatique si le code tiré existe déjà (risque infime aujourd'hui : l'inscription
