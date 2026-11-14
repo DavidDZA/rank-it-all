@@ -7,7 +7,7 @@ import { splitAnimeRankings } from './ranking';
 import { supabase } from './supabase';
 import type { Json } from './database.types';
 import { toast } from './fun';
-import { T } from '../i18n';
+import { LANG, T } from '../i18n';
 
 /*
  * Compte et synchro. L'appli lit et écrit toujours dans la base locale (rapide, hors ligne) ;
@@ -359,8 +359,22 @@ function onSession(event: string, session: Session | null) {
   }
   if (user && changed) {
     loadPseudo(user.id).catch(() => undefined);
+    saveEmailLanguage(u?.user_metadata).catch(() => undefined);
     schedule(0);
   }
+}
+
+/**
+ * Langue des e-mails du compte (mot de passe oublié) : rangée dans les données du compte (`user_metadata.lang`), que
+ * lit le modèle d'e-mail de Supabase (supabase/emails/). Mise à jour à l'ouverture de session si l'appareil est
+ * dans une autre langue : l'e-mail part dans la dernière langue utilisée avec ce compte.
+ */
+export const emailLanguageOutdated = (metadata: Record<string, unknown> | undefined) => metadata?.lang !== LANG;
+
+async function saveEmailLanguage(metadata: Record<string, unknown> | undefined) {
+  if (!emailLanguageOutdated(metadata)) return;
+  const { error } = await supabase!.auth.updateUser({ data: { lang: LANG } });
+  if (error) throw error;
 }
 
 let started = false;
@@ -377,7 +391,7 @@ export function startCloud(): void {
     const params = new URLSearchParams(location.search);
     if (!params.has('code') && !params.has('error') && !params.has('error_description')) return;
     const error = params.get('error_description');
-    if (error) toast(`✕ Connexion impossible : ${error}`);
+    if (error) toast(T.account.errors.signInFailed(error));
     let back = location.hash;
     try {
       back = sessionStorage.getItem(RETURN_KEY) ?? back;
@@ -421,7 +435,7 @@ export async function signUp(email: string, password: string, pseudo: string): P
   const { data, error } = await supabase!.auth.signUp({
     email: email.trim(),
     password,
-    options: { data: { pseudo: pseudo.trim() }, emailRedirectTo: siteUrl() },
+    options: { data: { pseudo: pseudo.trim(), lang: LANG }, emailRedirectTo: siteUrl() },
   });
   if (error) throw new Error(frError(error));
   // Adresse déjà inscrite (Supabase ne le dit pas, pour ne pas révéler les comptes existants).

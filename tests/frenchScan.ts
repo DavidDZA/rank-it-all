@@ -13,7 +13,9 @@ import { parse } from '@babel/parser';
 const FRENCH_CHARS = /[éèêëàâçùûüôîïœÉÈÊÀÂÇÙÛÔÎŒ’«»]/;
 /** Mots français courants, pour les textes sans accent (« Passer », « Films vus »). */
 const FRENCH_WORDS =
-  /\b(le|la|les|des|du|une?|tes|ton|ta|mes|mon|ma|pour|avec|sans|dans|sur|pas|vus?|vues?|films?|titres?|classement|envie|fermer|annuler|passer|choisir|chargement|ajouter|supprimer|retour|filtres?|tous|toutes|aucune?|oui|non|ou|et|est|sont|ce|cette|plus|moins|jours?|heures?|amis?|compte|ami|chercher|rechercher|bien|bof|tri[ée]?s?|liste|soir|regarder|catalogue|mettre|jour|duels?)\b/i;
+  /\b(le|la|les|des|du|une?|tes|ton|ta|mes|mon|ma|pour|avec|sans|dans|sur|pas|vus?|vues?|films?|titres?|classement|envie|fermer|annuler|passer|choisir|chargement|ajouter|supprimer|retour|filtres?|tous|toutes|aucune?|oui|non|ou|et|est|sont|ce|cette|plus|moins|jours?|heures?|amis?|compte|ami|chercher|rechercher|bien|bof|tri[ée]?s?|liste|soir|regarder|catalogue|mettre|jour|duels?|connexion|impossible|erreur|r[ée]essaie)\b/i;
+/** Espace avant « : », « ! », « ? » ou « ; » après un mot : typographie française (« Connexion impossible : … »). */
+const FRENCH_PUNCTUATION = /\p{L} [:!?;](\s|$)/u;
 
 export interface Hit {
   file: string;
@@ -32,6 +34,7 @@ function looksFrench(text: string, jsx: boolean): boolean {
   const s = text.trim();
   if (!s || IGNORED.some((r) => r.test(s))) return false;
   if (FRENCH_CHARS.test(s)) return true;
+  if (FRENCH_PUNCTUATION.test(s)) return true;
   if (!/[a-zA-Z]{2}/.test(s)) return false; // emoji, ponctuation, nombres
   if (jsx) return true; // texte JSX : toujours affiché
   return FRENCH_WORDS.test(s) && /\s/.test(s);

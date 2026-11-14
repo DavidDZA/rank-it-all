@@ -1,7 +1,8 @@
 # Fiche Google Play — Rank It All
 
-Tout ce qu'il faut recopier dans la Play Console (`io.github.daviddza.rankitall`). Langue par défaut : français
-(France). Images : `captures/` (1080 × 1920, dans l'ordre), `banniere-1024x500.png`, icône
+Tout ce qu'il faut recopier dans la Play Console (`io.github.daviddza.rankitall`). Langue par défaut : **anglais
+(en-US)** depuis le 14/11/2026 (fiche vue dans les langues non traduites, comme l'appli qui retombe sur l'anglais) ;
+le français est une traduction comme les autres. Images : `captures/` (1080 × 1920, dans l'ordre), `banniere-1024x500.png`, icône
 `../android/store_icon.png` (512 × 512).
 
 ## Fiche principale (*Croissance → Présence sur le Store → Fiche principale*)

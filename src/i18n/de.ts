@@ -163,6 +163,7 @@ export const de: Dict = {
       samePassword: 'Wähle ein anderes Passwort als das alte.',
       unknownCode: 'Unbekannter Freundescode: Prüfe die 8 Zeichen.',
       ownCode: 'Das ist dein eigener Freundescode!',
+      signInFailed: (reason: string) => `✕ Anmeldung fehlgeschlagen: ${reason}`,
     },
   },
   share: {

@@ -32,13 +32,15 @@ export interface FakeSupabase {
   unknown: string[];
   /** Lignes envoyées par la synchro de l'appareil (table → lignes). */
   pushed: Record<string, unknown[]>;
+  /** Modifications du compte demandées par l'appli (PUT /auth/v1/user : langue des e-mails…). */
+  userUpdates: Record<string, unknown>[];
 }
 
 const b64 = (o: unknown) => Buffer.from(JSON.stringify(o)).toString('base64url');
 
 /** Ouvre une session au nom de `me`, ami avec `friends`, et branche le faux serveur. */
 export async function fakeSupabase(page: Page, me: FakeUser, friends: FakeUser[]): Promise<FakeSupabase> {
-  const state: FakeSupabase = { unknown: [], pushed: {} };
+  const state: FakeSupabase = { unknown: [], pushed: {}, userUpdates: [] };
   const users = [me, ...friends];
   const now = Math.floor(Date.now() / 1000);
   const user = { id: me.id, aud: 'authenticated', role: 'authenticated', email: 'moi@test.invalid', app_metadata: { provider: 'email', providers: ['email'] }, user_metadata: {}, created_at: new Date().toISOString() };
@@ -51,7 +53,8 @@ export async function fakeSupabase(page: Page, me: FakeUser, friends: FakeUser[]
     user,
   };
   const ref = new URL(SUPABASE_URL).hostname.split('.')[0];
-  await page.addInitScript(([key, value]) => localStorage.setItem(key, value), [`sb-${ref}-auth-token`, JSON.stringify(session)]);
+  // Session posée au premier chargement seulement : ensuite, celle que l'appli a mise à jour (comme sur un vrai appareil).
+  await page.addInitScript(([key, value]) => localStorage.getItem(key) ?? localStorage.setItem(key, value), [`sb-${ref}-auth-token`, JSON.stringify(session)]);
 
   const profile = (u: FakeUser) => ({ id: u.id, pseudo: u.pseudo, friend_code: u.friendCode, share_wishlist: u.shareWishlist ?? true, share_ranking: u.shareRanking ?? true });
   const at = new Date().toISOString();
@@ -89,6 +92,12 @@ export async function fakeSupabase(page: Page, me: FakeUser, friends: FakeUser[]
     const url = new URL(req.url());
     const path = url.pathname;
     const method = req.method();
+    if (path === '/auth/v1/user' && method === 'PUT') {
+      const body = req.postDataJSON() as Record<string, unknown>;
+      state.userUpdates.push(body);
+      user.user_metadata = { ...user.user_metadata, ...(body.data as Record<string, unknown> | undefined) };
+      return route.fulfill({ json: user });
+    }
     if (path === '/auth/v1/user') return route.fulfill({ json: user });
     if (path === '/auth/v1/logout') return route.fulfill({ status: 204 });
     const table = path.match(/^\/rest\/v1\/([a-z_]+)$/)?.[1];

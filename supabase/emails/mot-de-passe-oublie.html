@@ -1,0 +1,61 @@
+{{- /*
+  E-mail « mot de passe oublié » de Supabase, en 6 langues : Authentication → Emails → Templates → Reset Password,
+  champ « Message body » (le sujet : mot-de-passe-oublie.sujet.txt). À recopier en entier après chaque modification.
+  La langue vient du compte (user_metadata.lang, enregistrée par l'appli : cloud.ts, saveEmailLanguage). Sans langue
+  (comptes d'avant le 14/11/2026, tous français, tant qu'ils n'ont pas rouvert l'appli) : français.
+  printf "%v" : une langue absente devient « <nil> » au lieu d'une erreur de comparaison.
+  Vérifié par tests/emails.test.ts (chaque langue a tous ses textes).
+*/ -}}
+{{- $l := printf "%v" .Data.lang -}}
+{{- $lang := "fr" -}}
+{{- $hello := "Salut !" -}}
+{{- $intro := "Tu as demandé à changer le mot de passe de ton compte Rank It All." -}}
+{{- $button := "Choisir un nouveau mot de passe" -}}
+{{- $once := "Ce lien ne sert qu’une fois. Si tu n’as rien demandé, ignore cet e-mail : ton mot de passe ne change pas." -}}
+{{- $copy := "Le bouton ne marche pas ? Copie ce lien dans ton navigateur :" -}}
+{{- if eq $l "en" -}}
+  {{- $lang = "en" -}}
+  {{- $hello = "Hi!" -}}
+  {{- $intro = "You asked to change the password of your Rank It All account." -}}
+  {{- $button = "Choose a new password" -}}
+  {{- $once = "This link only works once. If you didn’t ask for this, just ignore this email: your password stays the same." -}}
+  {{- $copy = "Button not working? Copy this link into your browser:" -}}
+{{- else if eq $l "es" -}}
+  {{- $lang = "es" -}}
+  {{- $hello = "¡Hola!" -}}
+  {{- $intro = "Has pedido cambiar la contraseña de tu cuenta de Rank It All." -}}
+  {{- $button = "Elegir una contraseña nueva" -}}
+  {{- $once = "Este enlace solo sirve una vez. Si no has pedido nada, ignora este correo: tu contraseña no cambia." -}}
+  {{- $copy = "¿El botón no funciona? Copia este enlace en tu navegador:" -}}
+{{- else if eq $l "de" -}}
+  {{- $lang = "de" -}}
+  {{- $hello = "Hallo!" -}}
+  {{- $intro = "Du möchtest das Passwort deines Rank-It-All-Kontos ändern." -}}
+  {{- $button = "Neues Passwort wählen" -}}
+  {{- $once = "Dieser Link funktioniert nur einmal. Wenn du das nicht angefordert hast, ignoriere diese E-Mail einfach: Dein Passwort bleibt unverändert." -}}
+  {{- $copy = "Der Button funktioniert nicht? Kopiere diesen Link in deinen Browser:" -}}
+{{- else if eq $l "it" -}}
+  {{- $lang = "it" -}}
+  {{- $hello = "Ciao!" -}}
+  {{- $intro = "Hai chiesto di cambiare la password del tuo account Rank It All." -}}
+  {{- $button = "Scegli una nuova password" -}}
+  {{- $once = "Questo link funziona una sola volta. Se non hai chiesto nulla, ignora questa email: la tua password non cambia." -}}
+  {{- $copy = "Il pulsante non funziona? Copia questo link nel browser:" -}}
+{{- else if eq $l "pt" -}}
+  {{- $lang = "pt-BR" -}}
+  {{- $hello = "Olá!" -}}
+  {{- $intro = "Você pediu para trocar a senha da sua conta do Rank It All." -}}
+  {{- $button = "Escolher uma nova senha" -}}
+  {{- $once = "Este link só funciona uma vez. Se você não pediu nada, ignore este e-mail: sua senha continua a mesma." -}}
+  {{- $copy = "O botão não funciona? Copie este link no navegador:" -}}
+{{- end }}
+<div lang="{{ $lang }}" style="font-family: Arial, Helvetica, sans-serif; color: #1f1f2e; max-width: 480px; margin: 0 auto; padding: 24px; line-height: 1.5;">
+  <h2 style="margin: 0 0 16px; color: #5b4bd6;">Rank It All</h2>
+  <p style="margin: 0 0 8px;">{{ $hello }}</p>
+  <p style="margin: 0 0 24px;">{{ $intro }}</p>
+  <p style="margin: 0 0 24px;">
+    <a href="{{ .ConfirmationURL }}" style="display: inline-block; background: #5b4bd6; color: #ffffff; text-decoration: none; font-weight: bold; padding: 12px 20px; border-radius: 10px;">{{ $button }}</a>
+  </p>
+  <p style="margin: 0 0 16px; font-size: 14px; color: #55556a;">{{ $once }}</p>
+  <p style="margin: 0; font-size: 12px; color: #55556a;">{{ $copy }}<br><a href="{{ .ConfirmationURL }}" style="color: #5b4bd6; word-break: break-all;">{{ .ConfirmationURL }}</a></p>
+</div>

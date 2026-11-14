@@ -177,6 +177,7 @@ export const fr = {
       samePassword: 'Choisis un mot de passe différent de l’ancien.',
       unknownCode: 'Code ami inconnu : vérifie les 8 caractères.',
       ownCode: 'C’est ton propre code ami !',
+      signInFailed: (reason: string) => `✕ Connexion impossible : ${reason}`,
     },
   },
   /** Images à partager (top 10, tier list). */

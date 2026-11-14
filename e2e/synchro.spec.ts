@@ -36,5 +36,7 @@ test('ce qui a été fait sur un autre appareil arrive ; ce qui est fait ici par
   const sent = (server.pushed.answers as Record<string, unknown>[]).find((r) => r.key === drive.key)!;
   expect(sent).toMatchObject({ user_id: ID, status: 'seen', tier: 'meh', deleted: false, title: { key: drive.key, title: 'Drive', year: 2011 } });
   expect(sent.title).not.toHaveProperty('overview');
+  // Langue des e-mails du compte (mot de passe oublié) : celle de l'appareil, enregistrée une fois.
+  expect(server.userUpdates).toMatchObject([{ data: { lang: 'fr' } }]);
   expect(server.unknown).toEqual([]);
 });

@@ -66,7 +66,10 @@ test.describe('comptes et amis @live', () => {
 
       // Le titre trié sur l'appareil est bien arrivé sur le compte (synchro typée).
       a = client();
-      const A = (await a.auth.signInWithPassword({ email: emailA, password: PASSWORD })).data.user!.id;
+      const signedIn = (await a.auth.signInWithPassword({ email: emailA, password: PASSWORD })).data.user!;
+      const A = signedIn.id;
+      // Langue des e-mails (mot de passe oublié) enregistrée dans le compte, lue par le modèle de Supabase.
+      expect(signedIn.user_metadata).toMatchObject({ pseudo: 'Alice Test', lang: 'fr' });
       const { data: sent } = await a.from('answers').select('key, status, tier, deleted').eq('user_id', A).eq('key', 'movie:1');
       expect(sent).toEqual([{ key: 'movie:1', status: 'seen', tier: 'good', deleted: false }]);
 

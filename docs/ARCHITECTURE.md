@@ -125,7 +125,12 @@ version Android n'est utile que pour changer ses réglages (nom, icône, couleur
   (`store/bannieres/`, 1024 × 500, `tools/captures-store/banniere.mjs` : icône, slogan traduit, tier list de la
   langue ; la française d'origine reste `store/banniere-1024x500.png`).
 - Le badge « Cocorico » (identifiant `french25`, gardé) compte les titres dans la langue de l'interface (en anglais :
-  ceux qui ne sont pas en anglais). Les e-mails de Supabase (mot de passe oublié) restent en anglais.
+  ceux qui ne sont pas en anglais).
+- **E-mail « mot de passe oublié »** (14/11) : Supabase n'a qu'un modèle par e-mail ; il choisit ses textes selon
+  `user_metadata.lang` du compte (modèle et sujet dans `supabase/emails/`, à recopier dans Supabase : § 4.2). L'appli
+  y range sa langue à l'inscription et à chaque ouverture de session si elle a changé (`saveEmailLanguage`,
+  `cloud.ts`) : l'e-mail part dans la dernière langue utilisée avec le compte. Sans langue (comptes d'avant, qui
+  n'ont pas rouvert l'appli) : français.
 
 ## 3. Données
 
@@ -266,7 +271,9 @@ modification (à faire par l'utilisateur dans *SQL Editor*).
 
 Réglages du projet Supabase : URL du site et `http://localhost:5173/**` dans *Authentication → URL
 Configuration* ; confirmation d'e-mail désactivée ; e-mails (réinitialisation du mot de passe) envoyés par un **compte Gmail
-dédié** en SMTP (*Authentication → Emails → SMTP Settings*, mot de passe d'application), modèle en anglais ; sans
+dédié** en SMTP (*Authentication → Emails → SMTP Settings*, mot de passe d'application) ; modèle *Reset password*
+(*Authentication → Emails*) en 6 langues, copié de `supabase/emails/mot-de-passe-oublie.html` (*Body*, onglet *Source*)
+et `mot-de-passe-oublie.sujet.txt` (*Subject*) — à recopier après chaque modification de ces fichiers ; sans
 nom de domaine, Hotmail / Outlook les classent en indésirables (solution : domaine + Brevo, à décider avec Android) ;
 mot de passe : 8 caractères, minuscule, majuscule, chiffre et symbole (repris dans `PASSWORD_RULES`, `cloud.ts`) ; fournisseur Google configuré (écran de consentement publié). Facebook abandonné (Meta exige une
 entreprise vérifiée).
@@ -308,7 +315,10 @@ Restaurer (dans un projet Supabase neuf, ou le même vidé) :
   (détection de la langue de l'appareil, langue fixée, ancien format, requêtes et téléchargement en espagnol,
   japonais, français ou sans langue : `langue.test.ts`), la traduction (aucun texte français en dur, mêmes clés et
   aucun texte vide dans les 6 dictionnaires, valeurs insérées, pluriels, 51 badges par langue, langue, pays et langue
-  TMDB détectés : `i18n.test.ts`).
+  TMDB détectés : `i18n.test.ts` ; le garde-fou repère aussi l'espace avant « : ! ? ; », typique du français), l'e-mail
+  « mot de passe oublié » (rendu dans chaque langue par un petit interpréteur des gabarits Go, français pour un compte
+  sans langue, aucun texte oublié dans une langue : `emails.test.ts`). La langue du compte est vérifiée de bout en
+  bout avec Supabase simulé (`synchro.spec.ts`) et sur le vrai projet (`comptes.live.spec.ts`).
 - `npm run e2e` : Playwright sur l'appli construite, dans le Chrome installé, formats téléphone (tactile) et PC.
   Parcours couverts : swipe (4 coins et 2 directions, boutons, vrais gestes, clavier, annuler / passer, « Annuler »
   une fois tout trié, repères pendant le glissement et tampon masqué, plus d'étiquette « Comme … » ; « Pas envie de

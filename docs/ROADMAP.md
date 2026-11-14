@@ -25,7 +25,8 @@
 > Multilingue, 1re étape (13/11) : la langue des « titres dans ta langue » du catalogue suit celle de l'appareil
 > (ARCHITECTURE § 3.3), testée en plusieurs langues (`tests/langue.test.ts`, `e2e/langue.spec.ts`).
 >
-> (14/11) **Traduction en 6 langues** livrée (ARCHITECTURE § 2.2).
+> (14/11) **Traduction en 6 langues** livrée (ARCHITECTURE § 2.2) ; le soir, fiches du Play Store traduites (anglais par
+> défaut) et e-mail « mot de passe oublié » en 6 langues.
 >
 > **Reprendre ici** (noté le 14/11 au soir) — test fermé en cours depuis le 11/11 (12 testeurs inscrits le 12/11) :
 > 14 jours écoulés vers le 26/11 (§ 2 étapes 5-6), puis demander la production.
@@ -142,8 +143,9 @@ libres (TMDB, Supabase) — c'est autorisé. Utile aussi si le Play Store est bl
 - ~~**Traduction**~~ — fait le 14/11 (ARCHITECTURE § 2.2) : 6 langues (français, anglais, espagnol, allemand,
   italien, portugais du Brésil), langue et pays de l'appareil modifiables dans les Réglages, titres TMDB et plateformes
   du pays, page de confidentialité, manifestes et fiche du Play Store traduits ; les 5 fiches traduites sont dans la
-  Play Console depuis le 14/11. Plus tard : e-mails Supabase traduits (aujourd'hui en anglais pour tous) ;
-  relecture des traductions par des locuteurs natifs (faites par Claude).
+  Play Console depuis le 14/11 ; e-mail « mot de passe oublié » en 6 langues (14/11, ARCHITECTURE § 2.2 : modèle à
+  recopier dans Supabase par l'utilisateur). Plus tard : relecture des traductions par des locuteurs natifs (faites par
+  Claude).
 
 - **Code ami** : nouvel essai automatique si le code tiré existe déjà (risque infime aujourd'hui : l'inscription
   échouerait) — quelques lignes dans `schema.sql`.

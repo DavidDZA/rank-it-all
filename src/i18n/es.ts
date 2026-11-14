@@ -165,6 +165,7 @@ export const es: Dict = {
       samePassword: 'Elige una contraseña distinta de la anterior.',
       unknownCode: 'Código de amigo desconocido: revisa los 8 caracteres.',
       ownCode: '¡Es tu propio código de amigo!',
+      signInFailed: (reason: string) => `✕ No se pudo iniciar sesión: ${reason}`,
     },
   },
   share: {

@@ -164,6 +164,7 @@ export const en: Dict = {
       samePassword: 'Choose a password different from the old one.',
       unknownCode: 'Unknown friend code: check the 8 characters.',
       ownCode: 'That’s your own friend code!',
+      signInFailed: (reason: string) => `✕ Sign-in failed: ${reason}`,
     },
   },
   share: {
