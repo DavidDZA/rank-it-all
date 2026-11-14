@@ -27,10 +27,38 @@
 >
 > (14/11) **Traduction en 6 langues** livrée (ARCHITECTURE § 2.2).
 >
-> **Reprendre ici** — test fermé en cours depuis le 11/11 (12 testeurs inscrits le 12/11) : 14 jours écoulés vers le
-> 26/11 (§ 2 étapes 5-6), puis demander la production. D'abord : demander à l'utilisateur s'il a ajouté les fiches
-> traduites dans la Play Console, ce que les testeurs pensent des changements du 13-14/11, et s'il a d'autres retours.
-> Ensuite : musique et jeux vidéo (§ 5). Faire connaître l'appli après la sortie : [PROMOTION.md](PROMOTION.md).
+> **Reprendre ici** (noté le 14/11 au soir) — test fermé en cours depuis le 11/11 (12 testeurs inscrits le 12/11) :
+> 14 jours écoulés vers le 26/11 (§ 2 étapes 5-6), puis demander la production. Deux choses en suspens :
+>
+> **1. Bug : appli figée sur le logo au démarrage, revenue chez un testeur.** Il l'avait eu, c'était parti (version 3,
+> 11/11), et c'est revenu (signalé le 14/11). Rien n'est encore analysé. À demander à l'utilisateur, pour ce testeur :
+> - quel téléphone (le Pixel 10 Pro du 11/11 ou un autre ?) et quelle version de l'appli (Play Store → Rank It All →
+>   « À propos de cette appli » : 1.0.2 attendu) ; Chrome à jour ?
+> - figé combien de temps : au bout de 8 s, la version 3 doit ouvrir le site dans un onglet Chrome (barre d'adresse) ;
+>   voit-il au moins l'écran « Chargement… » (puis « Réessayer » au bout de 15 s) ? Rien de tout ça = blocage côté
+>   Android/Chrome avant la page ; « Chargement… » qui reste = côté site (base locale, catalogue).
+> - depuis quand : depuis la mise en ligne de la traduction (14/11, nouvel `index.html` et manifestes par langue) ?
+>   Langue de son téléphone ? Est-ce que vider le cache / forcer l'arrêt de l'appli, ou ouvrir le site dans Chrome,
+>   marche ?
+> Pistes côté code : ARCHITECTURE § 2.1 (secours des 8 s, `generate.mjs`), écran « Chargement… » d'`index.html`
+> (dictionnaire BOOT, choix du manifeste), `main.tsx` (attente des reprises de la base, 4 s au plus), premier
+> téléchargement ou retéléchargement du catalogue si la langue a changé (`catalogueLanguageOutdated`).
+> Ajouter un test qui reproduit le cas une fois la cause trouvée.
+>
+> **2. Fiches traduites du Play Store, à faire par l'utilisateur** (pas eu le temps le 14/11 ; aucune nouvelle version
+> de l'appli n'est nécessaire) :
+> 1. Play Console → **Accroître le nombre d'utilisateurs → Présence sur le Store → Fiche principale du Play Store**.
+> 2. En haut : **Gérer les traductions → Ajouter vos propres traductions** ; cocher **en-US, es-ES, de-DE, it-IT,
+>    pt-BR** ; valider.
+> 3. Pour chaque langue (liste déroulante en haut de la page) :
+>    - nom, description courte, description complète : `store/fiche-play-store.md`, « Fiches dans les autres langues » ;
+>    - **Image de présentation** : `store/bannieres/banniere-<langue>.png` (en, es, de, it, pt) ;
+>    - **Captures d'écran du téléphone** : les 6 de `store/captures/<langue>/`, dans l'ordre 1 à 6 ;
+>    - icône inchangée ; **Enregistrer**.
+> 4. **Vue d'ensemble de la publication → Envoyer les modifications pour examen**.
+>
+> Ensuite : ce que les testeurs pensent des changements du 13-14/11, autres retours ; puis musique et jeux vidéo
+> (§ 5). Faire connaître l'appli après la sortie : [PROMOTION.md](PROMOTION.md).
 
 ## 1. Décisions en attente
 
