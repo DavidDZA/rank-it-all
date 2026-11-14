@@ -4,8 +4,8 @@ test.describe('réglages', () => {
   test('ordre des rubriques', async ({ page }) => {
     await page.goto('/#/settings');
     await expect(page.locator('main > .card > h3')).toHaveText([
-      '🌍 Langue et pays',
       '☁️ Compte',
+      '🌍 Langue et pays',
       '🕹️ Mode de swipe',
       '📺 Mes abonnements',
       '📦 Catalogue',

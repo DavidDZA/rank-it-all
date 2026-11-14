@@ -331,7 +331,8 @@ Restaurer (dans un projet Supabase neuf, ou le même vidé) :
   duels, Mes listes, « Ce soir ? », sauvegarde exportée puis réimportée (`parcours.spec.ts`), stats (6 cases, aussi
   sans les animes, plus de rubrique « Sagas complètes ») et 51 badges à 3 par ligne, tier list, partage en image
   (partage du téléphone simulé, ou téléchargement), filtres du swipe (`ecrans.spec.ts`), astuces à jour
-  (`tutoriel.spec.ts`), traduction (chaque écran dans chaque langue sans texte français oublié, manifeste et page
+  (`tutoriel.spec.ts`), ordre des rubriques des Réglages (Compte en tête, puis Langue et pays depuis le 14/11) et
+  seuils de votes (`reglages.spec.ts`), traduction (chaque écran dans chaque langue sans texte français oublié, manifeste et page
   de confidentialité de la langue, langue et pays changés dans les Réglages, fiche TMDB en anglais avec les
   plateformes des États-Unis ou de Belgique, catalogue retéléchargé dans la nouvelle langue : `traduction.spec.ts`),
   langue du catalogue avec un navigateur en espagnol, portugais, japonais, français, allemand,

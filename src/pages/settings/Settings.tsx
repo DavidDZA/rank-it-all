@@ -19,8 +19,8 @@ export default function Settings({ section }: { section?: string }) {
   return (
     <main className="page">
       <TopBar title={T.settings.title} />
-      <LanguageSetting />
       <Account />
+      <LanguageSetting />
       <SwipeModeSetting />
       <MyProviders />
       <CatalogueSetting />
