@@ -273,7 +273,8 @@ Réglages du projet Supabase : URL du site et `http://localhost:5173/**` dans *A
 Configuration* ; confirmation d'e-mail désactivée ; e-mails (réinitialisation du mot de passe) envoyés par un **compte Gmail
 dédié** en SMTP (*Authentication → Emails → SMTP Settings*, mot de passe d'application) ; modèle *Reset password*
 (*Authentication → Emails*) en 6 langues, copié de `supabase/emails/mot-de-passe-oublie.html` (*Body*, onglet *Source*)
-et `mot-de-passe-oublie.sujet.txt` (*Subject*) — à recopier après chaque modification de ces fichiers ; sans
+et `mot-de-passe-oublie.sujet.txt` (*Subject* : 255 caractères au plus, instructions de choix de langue comprises,
+d'où des textes courts) — à recopier après chaque modification de ces fichiers ; sans
 nom de domaine, Hotmail / Outlook les classent en indésirables (solution : domaine + Brevo, à décider avec Android) ;
 mot de passe : 8 caractères, minuscule, majuscule, chiffre et symbole (repris dans `PASSWORD_RULES`, `cloud.ts`) ; fournisseur Google configuré (écran de consentement publié). Facebook abandonné (Meta exige une
 entreprise vérifiée).

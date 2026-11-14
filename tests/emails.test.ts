@@ -17,8 +17,8 @@ function render(template: string, data: Data): string {
     const e = expr.trim();
     if (/^"(?:[^"\\]|\\.)*"$/.test(e)) return JSON.parse(e) as string;
     if (e === '.ConfirmationURL') return data.ConfirmationURL;
-    const printf = e.match(/^printf "%v" \.Data\.(\w+)$/);
-    if (printf) return String(data.Data[printf[1]] ?? '<nil>');
+    const printed = e.match(/^(?:printf "%v"|print) \.Data\.(\w+)$/);
+    if (printed) return String(data.Data[printed[1]] ?? '<nil>');
     if (/^\$\w+$/.test(e)) {
       if (!vars.has(e)) throw new Error(`variable inconnue ${e}`);
       return vars.get(e)!;
@@ -73,7 +73,7 @@ function render(template: string, data: Data): string {
       top.taken = true;
     } else if (a === 'end') {
       if (!stack.pop()) throw new Error('« end » sans « if »');
-    } else if ((m = a.match(/^(\$\w+) (:?=) (.+)$/))) {
+    } else if ((m = a.match(/^(\$\w+)\s*(:?=)\s*(.+)$/))) {
       if (m[2] === '=' && !vars.has(m[1])) throw new Error(`affectation de ${m[1]} avant sa déclaration`);
       if (on()) vars.set(m[1], value(m[3]));
     } else if (on()) out += value(a);
@@ -110,9 +110,15 @@ describe('e-mail « mot de passe oublié » (supabase/emails/)', () => {
 
   it('textes attendus en français et en anglais', () => {
     expect(visibleText(mail('fr').body)).toContain('Choisir un nouveau mot de passe');
-    expect(mail('fr').subject).toBe('Rank It All : choisis un nouveau mot de passe');
+    expect(mail('fr').subject).toBe('Rank It All : nouveau mot de passe');
     expect(visibleText(mail('en').body)).toContain('Choose a new password');
-    expect(mail('en').subject).toBe('Rank It All: choose a new password');
+    expect(mail('en').subject).toBe('Rank It All: new password');
+  });
+
+  it('sujet sur une ligne et dans la limite de Supabase (255 caractères, gabarit compris)', () => {
+    // Refusé au-delà (« Failed to validate template: subject: Too big », 14/11/2026). Compté en octets : plus sûr.
+    expect(subject).not.toContain('\n');
+    expect(Buffer.byteLength(subject)).toBeLessThanOrEqual(255);
   });
 
   it('compte sans langue (d’avant le 14/11/2026) : français', () => {
