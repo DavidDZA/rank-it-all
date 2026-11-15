@@ -47,6 +47,34 @@ test.describe('astuces de première visite', () => {
     await expect(rankTip).toContainText('ℹ sur une affiche : sa fiche complète');
   });
 
+  test('astuces récrites pour le bouton d’état (16/11) : remontrées une fois à qui avait vu l’ancienne version', async ({ page }) => {
+    await page.goto('/');
+    // Astuces vues avant le 16/11 : enregistrées sans version.
+    await page.evaluate(() => localStorage.setItem('tutorials-seen', JSON.stringify(['home', 'lists', 'rank', 'wishlist', 'add', 'duo', 'swipe-corners'])));
+    await page.goto('/#/lists');
+    const tip = page.getByRole('dialog', { name: '📚 Mes listes' });
+    await expect(tip).toContainText('Le bouton d’état de chaque titre (👍 Bien, avec sa flèche à droite)');
+    await tip.getByRole('button', { name: 'Compris' }).click();
+    await page.reload();
+    await expect(page.locator('.page')).toBeVisible();
+    await page.waitForTimeout(400);
+    await expect(page.getByRole('dialog')).toHaveCount(0); // une fois seulement
+    await page.goto('/#/rank/movie');
+    await expect(page.getByRole('dialog', { name: '🏆 Classer par duels' })).toContainText('Reclasser (↺) le replace par de nouveaux duels');
+    await page.getByRole('dialog').getByRole('button', { name: 'Compris' }).click();
+    await page.goto('/#/wishlist');
+    await expect(page.getByRole('dialog', { name: '💖 Ta wishlist' })).toContainText('Le bouton d’état (💖 Envie, avec sa flèche)');
+    await page.getByRole('dialog').getByRole('button', { name: 'Compris' }).click();
+    await page.goto('/#/add');
+    await expect(page.getByRole('dialog', { name: '🔍 Ajout manuel' })).toContainText('Le bouton d’état (↺ À trier, avec sa flèche)');
+    await page.getByRole('dialog').getByRole('button', { name: 'Compris' }).click();
+    // Le swipe n'a pas changé d'astuce : pas remontrée.
+    await page.goto('/#/swipe/movie');
+    await expect(page.locator('.swipe-page')).toBeVisible();
+    await page.waitForTimeout(400);
+    await expect(page.getByRole('dialog')).toHaveCount(0);
+  });
+
   test('« Revoir les astuces » dans les réglages', async ({ page }) => {
     await page.goto('/');
     await page.getByRole('dialog').getByRole('button', { name: 'Compris' }).click();

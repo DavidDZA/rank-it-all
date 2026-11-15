@@ -1,5 +1,5 @@
 import { defineConfig } from '@playwright/test';
-import { TUTORIALS, TUTORIALS_KEY } from './src/lib/tutorial';
+import { ALL_SEEN, TUTORIALS_KEY } from './src/lib/tutorial';
 
 /**
  * Tests de bout en bout (npm run e2e) : l'appli construite, ouverte dans le Chrome installé,
@@ -15,7 +15,7 @@ export default defineConfig({
     channel: 'chrome',
     locale: 'fr-FR',
     // Astuces de première visite déjà vues : elles masqueraient les écrans testés (tutoriel.spec.ts les teste).
-    storageState: { cookies: [], origins: [{ origin: 'http://localhost:4173', localStorage: [{ name: TUTORIALS_KEY, value: JSON.stringify(TUTORIALS) }] }] },
+    storageState: { cookies: [], origins: [{ origin: 'http://localhost:4173', localStorage: [{ name: TUTORIALS_KEY, value: JSON.stringify(ALL_SEEN) }] }] },
   },
   webServer: {
     command: 'npm run build && npx vite preview --port 4173 --strictPort',

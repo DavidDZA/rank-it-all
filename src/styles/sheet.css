@@ -330,9 +330,50 @@
   color: #fff;
 }
 
-/* Bouton d'état dans une ligne : la couleur de l'état, et ▾ (on le touche pour changer). */
-.status-btn .btn-cap::after {
-  content: ' ▾';
+/*
+ * Bouton d'état dans une ligne, dessiné comme une liste déroulante : l'état actuel (icône et mot) dans un cadre à la
+ * couleur de l'état, puis une flèche bien visible séparée par un trait. Un ▾ minuscule après le mot ne disait pas
+ * qu'on pouvait changer (retour de l'utilisateur, 16/11).
+ */
+.btn.small.labeled.status-btn {
+  flex-direction: row;
+  align-items: stretch;
+  gap: 0;
+  padding: 0;
+  min-width: 0;
+  border-radius: 12px;
+  border-width: 1.5px;
+  background: var(--surface);
+  overflow: hidden;
+}
+.status-main {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+  min-width: 44px;
+  padding: 4px 6px 3px 8px;
+}
+.status-btn .btn-cap {
+  color: var(--text, #fff);
+  font-weight: 600;
+}
+.status-chevron {
+  display: grid;
+  place-items: center;
+  padding: 0 6px;
+  border-left: 1px solid var(--border);
+  background: var(--surface-2);
+}
+.status-chevron svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 .status-btn.place-good {
   border-color: rgb(62 224 143 / 0.6);

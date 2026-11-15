@@ -246,6 +246,7 @@ export const de: Dict = {
         '**ℹ** auf einem Poster: alle Infos (Inhalt, Trailer…).',
         '**Unentschieden**, wenn du dich nicht entscheiden kannst, **Überspringen**, um ihn für später aufzuheben.',
         'In **Mein Ranking** verschiebst du einen Titel mit dem Griff ⠿ oder tippst auf seine Nummer, um ihm einen Platz zu geben.',
+        'Der **Status**-Knopf (👍 Gut, mit seinem Pfeil) verschiebt einen Titel: gut ↔ naja, ohne seinen Platz zu verlieren, oder will ich, kein Interesse, offen. **Neu ranken** (↺) ordnet ihn mit neuen Duellen ein.',
       ],
     },
     wishlist: {
@@ -255,6 +256,7 @@ export const de: Dict = {
       points: [
         '**Priorisieren**: Duelle, um nach oben zu holen, was du zuerst sehen willst.',
         'Deine Prioritäten zählen bei der Auslosung „Was schaue ich heute Abend?“ und bei der gemeinsamen Wishlist mit deinen Freunden.',
+        'Der **Status**-Knopf (💖 Will ich, mit seinem Pfeil): gut, naja, kein Interesse oder offen.',
       ],
     },
     tonight: {
@@ -267,13 +269,13 @@ export const de: Dict = {
       title: '📚 Meine Listen',
       ordered: false,
       note: '',
-      points: ['Alles, was du einsortiert hast, um einen Fehler zu korrigieren.', 'Tippe auf den **Status** eines Titels (👍 Gut ▾…), um ihn zu verschieben: gut, naja, will ich, kein Interesse oder **offen** (er kommt beim Swipen wieder). Genauso im Ranking, in der Wishlist und bei deinen Freunden.'],
+      points: ['Alles, was du einsortiert hast, um einen Fehler zu korrigieren.', 'Der **Status**-Knopf jedes Titels (👍 Gut, mit seinem Pfeil rechts) öffnet die Liste der Status: gut, naja, will ich, kein Interesse oder **offen** (er kommt beim Swipen wieder). Derselbe Knopf überall: Ranking, Wishlist, manuelles Hinzufügen, Freunde.'],
     },
     add: {
       title: '🔍 Manuell hinzufügen',
       ordered: false,
       note: '',
-      points: ['Für einen Titel, der im Katalog fehlt (wenig bekannt, ganz neu…).', 'Du kannst auch nach einer Person suchen (Schauspieler, Regie): Ihre Filmografie wird angezeigt.'],
+      points: ['Für einen Titel, der im Katalog fehlt (wenig bekannt, ganz neu…).', 'Du kannst auch nach einer Person suchen (Schauspieler, Regie): Ihre Filmografie wird angezeigt.', 'Der **Status**-Knopf (↺ Offen, mit seinem Pfeil) ordnet den gefundenen Titel ein: gut, naja, will ich oder kein Interesse.'],
     },
     friends: {
       title: '👥 Freunde',
@@ -288,6 +290,7 @@ export const de: Dict = {
       points: [
         '**Gemeinsam**: was ihr beide sehen wollt. **Heute Abend** lost daraus einen Titel aus.',
         '**Tipps**: was der andere mochte und du noch nicht gesehen hast. **Übereinstimmung**: Ähneln sich eure Rankings?',
+        'Bei jedem Titel dein **Status**-Knopf (mit seinem Pfeil): Bewerte direkt, was du gesehen hast, oder setz es auf deine Wishlist.',
       ],
     },
   },

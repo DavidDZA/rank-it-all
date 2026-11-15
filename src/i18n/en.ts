@@ -247,6 +247,7 @@ export const en: Dict = {
         '**ℹ** on a poster: its full details (summary, trailer…).',
         '**Tie** if you can’t decide, **Skip** to keep it for later.',
         'In **My ranking**, move a title with the ⠿ handle, or tap its number to give it a place.',
+        'The **state** button (👍 Liked, with its arrow) moves a title: liked ↔ meh without losing its place, or want, not interested, to sort. **Re-rank** (↺) places it again with new duels.',
       ],
     },
     wishlist: {
@@ -256,6 +257,7 @@ export const en: Dict = {
       points: [
         '**Prioritize**: duels to put first what you want to watch first.',
         'Your priorities are used for the “What should I watch tonight?” draw and the shared wishlist with your friends.',
+        'The **state** button (💖 Want, with its arrow): liked, meh, not interested, or to sort.',
       ],
     },
     tonight: {
@@ -268,13 +270,13 @@ export const en: Dict = {
       title: '📚 My lists',
       ordered: false,
       note: '',
-      points: ['Everything you’ve sorted, to fix a mistake.', 'Tap a title’s **state** (👍 Liked ▾…) to move it: liked, meh, want, not interested, or **to sort** (it comes back in the swipe). Same in your ranking, your wishlist and your friends’ pages.'],
+      points: ['Everything you’ve sorted, to fix a mistake.', 'Each title’s **state** button (👍 Liked, with its arrow on the right) opens the list of states: liked, meh, want, not interested, or **to sort** (it comes back in the swipe). The same button everywhere: ranking, wishlist, manual add, friends.'],
     },
     add: {
       title: '🔍 Add manually',
       ordered: false,
       note: '',
-      points: ['For a title missing from the catalog (little-known, very recent…).', 'You can also search for a person (actor, director): their filmography shows up.'],
+      points: ['For a title missing from the catalog (little-known, very recent…).', 'You can also search for a person (actor, director): their filmography shows up.', 'The **state** button (↺ To sort, with its arrow) files the title you found: liked, meh, want or not interested.'],
     },
     friends: {
       title: '👥 Friends',
@@ -289,6 +291,7 @@ export const en: Dict = {
       points: [
         '**In common**: what you both want to watch. **Tonight** draws a title from it at random.',
         '**Tips**: what the other one liked and you haven’t seen. **Compatibility**: are your rankings alike?',
+        'On each title, your **state** button (with its arrow): rate what you’ve seen right away, or add it to your wishlist.',
       ],
     },
   },

@@ -1,6 +1,6 @@
 import { expect, test, type Page } from '@playwright/test';
 import { mockTmdbApi, readAnswers, readMeta, seed, title } from './helpers';
-import { TUTORIALS, TUTORIALS_KEY } from '../src/lib/tutorial';
+import { ALL_SEEN, TUTORIALS_KEY } from '../src/lib/tutorial';
 
 /**
  * Propositions « selon tes goûts » (bouton 🎯 du swipe), TMDB simulé (clé de test : l'appli demande les fiches à TMDB
@@ -136,7 +136,7 @@ test.describe('propositions selon tes goûts', () => {
 test.describe('astuce des propositions', () => {
   // Toutes les astuces vues, sauf celle des propositions.
   test.use({
-    storageState: { cookies: [], origins: [{ origin: 'http://localhost:4173', localStorage: [{ name: TUTORIALS_KEY, value: JSON.stringify(TUTORIALS.filter((t) => t !== 'reco')) }] }] },
+    storageState: { cookies: [], origins: [{ origin: 'http://localhost:4173', localStorage: [{ name: TUTORIALS_KEY, value: JSON.stringify(ALL_SEEN.filter((t) => t !== 'reco')) }] }] },
   });
 
   test('montrée au premier 🎯, puis plus jamais', async ({ page }) => {

@@ -248,6 +248,7 @@ export const pt: Dict = {
         '**ℹ** em um pôster: a ficha completa (sinopse, trailer…).',
         '**Empate** se você não conseguir decidir, **Pular** para deixar para depois.',
         'Em **Meu ranking**, mova um título pela alça ⠿, ou toque no número dele para escolher a posição.',
+        'O botão de **estado** (👍 Gostei, com a seta) muda um título de lista: gostei ↔ mais ou menos sem perder a posição, ou quero, sem interesse, pendente. **Reordenar** (↺) o recoloca com novos duelos.',
       ],
     },
     wishlist: {
@@ -257,6 +258,7 @@ export const pt: Dict = {
       points: [
         '**Priorizar**: duelos para colocar no topo o que você quer ver primeiro.',
         'Suas prioridades valem para o sorteio “O que eu assisto hoje?” e para a wishlist em comum com seus amigos.',
+        'O botão de **estado** (💖 Quero, com a seta): gostei, mais ou menos, sem interesse ou pendente.',
       ],
     },
     tonight: {
@@ -269,13 +271,13 @@ export const pt: Dict = {
       title: '📚 Minhas listas',
       ordered: false,
       note: '',
-      points: ['Tudo o que você classificou, para corrigir um erro.', 'Toque no **estado** de um título (👍 Gostei ▾…) para movê-lo: gostei, mais ou menos, quero, sem interesse ou **pendente** (volta ao deslizar). O mesmo no ranking, na wishlist e com seus amigos.'],
+      points: ['Tudo o que você classificou, para corrigir um erro.', 'O botão de **estado** de cada título (👍 Gostei, com a seta à direita) abre a lista de estados: gostei, mais ou menos, quero, sem interesse ou **pendente** (volta para o swipe). O mesmo botão em todo lugar: ranking, wishlist, adição manual, amigos.'],
     },
     add: {
       title: '🔍 Adicionar manualmente',
       ordered: false,
       note: '',
-      points: ['Para um título que não está no catálogo (pouco conhecido, muito recente…).', 'Você também pode buscar uma pessoa (ator, diretor): a filmografia dela aparece.'],
+      points: ['Para um título que não está no catálogo (pouco conhecido, muito recente…).', 'Você também pode buscar uma pessoa (ator, diretor): a filmografia dela aparece.', 'O botão de **estado** (↺ Pendente, com a seta) guarda o título encontrado: gostei, mais ou menos, quero ou sem interesse.'],
     },
     friends: {
       title: '👥 Amigos',
@@ -290,6 +292,7 @@ export const pt: Dict = {
       points: [
         '**Em comum**: o que vocês dois querem ver. **Hoje à noite** sorteia um título daí.',
         '**Dicas**: o que o outro curtiu e você não viu. **Compatibilidade**: os rankings de vocês se parecem?',
+        'Em cada título, o seu botão de **estado** (com a seta): avalie direto o que você viu ou coloque na sua wishlist.',
       ],
     },
   },

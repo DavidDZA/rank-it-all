@@ -32,7 +32,8 @@
 > les réponses et le classement, choisi par un test hors ligne sur le profil de l'utilisateur (ARCHITECTURE § 3.6) ;
 > nouveau chemin du relais `/taste/…` (déployé avec le dossier `worker/`). « Ça marche plutôt bien » d'après l'utilisateur.
 > (16/11) Un mot court sous chaque petite icône (listes, filtres, 🎯), en 6 langues ; **état d'un titre modifiable
-> partout** (vu bien, vu bof, envie, pas envie, à trier), un seul bouton par ligne, chez les amis aussi (ARCHITECTURE § 1).
+> partout** (vu bien, vu bof, envie, pas envie, à trier), un seul bouton par ligne, chez les amis aussi (ARCHITECTURE § 1) ;
+> puis mots agrandis, bouton d'état dessiné comme une liste déroulante, astuces récrites et remontrées une fois (§ 3.1).
 >
 > **Reprendre ici** (noté le 14/11 au soir) — test fermé en cours depuis le 11/11 (12 testeurs inscrits le 12/11) :
 > 14 jours écoulés vers le 26/11 (§ 2 étapes 5-6), puis demander la production.

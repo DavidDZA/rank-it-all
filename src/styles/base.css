@@ -271,7 +271,7 @@ button.link {
 }
 .btn-cap {
   font-family: var(--body, inherit);
-  font-size: 0.58rem;
+  font-size: 0.68rem;
   font-weight: 500;
   letter-spacing: 0;
   color: var(--muted);
@@ -284,7 +284,7 @@ button.link {
 /* Bouton rond de la barre du haut (filtres, 🎯) : l'icône et son mot dans le même rond, un peu élargi. */
 .icon-btn.labeled {
   width: auto;
-  min-width: 48px;
+  min-width: 54px;
   padding: 0 6px;
   border-radius: 16px;
   display: flex;
@@ -297,11 +297,11 @@ button.link {
 .icon-btn.labeled .btn-icon {
   display: grid;
   place-items: center;
-  font-size: 1.05rem;
+  font-size: 1.1rem;
   height: 22px;
 }
 .icon-btn.labeled .btn-cap {
-  font-size: 0.56rem;
+  font-size: 0.64rem;
 }
 .icon-btn.labeled.active .btn-cap {
   color: #fff;

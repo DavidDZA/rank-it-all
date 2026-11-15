@@ -28,6 +28,9 @@ async function open(page: Page, hash: string) {
 /** Mots sous les icônes des boutons d'une ligne. */
 const captions = (page: Page, row: string) => page.locator('.list-item', { hasText: row }).first().locator('.btn-cap');
 
+/** Taille du texte (px) d'un élément. */
+const fontSize = async (page: Page, sel: string) => parseFloat(await page.locator(sel).first().evaluate((el) => getComputedStyle(el).fontSize));
+
 /** Les boutons d'une ligne restent dans la ligne, et la ligne dans l'écran. */
 async function fits(page: Page) {
   const width = page.viewportSize()!.width;
@@ -47,6 +50,7 @@ test.describe('mots sous les icônes', () => {
     await open(page, '#/swipe/movie');
     await expect(page.locator('.reco-btn .btn-cap')).toHaveText('Pour toi');
     await expect(page.locator('.filter-btn .btn-cap')).toHaveText('Filtres');
+    expect(await fontSize(page, '.filter-btn .btn-cap')).toBeGreaterThanOrEqual(10); // lisible (16/11 : agrandi)
     // Noms complets inchangés (lecteurs d'écran, et tests).
     await expect(page.getByRole('button', { name: '🎯 Selon tes goûts' })).toBeVisible();
     await expect(page.getByRole('button', { name: 'Filtres' })).toBeVisible();
@@ -73,6 +77,7 @@ test.describe('mots sous les icônes', () => {
     await open(page, '#/lists');
     await expect(captions(page, 'Heat')).toHaveText(['Bien']);
     await expect(captions(page, 'Casino')).toHaveText(['Bof']);
+    expect(await fontSize(page, '.list-item .btn-cap')).toBeGreaterThanOrEqual(10.5);
     await fits(page);
     await page.locator('button.chip', { hasText: 'Pas vus' }).click();
     await expect(captions(page, 'Matrix')).toHaveText(['Pas envie']);

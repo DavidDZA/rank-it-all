@@ -248,6 +248,7 @@ export const it: Dict = {
         '**ℹ** su una locandina: la sua scheda completa (trama, trailer…).',
         '**Pari** se non sai decidere, **Salta** per tenerlo per dopo.',
         'In **La mia classifica**, sposta un titolo con la maniglia ⠿, o tocca il suo numero per dargli una posizione.',
+        'Il pulsante di **stato** (👍 Bello, con la sua freccia) sposta un titolo: bello ↔ così così senza perdere il suo posto, oppure voglio, non mi interessa, da ordinare. **Riordina** (↺) lo ricolloca con nuovi duelli.',
       ],
     },
     wishlist: {
@@ -257,6 +258,7 @@ export const it: Dict = {
       points: [
         '**Dai priorità**: duelli per mettere in cima ciò che vuoi vedere per primo.',
         'Le tue priorità servono per l’estrazione «Cosa guardo stasera?» e per la wishlist in comune con i tuoi amici.',
+        'Il pulsante di **stato** (💖 Voglio, con la sua freccia): bello, così così, non mi interessa o da ordinare.',
       ],
     },
     tonight: {
@@ -269,13 +271,13 @@ export const it: Dict = {
       title: '📚 Le mie liste',
       ordered: false,
       note: '',
-      points: ['Tutto ciò che hai classificato, per correggere un errore.', 'Tocca lo **stato** di un titolo (👍 Bello ▾…) per spostarlo: bello, così così, voglio, non mi interessa o **da ordinare** (torna nello swipe). Lo stesso in classifica, nella wishlist e dai tuoi amici.'],
+      points: ['Tutto ciò che hai classificato, per correggere un errore.', 'Il pulsante di **stato** di ogni titolo (👍 Bello, con la sua freccia a destra) apre l’elenco degli stati: bello, così così, voglio, non mi interessa o **da ordinare** (torna nello swipe). Lo stesso pulsante ovunque: classifica, wishlist, aggiunta manuale, amici.'],
     },
     add: {
       title: '🔍 Aggiungi a mano',
       ordered: false,
       note: '',
-      points: ['Per un titolo che manca nel catalogo (poco noto, molto recente…).', 'Puoi anche cercare una persona (attore, regista): compare la sua filmografia.'],
+      points: ['Per un titolo che manca nel catalogo (poco noto, molto recente…).', 'Puoi anche cercare una persona (attore, regista): compare la sua filmografia.', 'Il pulsante di **stato** (↺ Da ordinare, con la sua freccia) sistema il titolo trovato: bello, così così, voglio o non mi interessa.'],
     },
     friends: {
       title: '👥 Amici',
@@ -290,6 +292,7 @@ export const it: Dict = {
       points: [
         '**In comune**: quello che volete vedere entrambi. **Stasera** ne estrae un titolo a caso.',
         '**Consigli**: quello che è piaciuto all’altro e tu non hai visto. **Compatibilità**: le vostre classifiche si somigliano?',
+        'Su ogni titolo, il tuo pulsante di **stato** (con la sua freccia): valuta subito ciò che hai visto, o mettilo nella tua wishlist.',
       ],
     },
   },

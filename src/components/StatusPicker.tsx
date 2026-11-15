@@ -63,7 +63,15 @@ export function StatusButton({ title, current, ranked, onChanged }: PickerProps)
         aria-label={T.status.buttonAria(title.title, T.status.label[place])}
         title={T.status.buttonTip}
       >
-        <IconCaption icon={PLACE_ICON[place]} caption={T.status.short[place]} />
+        {/* Comme une liste déroulante : l'état actuel, puis une flèche bien visible (« touche pour choisir »). */}
+        <span className="status-main">
+          <IconCaption icon={PLACE_ICON[place]} caption={T.status.short[place]} />
+        </span>
+        <span className="status-chevron" aria-hidden>
+          <svg viewBox="0 0 24 24">
+            <path d="M6 9l6 6 6-6" />
+          </svg>
+        </span>
       </button>
       {open &&
         createPortal(

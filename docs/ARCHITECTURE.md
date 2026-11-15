@@ -24,8 +24,10 @@ espagnol, allemand, italien, portugais du Brésil : § 2.2).
 - **État d'un titre, modifiable partout** (16/11, demande de l'utilisateur : « on devrait toujours pouvoir déplacer un
   titre, dans n'importe quel état ») : 👍 vu · bien, 😐 vu · bof, 💖 envie, 💤 pas envie, ↺ à trier. Chaque ligne de
   titre (Mon classement, wishlist, Mes listes, ajout manuel, « À deux » : son top et ses conseils) a **un seul bouton
-  d'état** (`StatusButton`, `components/StatusPicker.tsx`) : l'état actuel, son mot et ▾, bordure de sa couleur ; le
-  toucher ouvre les 5 choix avec leur explication (l'actuel marqué « Actuel »). La fiche les montre directement
+  d'état** (`StatusButton`, `components/StatusPicker.tsx`), dessiné comme une **liste déroulante** : l'état actuel (icône
+  et mot) dans un cadre de sa couleur, puis une flèche bien visible séparée par un trait (un petit ▾ après le mot, le
+  premier jour, ne disait pas qu'on pouvait changer) ; le toucher ouvre les 5 choix avec leur explication (l'actuel
+  marqué « Actuel »). La fiche les montre directement
   (`StatusChoices compact`). Un message confirme le changement. Logique : `moveTitle` (`ranking.ts`) — bien ↔ bof
   garde la place au classement (l'avis ne décide que de l'ordre des duels) ; vers envie, pas envie ou à trier, le titre
   quitte le classement de son ancienne liste (confirmation si l'on part du classement) ; « à trier » efface la réponse,
@@ -34,7 +36,8 @@ espagnol, allemand, italien, portugais du Brésil : § 2.2).
   et « Ce soir ? » (👍 / 😐 du titre tiré).
 - **Mots sous les icônes** (16/11, retour de l'utilisateur : « pas toujours clair ») : chaque petit bouton à icône porte
   dessous un mot court (`IconCaption`, textes `T.actions` et `T.status`) — l'état des lignes (Bien ▾, Envie ▾…),
-  ↺ Reclasser, « Filtres » sous l'entonnoir, « Pour toi » sous 🎯, 👍 Bien / 😐 Bof dans « Ce soir ? ». Le bouton garde
+  ↺ Reclasser, « Filtres » sous l'entonnoir, « Pour toi » sous 🎯, 👍 Bien / 😐 Bof dans « Ce soir ? » ; 0,68 rem dans les
+  listes, 0,64 rem dans la barre du haut (agrandis le 16/11 : trop petits au départ). Le bouton garde
   son nom complet (`aria-label`). Pas de mot sous ce qui est déjà clair ou déjà écrit (retour ‹, croix des fenêtres,
   ℹ des duels, poignée ⠿ expliquée au-dessus de la liste).
 - **Classement** par duels (insertion dichotomique), vérifications entre voisins, **déplacement à la main**
@@ -179,7 +182,10 @@ version Android n'est utile que pour changer ses réglages (nom, icône, couleur
 - `localStorage` : préférences propres à l'appareil (clé TMDB, abonnements, mode de swipe, filtres, astuces vues).
   Astuces de première visite : `lib/tutorial.ts` (identifiants, une par type d'écran : swipe 4 coins / 2 directions,
   classement… communes aux films, séries et animes), textes dans `components/Tutorial.tsx` ; « Revoir les astuces »
-  en bas des réglages. Les tests de bout en bout les marquent toutes vues (`playwright.config.ts`), sauf
+  en bas des réglages. **Versions** (`TUTORIAL_REVISIONS`) : une astuce récrite pour expliquer du nouveau prend la
+  version suivante, et elle est remontrée une fois à qui avait vu l'ancienne (repère `<id>@<version>`, `seenMark`).
+  Version 2 le 16/11 : classement, wishlist, Mes listes, ajout manuel, « À deux » (le bouton d'état). Les tests de bout
+  en bout les marquent toutes vues dans leur version actuelle (`ALL_SEEN`, `playwright.config.ts`), sauf
   `tutoriel.spec.ts`.
 
 ### 3.2 Catégories
@@ -448,7 +454,9 @@ Restaurer (dans un projet Supabase neuf, ou le même vidé) :
   wishlist, Mes listes, ajout manuel), boutons qui tiennent dans leur ligne au format téléphone (`libelles.spec.ts`),
   état d'un titre (fenêtre des 5 états à l'écran, bien ↔ bof sans perdre sa place au classement, sortie du classement
   après confirmation, « à trier » qui efface la réponse et la priorité de wishlist, pas envie → envie → bof → à trier,
-  fiche : `etats.spec.ts` ; chez un ami, noter « vu · bof » un titre de son top : `duo.spec.ts` ; `moveTitle` et
+  fiche, bouton dessiné comme une liste déroulante avec sa flèche : `etats.spec.ts` ; taille des mots sous les
+  icônes : `libelles.spec.ts` ; astuces récrites remontrées une fois, pas les autres : `tutoriel.spec.ts` et
+  `tutorial.test.ts` ; chez un ami, noter « vu · bof » un titre de son top : `duo.spec.ts` ; `moveTitle` et
   `placeOf` dans `ranking.test.ts`), traduction (chaque écran dans chaque langue sans texte français oublié, manifeste et page
   de confidentialité de la langue, langue et pays changés dans les Réglages, fiche TMDB en anglais avec les
   plateformes des États-Unis ou de Belgique, catalogue retéléchargé dans la nouvelle langue : `traduction.spec.ts`),
@@ -480,6 +488,8 @@ Restaurer (dans un projet Supabase neuf, ou le même vidé) :
 
 ## 6. Conventions de travail
 
+- Une astuce modifiée pour une fonction nouvelle : changer son texte dans les 6 langues **et** augmenter sa version
+  (`TUTORIAL_REVISIONS`), sinon ceux qui l'ont déjà vue ne la reverront jamais.
 - Un nouveau petit bouton à icône reçoit son mot court dessous (`IconCaption`, `T.actions`, classe `labeled`) ; rester
   sobre (un ou deux mots), et vérifier qu'il tient au format téléphone (`libelles.spec.ts`).
 - Une nouvelle ligne de titre propose son état avec `StatusButton` (jamais de boutons 👍 😐 ♥ ✕ séparés) ; une fenêtre

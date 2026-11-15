@@ -36,6 +36,19 @@ const state = (page: Page, name: string) => row(page, name).locator('.status-btn
 const sheet = (page: Page) => page.getByRole('dialog', { name: /^Ranger/ });
 
 test.describe('état d’un titre', () => {
+  test('le bouton se lit comme une liste déroulante : l’état, et une flèche bien visible à droite', async ({ page }) => {
+    await open(page, '#/lists');
+    const btn = row(page, 'Heat').locator('.status-btn');
+    await expect(btn.locator('.btn-cap')).toHaveText('Bien');
+    const arrow = btn.locator('.status-chevron svg');
+    await expect(arrow).toBeVisible();
+    const a = (await arrow.boundingBox())!;
+    expect(a.width).toBeGreaterThanOrEqual(14); // plus le petit ▾ d'avant
+    const b = (await btn.boundingBox())!;
+    expect(a.x).toBeGreaterThan(b.x + b.width / 2); // à droite de l'état
+    await expect(btn).toHaveAttribute('aria-label', 'Heat : Vu · bien. Changer');
+  });
+
   test('la fenêtre des 5 états : l’état actuel marqué, tout tient dans l’écran', async ({ page }) => {
     await open(page, '#/lists');
     await row(page, 'Heat').locator('.status-btn').click();

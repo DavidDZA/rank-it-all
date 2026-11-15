@@ -266,6 +266,7 @@ export const fr = {
         '**ℹ** sur une affiche : sa fiche complète (résumé, bande-annonce…).',
         '**Égalité** si tu ne sais pas départager, **Passer** pour le garder pour plus tard.',
         'Dans **Mon classement**, déplace un titre avec la poignée ⠿, ou touche son numéro pour lui donner une place.',
+        'Le bouton d’**état** (👍 Bien, avec sa flèche) change un titre de liste : bien ↔ bof sans perdre sa place, ou envie, pas envie, à trier. **Reclasser** (↺) le replace par de nouveaux duels.',
       ],
     },
     wishlist: {
@@ -275,6 +276,7 @@ export const fr = {
       points: [
         '**Prioriser** : des duels pour mettre en tête ce que tu veux voir en premier.',
         'Tes priorités servent au tirage « Ce soir, je regarde quoi ? » et à la wishlist commune avec tes amis.',
+        'Le bouton d’**état** (💖 Envie, avec sa flèche) : vu bien, vu bof, pas envie, ou à trier.',
       ],
     },
     tonight: {
@@ -287,13 +289,13 @@ export const fr = {
       title: '📚 Mes listes',
       ordered: false,
       note: '',
-      points: ['Tout ce que tu as trié, pour corriger une erreur.', 'Touche l’**état** d’un titre (👍 Bien ▾…) pour le ranger ailleurs : vu bien, vu bof, envie, pas envie, ou **à trier** (il revient au swipe). Pareil dans le classement, la wishlist et chez tes amis.'],
+      points: ['Tout ce que tu as trié, pour corriger une erreur.', 'Le bouton d’**état** de chaque titre (👍 Bien, avec sa flèche à droite) ouvre la liste des états : vu bien, vu bof, envie, pas envie, ou **à trier** (il revient au swipe). Le même bouton partout : classement, wishlist, ajout manuel, amis.'],
     },
     add: {
       title: '🔍 Ajout manuel',
       ordered: false,
       note: '',
-      points: ['Pour un titre absent du catalogue (peu connu, très récent…).', 'Cherche aussi une personne (acteur, réalisateur) : sa filmographie s’affiche.'],
+      points: ['Pour un titre absent du catalogue (peu connu, très récent…).', 'Cherche aussi une personne (acteur, réalisateur) : sa filmographie s’affiche.', 'Le bouton d’**état** (↺ À trier, avec sa flèche) range le titre trouvé : vu bien, vu bof, envie ou pas envie.'],
     },
     friends: {
       title: '👥 Amis',
@@ -308,6 +310,7 @@ export const fr = {
       points: [
         '**En commun** : ce que vous voulez voir tous les deux. **Ce soir** y tire un titre au sort.',
         '**Conseils** : ce que l’autre a aimé et que tu n’as pas vu. **Compatibilité** : vos classements se ressemblent-ils ?',
+        'Sur chaque titre, ton bouton d’**état** (avec sa flèche) : note directement ce que tu as vu, ou mets-le dans ta wishlist.',
       ],
     },
   },
