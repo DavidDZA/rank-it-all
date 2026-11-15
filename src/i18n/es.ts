@@ -214,6 +214,7 @@ export const es: Dict = {
         'Toca el póster para ver su ficha completa (sinopsis, tráiler, dónde verlo). ¿No estás seguro? «Saltar»: volverá más tarde.',
         'Las películas de una saga llegan en orden; «💤 No me interesa la saga» las descarta todas de golpe.',
         'El embudo filtra por género, época, nota, o por actor y director.',
+        '**🎯** arriba: propuestas elegidas según tus gustos.',
       ],
     },
     'swipe-horizontal': {
@@ -225,6 +226,17 @@ export const es: Dict = {
         'Toca el póster para ver su ficha completa (sinopsis, tráiler, dónde verlo). ¿No estás seguro? «Saltar»: volverá más tarde.',
         'Las películas de una saga llegan en orden; «💤 No me interesa la saga» las descarta todas de golpe.',
         'El embudo filtra por género, época, nota, o por actor y director.',
+        '**🎯** arriba: propuestas elegidas según tus gustos.',
+      ],
+    },
+    reco: {
+      title: '🎯 Para ti',
+      ordered: false,
+      note: 'El 🎯 de arriba te devuelve al sorteo al azar.',
+      points: [
+        'Títulos **elegidos para ti** a partir de todo lo que has clasificado: tus 👍, tus 😐, tu wishlist, tus «no me interesa» y el puesto de tus títulos en tu clasificación.',
+        'Debajo de cada título, **por qué** está ahí: los títulos que te gustaron que lo recomiendan, el director o el actor que cuenta para ti.',
+        'Cada respuesta **afina** las siguientes. 🧭 **Por descubrir**: de vez en cuando, una apuesta para conocer mejor tus gustos.',
       ],
     },
     rank: {
@@ -485,6 +497,22 @@ export const es: Dict = {
     allSorted: '¡Todo está clasificado! Actualiza el catálogo de vez en cuando para recibir las novedades.',
     diagonal: '↖ ↗ ↙ ↘ Desliza en diagonal, hacia una esquina',
     go: (n: string) => `¡Vamos! (${n})`,
+    reco: {
+      button: '🎯 Para ti',
+      onTip: 'Propuestas según tus gustos: títulos elegidos a partir de todo lo que has clasificado',
+      offTip: 'Volver al sorteo al azar',
+      strip: (n: string, count: number) => `🎯 Para ti · ${n} ${count === 1 ? 'propuesta' : 'propuestas'}`,
+      locked: (n: number) => `🎯 ${n} título${n > 1 ? 's' : ''} más que te guste${n > 1 ? 'n' : ''} (👍) para abrir las propuestas según tus gustos`,
+      preparing: 'Analizando tus gustos…',
+      preparingNote: (pct: number) => `${pct} % · más largo la primera vez`,
+      error: 'No se han podido preparar las propuestas (¿sin conexión?).',
+      empty: 'No hay más propuestas por ahora: clasifica algunos títulos más al azar y vuelve.',
+      backToRandom: '🎲 Volver al azar',
+      liked: (names: string, n: number) => `${n > 1 ? 'Te gustaron' : 'Te gustó'} ${names}`,
+      whyTip: 'Por qué este título: los títulos que te gustaron que lo recomiendan y la persona que más cuenta para ti',
+      explore: '🧭 Por descubrir: una apuesta para conocer mejor tus gustos',
+      exploreTip: 'El modelo duda con este título: tu respuesta es la que más le enseña',
+    },
   },
   home: {
     taglines: ['¿Palomitas listas? 🍿', '5 minutos, y tu colección crece 🌱', '¿Qué clasificamos hoy?', '¿Un último deslizamiento? 🎬', 'Tu memoria de cinéfilo, en orden ✨'],

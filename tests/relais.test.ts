@@ -24,6 +24,7 @@ import { db } from '../src/lib/db';
 import { getUserToken, setToken } from '../src/lib/settings';
 import { detailsOutdated, ensureDetails, fetchProviderOptions, fetchSaga, personFilmography, search, searchPeople, tmdb } from '../src/lib/tmdb';
 import { boostFrom } from '../src/lib/recommend';
+import { ensureTastes } from '../src/lib/taste';
 import { addNewTitles, syncCatalogue } from '../src/lib/sync';
 import { DEFAULT_MIN_VOTES } from '../src/lib/settings';
 import { makeTitle } from './helpers';
@@ -33,6 +34,8 @@ import { makeTitle } from './helpers';
 const film = (id: number, date = '2010-01-01') => ({ id, title: `Film ${id}`, original_title: `Film ${id}`, release_date: date, poster_path: null, vote_count: 5000, genre_ids: [18], original_language: 'en', media_type: 'movie' });
 /** Titres de ce numéro : TMDB ignore append_to_response (réponse sans casting ni plateformes). */
 const BARE = 900;
+/** Titre inconnu de TMDB (404). */
+const UNKNOWN = 404;
 
 function fakeTmdb(url: URL): unknown {
   const p = url.pathname.replace('/3', '');
@@ -45,8 +48,13 @@ function fakeTmdb(url: URL): unknown {
     const append = (url.searchParams.get('append_to_response') ?? '').split(',');
     const res: Record<string, unknown> = { id: Number(m[2]), genres: [{ id: 18, name: 'Drame' }], original_language: 'en', vote_average: 8.4, runtime: 139 };
     if (Number(m[2]) === BARE) return res;
-    if (m[1] === 'tv') res.created_by = [{ name: 'Créatrice' }];
-    if (append.includes('credits')) res.credits = { cast: [{ name: 'Brad Pitt', order: 1 }, { name: 'Edward Norton', order: 0 }, { name: 'Helena Bonham Carter', order: 2 }], crew: [{ name: 'David Fincher', job: 'Director' }] };
+    if (Number(m[2]) === UNKNOWN) return null;
+    if (m[1] === 'tv') res.created_by = [{ id: 70, name: 'Créatrice' }];
+    const cast = [{ id: 1, name: 'Brad Pitt', order: 1 }, { id: 2, name: 'Edward Norton', order: 0 }, { id: 3, name: 'Helena Bonham Carter', order: 2 }];
+    if (append.includes('credits')) res.credits = { cast, crew: [{ id: 7, name: 'David Fincher', job: 'Director' }] };
+    if (append.includes('aggregate_credits')) res.aggregate_credits = { cast, crew: [{ id: 8, name: 'Scénariste', jobs: [{ job: 'Writer' }] }] };
+    if (append.includes('keywords')) res.keywords = m[1] === 'tv' ? { results: [{ id: 9, name: 'heist' }] } : { keywords: [{ id: 9, name: 'heist' }] };
+    if (append.includes('recommendations')) res.recommendations = { page: 1, total_pages: 1, total_results: 1, results: [{ ...film(20), overview: 'Résumé' }] };
     if (append.includes('videos')) res.videos = { results: [{ key: 'yt-fr', site: 'YouTube', type: 'Trailer', iso_639_1: 'fr', official: true }] };
     if (append.includes('watch/providers')) res['watch/providers'] = { results: { FR: { link: 'https://justwatch', flatrate: [{ provider_id: 8, provider_name: 'Netflix', logo_path: '/n.png' }] } } };
     return res;
@@ -92,7 +100,7 @@ beforeEach(async () => {
   upstream = [];
   cache.clear();
   localStorage.clear();
-  await Promise.all([db.titles.clear(), db.answers.clear(), db.meta.clear(), db.details.clear()]);
+  await Promise.all([db.titles.clear(), db.answers.clear(), db.meta.clear(), db.details.clear(), db.tastes.clear()]);
 });
 
 // ---------- Chemins ----------
@@ -138,6 +146,7 @@ describe('relais TMDB : chemins', () => {
     expect(await personFilmography(525, 'director')).toHaveLength(1);
     expect(await search('fight')).toHaveLength(1);
     expect(await boostFrom(title)).toHaveLength(1);
+    expect((await ensureTastes(['movie:556'])).get('movie:556')?.f).toContain('dir:7');
     await syncCatalogue(DEFAULT_MIN_VOTES, () => undefined);
     await addNewTitles(DEFAULT_MIN_VOTES);
     expect(relayed.length).toBeGreaterThan(10);
@@ -191,6 +200,66 @@ describe('relais TMDB : fiche détaillée', () => {
     expect(await db.details.get(`movie:${BARE}`)).toBeUndefined();
     await ensureDetails(makeTitle(BARE));
     expect(relayed).toHaveLength(2); // redemandée par l'appli (le relais peut la servir de son cache)
+  });
+});
+
+// ---------- Résumés pour les propositions « selon tes goûts » ----------
+
+describe('relais TMDB : résumés des titres (propositions)', () => {
+  it('film : demandé résumé au relais, avec mots-clés, équipe et recommandations ; gardé dans la base', async () => {
+    const data = (await ensureTastes(['movie:560'])).get('movie:560')!;
+    expect(relayed.map((r) => r.path)).toEqual(['/taste/movie/560']);
+    expect(upstream[0].url.pathname).toBe('/3/movie/560');
+    expect(upstream[0].url.searchParams.get('append_to_response')).toBe('keywords,credits,recommendations');
+    expect(data.f).toEqual(expect.arrayContaining(['kw:9', 'g:18', 'lang:en', 'dir:7', 'ac:2', 'ac:1']));
+    expect(data.names).toMatchObject({ 'dir:7': 'David Fincher', 'ac:2': 'Edward Norton' });
+    expect(data.recs).toHaveLength(1);
+    expect(data.recs[0]).not.toHaveProperty('overview');
+    expect((await db.tastes.get('movie:560'))?.data?.f).toEqual(data.f);
+    await ensureTastes(['movie:560']);
+    expect(relayed).toHaveLength(1); // déjà dans la base : pas redemandé
+  });
+
+  it('série : créateurs et casting de toutes les saisons, sans les scénaristes d’épisodes', async () => {
+    const data = (await ensureTastes(['tv:1399'])).get('tv:1399')!;
+    expect(upstream[0].url.searchParams.get('append_to_response')).toBe('keywords,aggregate_credits,recommendations');
+    expect(data.f).toEqual(expect.arrayContaining(['kw:9', 'cr:70', 'ac:2']));
+    expect(data.f.some((f) => f.startsWith('wr:'))).toBe(false);
+    expect(data.names['cr:70']).toBe('Créatrice');
+  });
+
+  it('clé personnelle : fiche demandée à TMDB et résumée par l’appli, même résultat', async () => {
+    const viaRelay = (await ensureTastes(['movie:561'])).get('movie:561');
+    await db.tastes.clear();
+    setToken('cle-valide');
+    relayed = [];
+    const direct = (await ensureTastes(['movie:561'])).get('movie:561');
+    expect(relayed).toHaveLength(0);
+    expect(upstream.at(-1)?.url.searchParams.get('append_to_response')).toBe('keywords,credits,recommendations');
+    expect(direct).toEqual(viaRelay);
+  });
+
+  it('titre inconnu de TMDB : vérifié sur la fiche complète, noté, pas redemandé', async () => {
+    expect((await ensureTastes([`movie:${UNKNOWN}`])).size).toBe(0);
+    expect(relayed.map((r) => r.path)).toEqual([`/taste/movie/${UNKNOWN}`, `/movie/${UNKNOWN}`]);
+    expect((await db.tastes.get(`movie:${UNKNOWN}`))?.data).toBeNull();
+    await ensureTastes([`movie:${UNKNOWN}`]);
+    expect(relayed).toHaveLength(2);
+  });
+
+  it('relais pas encore à jour (sans le chemin /taste) : la fiche complète, résumée par l’appli', async () => {
+    const i = ROUTES.findIndex(([pattern]) => pattern.test('/taste/movie/1'));
+    const [route] = ROUTES.splice(i, 1);
+    try {
+      const data = (await ensureTastes(['movie:562'])).get('movie:562');
+      expect(relayed).toEqual([
+        { path: '/taste/movie/562', status: 404 },
+        { path: '/movie/562', status: 200 },
+      ]);
+      expect(data?.f).toEqual(expect.arrayContaining(['kw:9', 'dir:7']));
+    } finally {
+      ROUTES.splice(i, 0, route);
+    }
   });
 });
 

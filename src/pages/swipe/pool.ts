@@ -13,11 +13,18 @@ export const QUEUE_SIZE = 4;
 export interface Pool {
   items: { title: Title; w: number }[];
   total: number;
+  /** Propositions « selon tes goûts » : déjà dans l'ordre, tirées l'une après l'autre (sans hasard). */
+  ordered?: boolean;
 }
 
-/** Tire un titre (pondéré) et le retire du tirage. */
+/** Tire un titre (pondéré, ou le suivant d'un tirage ordonné) et le retire du tirage. */
 export function draw(pool: Pool): Title | null {
   if (!pool.items.length) return null;
+  if (pool.ordered) {
+    const [first] = pool.items.splice(0, 1);
+    pool.total -= first.w;
+    return first.title;
+  }
   let r = Math.random() * pool.total;
   let i = 0;
   while (i < pool.items.length - 1 && r >= pool.items[i].w) r -= pool.items[i++].w;
@@ -28,7 +35,7 @@ export function draw(pool: Pool): Title | null {
 
 /** Retire des titres du tirage (ils sont déjà dans la file). */
 export function removeFromPool(pool: Pool, keys: Set<string>) {
-  pool.items = pool.items.filter((i) => !keys.has(i.title.key));
+  pool.items = pool.items.filter((i) => !keys.has(i.title.key)); // garde l'ordre d'un tirage ordonné
   pool.total = pool.items.reduce((s, i) => s + i.w, 0);
 }
 

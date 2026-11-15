@@ -1,5 +1,6 @@
 import type { SagaTag } from './pool';
-import { T } from '../../i18n';
+import type { Proposal } from '../../lib/proposals';
+import { LANG, T } from '../../i18n';
 
 /** Bouton rond du swipe, avec sa légende et (option) la flèche de son coin. */
 export function ActionButton(props: {
@@ -47,5 +48,36 @@ export function SagaDropButton({ left, onDrop }: { left: number; onDrop: () => v
     >
       {T.swipe.dropSaga(left)}
     </button>
+  );
+}
+
+/** « Tu as aimé A et B » : la liste dans la langue de l'interface. */
+function listOf(names: string[]): string {
+  try {
+    return new Intl.ListFormat(LANG, { type: 'conjunction' }).format(names);
+  } catch {
+    return names.join(', ');
+  }
+}
+
+/**
+ * Sous le titre d'une proposition « selon tes goûts » : pourquoi elle est là (tes titres aimés qui la recommandent,
+ * la personne qui compte le plus), ou « à découvrir » pour un pari. Ligne toujours présente en mode propositions
+ * (vide au besoin) : la carte garde la même taille d'un titre à l'autre.
+ */
+export function RecoWhy({ proposal }: { proposal?: Proposal }) {
+  if (proposal?.explore)
+    return (
+      <p className="reco-why explore" title={T.swipe.reco.exploreTip}>
+        {T.swipe.reco.explore}
+      </p>
+    );
+  const why = proposal?.why;
+  if (!why) return <p className="reco-why">{' '}</p>;
+  const parts = [why.liked.length ? T.swipe.reco.liked(listOf(why.liked), why.liked.length) : null, why.person ? `${why.person.role === 'actor' ? '🎭' : '🎬'} ${why.person.name}` : null];
+  return (
+    <p className="reco-why" title={T.swipe.reco.whyTip}>
+      🎯 {parts.filter(Boolean).join(' · ')}
+    </p>
   );
 }

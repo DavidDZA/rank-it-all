@@ -1,6 +1,6 @@
 # Feuille de route — ce qui reste à faire
 
-> État au 14/11/2026. Comment l'appli marche aujourd'hui : [ARCHITECTURE.md](ARCHITECTURE.md).
+> État au 15/11/2026. Comment l'appli marche aujourd'hui : [ARCHITECTURE.md](ARCHITECTURE.md).
 > Fait : comptes et synchro, amis et « À deux », catégorie Animes, seuils français / vieux films, classement à
 > la main, refonte (fiches à part, chargement découpé, types Supabase, tests de bout en bout) ; puis (01-02/11)
 > renommage en **Rank It All** (base locale migrée, ancienne adresse redirigée), filtre « dispo sur mes
@@ -28,6 +28,10 @@
 > (14/11) **Traduction en 6 langues** livrée (ARCHITECTURE § 2.2) ; le soir, fiches du Play Store traduites (anglais par
 > défaut) et e-mail « mot de passe oublié » en 6 langues.
 >
+> (15/11) **Propositions « selon tes goûts »** (bouton 🎯 du swipe), demandées par les testeurs : modèle appris sur toutes
+> les réponses et le classement, choisi par un test hors ligne sur le profil de l'utilisateur (ARCHITECTURE § 3.6) ;
+> nouveau chemin du relais `/taste/…` (déployé avec le dossier `worker/`).
+>
 > **Reprendre ici** (noté le 14/11 au soir) — test fermé en cours depuis le 11/11 (12 testeurs inscrits le 12/11) :
 > 14 jours écoulés vers le 26/11 (§ 2 étapes 5-6), puis demander la production.
 >
@@ -38,8 +42,10 @@
 > **Fiches traduites du Play Store** : les 5 langues ajoutées et envoyées pour examen le 14/11 au soir (déclaration
 > IA : « Ne pas signaler », comme le 08/11 : vraies captures, bannières assemblées par script).
 >
-> Ensuite : ce que les testeurs pensent des changements du 13-14/11, autres retours ; puis musique et jeux vidéo
-> (§ 5). Faire connaître l'appli après la sortie : [PROMOTION.md](PROMOTION.md).
+> Ensuite : ce que les testeurs pensent des changements du 13-15/11, autres retours. **Propositions** : lire leur taux
+> de réussite chez les testeurs dans une semaine ou deux (requête SQL dans ARCHITECTURE § 3.6) et le comparer au
+> tirage au hasard ; ajuster si besoin (seuil des 10 « bien », part des cartes « à découvrir »). Puis musique et jeux
+> vidéo (§ 5). Faire connaître l'appli après la sortie : [PROMOTION.md](PROMOTION.md).
 
 ## 1. Décisions en attente
 
@@ -162,6 +168,11 @@ libres (TMDB, Supabase) — c'est autorisé. Utile aussi si le Play Store est bl
   d'API en secret GitHub pour un déploiement automatique. Plus tard, si l'appli grandit : **catalogue préparé
   chaque nuit par GitHub Actions** et publié sur GitHub Pages (un téléchargement au lieu de ≈ 900 requêtes ; un
   fichier par langue avec la traduction).
+- **Propositions, plus tard** : quand il y aura quelques centaines d'utilisateurs actifs, ajouter les goûts des autres
+  comptes (« ceux qui ont aimé ça ont aimé ça », à partir des réponses déjà sur Supabase) : la seule piste qui pourrait
+  faire nettement mieux que le modèle du 15/11. La base publique **MovieLens** (notes de films reliées à TMDB) serait
+  excellente pour les films, mais sa licence interdit de redistribuer les données sans autorisation : demander d'abord
+  à GroupLens.
 - **Viralité** : lien / QR code sur l'image du top 10, carte de compatibilité à partager, demande de note sur le
   store, « Mon année en films » en décembre, import Letterboxd / SensCritique / IMDb / TV Time. Plan complet pour
   faire connaître l'appli : [PROMOTION.md](PROMOTION.md).

@@ -3,7 +3,7 @@
  * pas sur les séries ni les animes). Propres à l'appareil (localStorage), comme les autres préférences d'affichage.
  * Sans dépendance : la configuration des tests de bout en bout importe `TUTORIALS` pour les marquer toutes vues.
  */
-export const TUTORIALS = ['home', 'swipe-corners', 'swipe-horizontal', 'rank', 'wishlist', 'tonight', 'lists', 'add', 'friends', 'duo'] as const;
+export const TUTORIALS = ['home', 'swipe-corners', 'swipe-horizontal', 'reco', 'rank', 'wishlist', 'tonight', 'lists', 'add', 'friends', 'duo'] as const;
 export type TutorialId = (typeof TUTORIALS)[number];
 
 export const TUTORIALS_KEY = 'tutorials-seen';

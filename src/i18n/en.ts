@@ -213,6 +213,7 @@ export const en: Dict = {
         'Tap the poster for its full details (summary, trailer, where to watch). Not sure? “Skip”: it’ll come back later.',
         'The movies of a saga come in order; “💤 Not into this saga” sets them all aside at once.',
         'The funnel filters by genre, period, rating, or by actor and director.',
+        '**🎯** at the top: picks chosen to match your taste.',
       ],
     },
     'swipe-horizontal': {
@@ -224,6 +225,17 @@ export const en: Dict = {
         'Tap the poster for its full details (summary, trailer, where to watch). Not sure? “Skip”: it’ll come back later.',
         'The movies of a saga come in order; “💤 Not into this saga” sets them all aside at once.',
         'The funnel filters by genre, period, rating, or by actor and director.',
+        '**🎯** at the top: picks chosen to match your taste.',
+      ],
+    },
+    reco: {
+      title: '🎯 Picked for you',
+      ordered: false,
+      note: 'The 🎯 at the top takes you back to random picks.',
+      points: [
+        'Titles **picked for you** from everything you’ve sorted: your 👍, your 😐, your wishlist, your “not interested”, and where your titles sit in your ranking.',
+        'Under each title, **why** it’s there: the titles you liked that recommend it, the director or actor who matters to you.',
+        'Each answer **fine-tunes** the next ones. 🧭 **Discover**: now and then, a gamble to learn your taste better.',
       ],
     },
     rank: {
@@ -484,6 +496,22 @@ export const en: Dict = {
     allSorted: 'Everything is sorted! Update the catalog from time to time to get the new releases.',
     diagonal: '↖ ↗ ↙ ↘ Swipe diagonally, to a corner',
     go: (n: string) => `Let’s go (${n})`,
+    reco: {
+      button: '🎯 Picked for you',
+      onTip: 'Picks based on your taste: titles chosen from everything you’ve sorted',
+      offTip: 'Back to random picks',
+      strip: (n: string, count: number) => `🎯 Picked for you · ${n} ${count === 1 ? 'pick' : 'picks'}`,
+      locked: (n: number) => `🎯 ${n} more liked title${n > 1 ? 's' : ''} (👍) to unlock picks based on your taste`,
+      preparing: 'Analyzing your taste…',
+      preparingNote: (pct: number) => `${pct}% · longer the first time`,
+      error: 'Couldn’t prepare your picks (offline?).',
+      empty: 'No more picks for now: sort a few more random titles, then come back!',
+      backToRandom: '🎲 Back to random',
+      liked: (names: string, _n: number) => `You liked ${names}`,
+      whyTip: 'Why this title: the titles you liked that recommend it, and the person who matters most to you',
+      explore: '🧭 Discover: a gamble to learn your taste better',
+      exploreTip: 'The model is unsure about this one: your answer teaches it the most',
+    },
   },
   home: {
     taglines: ['Popcorn ready? 🍿', '5 minutes, and your collection grows 🌱', 'What are we sorting today?', 'One more swipe for the road? 🎬', 'Your movie memory, in order ✨'],

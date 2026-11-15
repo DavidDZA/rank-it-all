@@ -1,4 +1,5 @@
 import Dexie, { type EntityTable } from 'dexie';
+import type { TasteData } from '../../worker/src/taste.js';
 
 export type MediaType = 'movie' | 'tv';
 export type Status = 'seen' | 'unseen' | 'wish';
@@ -87,12 +88,23 @@ export interface Synced {
   hash: string;
 }
 
+/**
+ * Résumé TMDB d'un titre pour les propositions « selon tes goûts » (mots-clés, équipe, recommandations : voir
+ * worker/src/taste.js). Cache propre à l'appareil, ni synchronisé ni sauvegardé. `data` null : titre inconnu de TMDB.
+ */
+export interface TasteRow {
+  key: string;
+  fetchedAt: number;
+  data: TasteData | null;
+}
+
 type Database = Dexie & {
   titles: EntityTable<Title, 'key'>;
   answers: EntityTable<Answer, 'key'>;
   meta: EntityTable<Meta, 'key'>;
   synced: EntityTable<Synced, 'id'>;
   details: EntityTable<DetailsRow, 'key'>;
+  tastes: EntityTable<TasteRow, 'key'>;
 };
 
 /** Schéma et ses migrations, pour la base de l'appli comme pour l'ancienne (reprise sous le nouveau nom). */
@@ -121,6 +133,9 @@ function withSchema(d: Dexie): Database {
         });
       await tx.table('details').bulkPut(rows);
     });
+
+  // Résumés pour les propositions « selon tes goûts » (15/11/2026).
+  d.version(4).stores({ tastes: 'key' });
   return d as Database;
 }
 
@@ -191,7 +206,7 @@ export async function getDetails(key: string): Promise<Details | undefined> {
 
 /** Données de la table meta qui suivent le compte (et la sauvegarde) ; le reste est propre à l'appareil. */
 export const isUserMeta = (key: string) =>
-  /^(ranking:|saga:|boosts:)/.test(key) || key === 'activity' || key === 'badges' || key === 'min-votes' || key === 'show-anime' || key === 'custom-imports';
+  /^(ranking:|saga:|boosts:|reco-stats:)/.test(key) || key === 'activity' || key === 'badges' || key === 'min-votes' || key === 'show-anime' || key === 'custom-imports';
 
 export const titleKey = (type: MediaType, tmdbId: number) => `${type}:${tmdbId}`;
 

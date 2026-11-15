@@ -212,6 +212,7 @@ export const de: Dict = {
         'Tippe aufs Poster für alle Infos (Inhalt, Trailer, wo es läuft). Nicht sicher? „Überspringen“: Er kommt später wieder.',
         'Die Filme einer Reihe kommen in der richtigen Reihenfolge; „💤 Keine Lust auf die Reihe“ legt sie alle auf einmal beiseite.',
         'Der Trichter filtert nach Genre, Zeit, Bewertung oder nach Schauspieler und Regie.',
+        '**🎯** oben: Vorschläge nach deinem Geschmack.',
       ],
     },
     'swipe-horizontal': {
@@ -223,6 +224,17 @@ export const de: Dict = {
         'Tippe aufs Poster für alle Infos (Inhalt, Trailer, wo es läuft). Nicht sicher? „Überspringen“: Er kommt später wieder.',
         'Die Filme einer Reihe kommen in der richtigen Reihenfolge; „💤 Keine Lust auf die Reihe“ legt sie alle auf einmal beiseite.',
         'Der Trichter filtert nach Genre, Zeit, Bewertung oder nach Schauspieler und Regie.',
+        '**🎯** oben: Vorschläge nach deinem Geschmack.',
+      ],
+    },
+    reco: {
+      title: '🎯 Für dich',
+      ordered: false,
+      note: 'Das 🎯 oben bringt dich zurück zur Zufallsauswahl.',
+      points: [
+        'Titel, **für dich ausgewählt** anhand von allem, was du sortiert hast: deine 👍, deine 😐, deine Wishlist, dein „kein Interesse“ und die Plätze deiner Titel im Ranking.',
+        'Unter jedem Titel steht, **warum** er da ist: deine gemochten Titel, die ihn empfehlen, die Regie oder der Schauspieler, die dir wichtig sind.',
+        'Jede Antwort **verfeinert** die nächsten. 🧭 **Entdecken**: ab und zu ein Versuch, um deinen Geschmack besser kennenzulernen.',
       ],
     },
     rank: {
@@ -483,6 +495,22 @@ export const de: Dict = {
     allSorted: 'Alles einsortiert! Aktualisiere den Katalog ab und zu, um Neuerscheinungen zu bekommen.',
     diagonal: '↖ ↗ ↙ ↘ Diagonal swipen, in eine Ecke',
     go: (n: string) => `Los geht’s (${n})`,
+    reco: {
+      button: '🎯 Für dich',
+      onTip: 'Vorschläge nach deinem Geschmack: Titel, ausgewählt anhand von allem, was du sortiert hast',
+      offTip: 'Zurück zur Zufallsauswahl',
+      strip: (n: string, count: number) => `🎯 Für dich · ${n} ${count === 1 ? 'Vorschlag' : 'Vorschläge'}`,
+      locked: (n: number) => `🎯 Noch ${n} gemochte${n > 1 ? '' : 'r'} Titel (👍), dann gibt es Vorschläge nach deinem Geschmack`,
+      preparing: 'Dein Geschmack wird analysiert…',
+      preparingNote: (pct: number) => `${pct} % · beim ersten Mal dauert es länger`,
+      error: 'Die Vorschläge konnten nicht vorbereitet werden (offline?).',
+      empty: 'Gerade keine Vorschläge mehr: Sortiere noch ein paar Titel per Zufall und komm dann wieder!',
+      backToRandom: '🎲 Zurück zum Zufall',
+      liked: (names: string, _n: number) => `Du mochtest ${names}`,
+      whyTip: 'Warum dieser Titel: deine gemochten Titel, die ihn empfehlen, und die Person, die dir am wichtigsten ist',
+      explore: '🧭 Entdecken: ein Versuch, um deinen Geschmack besser kennenzulernen',
+      exploreTip: 'Das Modell ist sich bei diesem Titel unsicher: Deine Antwort bringt ihm am meisten bei',
+    },
   },
   home: {
     taglines: ['Popcorn bereit? 🍿', '5 Minuten, und deine Sammlung wächst 🌱', 'Was sortieren wir heute?', 'Noch ein Swipe für unterwegs? 🎬', 'Dein Filmgedächtnis, schön geordnet ✨'],

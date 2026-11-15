@@ -27,14 +27,19 @@ import {
   type SagaTag,
 } from './pool';
 import { FilterButton, FilterIcon, FilterSheet } from '../../components/FilterSheet';
-import { ActionButton, CardTag, SagaDropButton } from './controls';
+import { ActionButton, CardTag, RecoWhy, SagaDropButton } from './controls';
 import { KNOWN_VOTES, personFilmography } from '../../lib/tmdb';
+import { buildProposals, likedCount, RECO_MIN_LIKED, recordRecoAnswer, type Proposal } from '../../lib/proposals';
+import { rememberTaste } from '../../lib/taste';
+import { ProgressBar } from '../../components/CatalogueProgress';
 import { downloadCatalogue, useCatalogueDownload } from '../../lib/catalogueDownload';
 import { CatalogueProgress } from '../../components/CatalogueProgress';
 import { Tutorial } from '../../components/Tutorial';
 import { num, T } from '../../i18n';
 
 const FLIP_MS = 350; // durée du retournement de la carte (animation flip-in)
+/** Propositions « selon tes goûts » recalculées toutes les RECO_REFRESH réponses (le modèle apprend en continu). */
+const RECO_REFRESH = 10;
 
 export default function Swipe({ category }: { category: Category }) {
   const media = mediaOf(category); // type TMDB (les animes sont des séries pour TMDB)
@@ -76,6 +81,21 @@ export default function Swipe({ category }: { category: Category }) {
   // Mode 2 directions : la carte de derrière attend la fin du retournement pour la 2e question.
   const [flipping, setFlipping] = useState(false);
   const cardArea = useRef<HTMLDivElement>(null);
+
+  // Propositions « selon tes goûts » (bouton 🎯), retenues d'une visite à l'autre pour chaque catégorie.
+  const recoKey = `swipe-reco:${category}`;
+  const [reco, setRecoState] = useState<boolean>(() => readPref(recoKey, false));
+  const recoRef = useRef(reco);
+  const proposals = useRef(new Map<string, Proposal>());
+  // Propositions prêtes (version, 0 : en préparation), avancement de la préparation, échec.
+  const [recoVersion, setRecoVersion] = useState(0);
+  const [recoProgress, setRecoProgress] = useState(0);
+  const [recoError, setRecoError] = useState(false);
+  const [recoAttempt, setRecoAttempt] = useState(0);
+  const recoAnswers = useRef(0);
+  // Réponses données aux propositions, pour les retirer de la mesure en cas d'« Annuler ».
+  const recoAnswered = useRef(new Map<string, { status: Status; tier?: Tier; explore: boolean }>());
+  const recoReady = recoVersion > 0;
 
   const fill = (q: Title[]) => {
     const next = [...q];
@@ -159,7 +179,7 @@ export default function Swipe({ category }: { category: Category }) {
         .then((titles) => {
           if (!alive) return;
           const added = addTitles(titles).filter((t) => !answered.current.has(t.key) && matchesTheme(t, theme));
-          if (!added.length) return;
+          if (!added.length || recoRef.current) return; // propositions : leur ordre ne bouge pas
           pool.current.items.push(...added.map((title) => ({ title, w: weightOf(title) })));
           pool.current.total = pool.current.items.reduce((s, i) => s + i.w, 0);
           if (queueRef.current && !queueRef.current.length) setQueue(fill([]));
@@ -171,13 +191,56 @@ export default function Swipe({ category }: { category: Category }) {
     };
   }, [loaded, theme]);
 
-  // (Re)construit le tirage quand le thème change.
+  /** Tirage des propositions : dans leur ordre, sans celles déjà triées, déjà dans la file ou hors des filtres. */
+  const proposalPool = (skip = new Set<string>()): Pool => {
+    const items = [...proposals.current.values()]
+      .filter((p) => !answered.current.has(p.title.key) && !skip.has(p.title.key) && matchesTheme(p.title, theme))
+      .map((p) => ({ title: p.title, w: 1 }));
+    return { items, total: items.length, ordered: true };
+  };
+
+  // Prépare les propositions « selon tes goûts » (quelques secondes ; plus longtemps la première fois).
   useEffect(() => {
-    if (!loaded) return;
-    const items = catalogue.current
-      .filter((t) => !answered.current.has(t.key) && matchesTheme(t, theme))
-      .map((title) => ({ title, w: weightOf(title) }));
-    pool.current = { items, total: items.reduce((s, i) => s + i.w, 0) };
+    if (!loaded || !reco) return;
+    let alive = true;
+    setRecoVersion(0);
+    setRecoProgress(0);
+    setRecoError(false);
+    buildProposals(category, (share) => alive && setRecoProgress(Math.round(share * 100) / 100))
+      .then((list) => {
+        if (!alive) return;
+        proposals.current = new Map(list.map((p) => [p.title.key, p]));
+        recoAnswers.current = 0;
+        setRecoVersion((v) => v + 1);
+      })
+      .catch(() => alive && setRecoError(true));
+    return () => {
+      alive = false;
+    };
+  }, [loaded, reco, category, catalogueVersion, recoAttempt]);
+
+  /** Toutes les RECO_REFRESH réponses : le modèle réapprend, la suite des propositions change (la file ne bouge pas). */
+  const refreshProposals = () => {
+    buildProposals(category)
+      .then((list) => {
+        if (!recoRef.current) return;
+        proposals.current = new Map(list.map((p) => [p.title.key, p]));
+        pool.current = proposalPool(new Set((queueRef.current ?? []).map((t) => t.key)));
+        if (queueRef.current && !queueRef.current.length) setQueue(fill([]));
+      })
+      .catch(() => undefined); // hors ligne : on garde les propositions actuelles
+  };
+
+  // (Re)construit le tirage quand le thème change, ou au passage au hasard / aux propositions.
+  useEffect(() => {
+    if (!loaded || (reco && !recoReady)) return;
+    if (reco) pool.current = proposalPool();
+    else {
+      const items = catalogue.current
+        .filter((t) => !answered.current.has(t.key) && matchesTheme(t, theme))
+        .map((title) => ({ title, w: weightOf(title) }));
+      pool.current = { items, total: items.reduce((s, i) => s + i.w, 0) };
+    }
     setPhase('seen');
     // Avant d'afficher la 1re carte, on regarde si c'est un film de saga, pour commencer par le 1er film.
     // Seulement si sa fiche le dit déjà : on n'attend pas le réseau pour afficher la 1re carte
@@ -195,7 +258,7 @@ export default function Swipe({ category }: { category: Category }) {
     return () => {
       alive = false;
     };
-  }, [loaded, theme]);
+  }, [loaded, theme, reco, recoReady]);
 
   const current = queue?.[0];
   const busy = fling !== null;
@@ -238,7 +301,18 @@ export default function Swipe({ category }: { category: Category }) {
       tier = dir === 'right' ? 'good' : 'meh';
     } else status = dir === 'right' ? 'wish' : 'unseen';
     await setStatus(current, status, tier);
-    if (tier === 'good') boostRecommendations(current);
+    rememberTaste(current.key); // résumé préparé pour les prochaines propositions
+    if (reco) {
+      const proposal = proposals.current.get(current.key);
+      if (proposal) {
+        recoAnswered.current.set(current.key, { status, tier, explore: proposal.explore });
+        recordRecoAnswer(category, status, tier, proposal.explore).catch(() => undefined);
+      }
+      if (++recoAnswers.current >= RECO_REFRESH) {
+        recoAnswers.current = 0;
+        refreshProposals();
+      }
+    } else if (tier === 'good') boostRecommendations(current);
     const origin = centerOf(cardArea.current);
     if (status === 'seen') burst(['✅', '🍿', '⭐'], origin, 10);
     else if (status === 'wish') burst(['💖', '💕', '✨'], origin, 14);
@@ -296,6 +370,11 @@ export default function Swipe({ category }: { category: Category }) {
     for (const t of last) {
       await clearStatus(t.key);
       answered.current.delete(t.key);
+      const given = recoAnswered.current.get(t.key);
+      if (given) {
+        recoAnswered.current.delete(t.key);
+        recordRecoAnswer(category, given.status, given.tier, given.explore, -1).catch(() => undefined);
+      }
     }
     recordActivity(-last.length);
     setHistory((h) => h.slice(0, -1));
@@ -305,6 +384,23 @@ export default function Swipe({ category }: { category: Category }) {
 
   const press = (dir: Dir) => {
     if (!busy && current) setFling(dir);
+  };
+
+  /** Bouton 🎯 : propositions selon tes goûts, ou retour au tirage au hasard. */
+  const toggleReco = async () => {
+    if (busy) return;
+    const next = !reco;
+    if (next) {
+      const liked = await likedCount(category).catch(() => 0);
+      if (liked < RECO_MIN_LIKED) {
+        toast(T.swipe.reco.locked(RECO_MIN_LIKED - liked));
+        return;
+      }
+    }
+    writePref(recoKey, next);
+    recoRef.current = next;
+    setRecoVersion(0);
+    setRecoState(next);
   };
 
   const applyTheme = (t: Theme) => {
@@ -364,13 +460,23 @@ export default function Swipe({ category }: { category: Category }) {
   const typeTitle = `${CATEGORY_LABEL[category].emoji} ${capitalize(CATEGORY_LABEL[category].plural)}`;
 
   return (
-    <main className={`page swipe-page ${mode}`}>
+    <main className={`page swipe-page ${mode} ${reco ? 'reco' : ''}`}>
       <Tutorial id={mode === 'corners' ? 'swipe-corners' : 'swipe-horizontal'} />
+      {reco && <Tutorial id="reco" />}
       <header className="swipe-top">
         <BackLink />
         <h2 className={`swipe-title ${mode === 'horizontal' && current ? `question ${phase}` : ''}`}>
           {mode === 'horizontal' && current ? p.question : typeTitle}
         </h2>
+        <button
+          className={`icon-btn reco-btn ${reco ? 'active' : ''}`}
+          onClick={toggleReco}
+          aria-pressed={reco}
+          aria-label={T.swipe.reco.button}
+          title={reco ? T.swipe.reco.offTip : T.swipe.reco.onTip}
+        >
+          🎯
+        </button>
         <FilterButton
           active={!isNoTheme(theme)}
           label={T.swipe.remainingLong(themeLabel(media, theme), num(remaining))}
@@ -380,6 +486,11 @@ export default function Swipe({ category }: { category: Category }) {
           🔥 {count}
         </span>
       </header>
+      {reco && (
+        <button className="theme-strip reco-strip" onClick={toggleReco} title={T.swipe.reco.offTip}>
+          {recoReady ? T.swipe.reco.strip(num(remaining), remaining) : T.swipe.reco.button}
+        </button>
+      )}
       {!isNoTheme(theme) && (
         <button className="theme-strip" onClick={() => setShowThemes(true)} title={T.filterSheet.changeTip}>
           <FilterIcon /> {T.swipe.remaining(themeLabel(media, theme), num(remaining))}
@@ -394,11 +505,40 @@ export default function Swipe({ category }: { category: Category }) {
             {T.common.retry}
           </button>
         </div>
+      ) : reco && loaded && !recoReady ? (
+        <div className="empty reco-preparing" aria-live="polite">
+          <span className="big-emoji">🎯</span>
+          {recoError ? (
+            <>
+              <p>{T.swipe.reco.error}</p>
+              <button className="btn primary" onClick={() => setRecoAttempt((n) => n + 1)}>
+                {T.common.retry}
+              </button>
+            </>
+          ) : (
+            <>
+              <p>{T.swipe.reco.preparing}</p>
+              <ProgressBar done={recoProgress} />
+              <p className="muted small">{T.swipe.reco.preparingNote(Math.round(recoProgress * 100))}</p>
+            </>
+          )}
+          <button className="btn" onClick={toggleReco}>
+            {T.swipe.reco.backToRandom}
+          </button>
+        </div>
       ) : queue === null ? (
         <p className="muted center">{T.common.loading}</p>
       ) : !current ? (
         <div className="empty">
-          {catalogue.current.length === 0 ? (
+          {reco && catalogue.current.length > 0 ? (
+            <>
+              <span className="big-emoji">🎯</span>
+              <p>{isNoTheme(theme) ? T.swipe.reco.empty : T.swipe.nothingFiltered}</p>
+              <button className="btn primary" onClick={toggleReco}>
+                {T.swipe.reco.backToRandom}
+              </button>
+            </>
+          ) : catalogue.current.length === 0 ? (
             download.running || download.error ? (
               <CatalogueProgress compact />
             ) : (
@@ -439,6 +579,7 @@ export default function Swipe({ category }: { category: Category }) {
                 <CardTag saga={tags[behind.key]} />
                 <RatingBadge title={behind} />
                 <TitleText title={behind} credits />
+                {reco && <RecoWhy proposal={proposals.current.get(behind.key)} />}
               </div>
             )}
             <SwipeCard
@@ -459,6 +600,7 @@ export default function Swipe({ category }: { category: Category }) {
               <CardTag saga={saga} />
               <RatingBadge title={current} />
               <TitleText title={current} credits />
+              {reco && <RecoWhy proposal={proposals.current.get(current.key)} />}
             </SwipeCard>
           </div>
           {mode === 'corners' ? (

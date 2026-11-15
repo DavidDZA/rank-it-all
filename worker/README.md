@@ -13,6 +13,9 @@ Cloudflare Worker entre l'appli et TMDB : le site l'appelle **sans clé**, le re
 - Seules les bonnes réponses sont marquées « à garder » ; un refus de TMDB repart en `no-store` (sinon le navigateur le
   ressert 24 h). Un 429 de TMDB est réessayé une fois après 1 s.
 - Cache partagé entre utilisateurs : 12 h pour les pages du catalogue, 24 h pour les fiches, 1 h pour les recherches.
+- Seul chemin propre au relais : `/taste/<movie|tv>/<id>` (propositions « selon tes goûts », 15/11/2026). Le relais
+  demande la fiche à TMDB avec ses mots-clés, son équipe et ses recommandations, et la renvoie **résumée**
+  (`src/taste.js`, partagé avec l'appli : ≈ 5 Ko au lieu de 30 à 60). Le résumé a sa propre entrée du cache.
 - Offre gratuite : 100 000 demandes par jour ; un premier téléchargement du catalogue en fait environ 900.
 
 Test (sans Cloudflare ni TMDB, simulés) : `node worker/test.mjs`.

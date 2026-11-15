@@ -232,6 +232,7 @@ export const fr = {
         'Touche l’affiche pour sa fiche complète (résumé, bande-annonce, où regarder). Pas sûr ? « Passer » : il reviendra plus tard.',
         'Les films d’une saga s’enchaînent dans l’ordre ; « 💤 Pas envie de la saga » les écarte tous d’un coup.',
         'L’entonnoir filtre par genre, époque, note, ou par acteur et réalisateur.',
+        '**🎯** en haut : des propositions choisies selon tes goûts.',
       ],
     },
     'swipe-horizontal': {
@@ -243,6 +244,17 @@ export const fr = {
         'Touche l’affiche pour sa fiche complète (résumé, bande-annonce, où regarder). Pas sûr ? « Passer » : il reviendra plus tard.',
         'Les films d’une saga s’enchaînent dans l’ordre ; « 💤 Pas envie de la saga » les écarte tous d’un coup.',
         'L’entonnoir filtre par genre, époque, note, ou par acteur et réalisateur.',
+        '**🎯** en haut : des propositions choisies selon tes goûts.',
+      ],
+    },
+    reco: {
+      title: '🎯 Selon tes goûts',
+      ordered: false,
+      note: 'Le 🎯 en haut ramène au tirage au hasard.',
+      points: [
+        'Des titres **choisis pour toi** d’après tout ce que tu as trié : tes 👍, tes 😐, ta wishlist, tes « pas envie », et la place de tes titres au classement.',
+        'Sous chaque titre, **pourquoi** il est là : tes titres aimés qui le recommandent, le réalisateur ou l’acteur qui compte pour toi.',
+        'Chaque réponse **affine** les suivantes. 🧭 **À découvrir** : de temps en temps, un pari pour mieux cerner tes goûts.',
       ],
     },
     rank: {
@@ -511,6 +523,22 @@ export const fr = {
     allSorted: 'Tout est trié ! Mets à jour le catalogue de temps en temps pour récupérer les nouveautés.',
     diagonal: '↖ ↗ ↙ ↘ Swipe en diagonale, vers un coin',
     go: (n: string) => `C’est parti (${n})`,
+    reco: {
+      button: '🎯 Selon tes goûts',
+      onTip: 'Propositions selon tes goûts : des titres choisis d’après tout ce que tu as trié',
+      offTip: 'Revenir au tirage au hasard',
+      strip: (n: string, count: number) => `🎯 Selon tes goûts · ${n} ${count > 1 ? 'propositions' : 'proposition'}`,
+      locked: (n: number) => `🎯 Encore ${n} titre${n > 1 ? 's' : ''} aimé${n > 1 ? 's' : ''} (👍) pour ouvrir les propositions selon tes goûts`,
+      preparing: 'Analyse de tes goûts…',
+      preparingNote: (pct: number) => `${pct} % · plus long la première fois`,
+      error: 'Impossible de préparer les propositions (hors ligne ?).',
+      empty: 'Plus de propositions pour l’instant : trie encore quelques titres au hasard, puis reviens !',
+      backToRandom: '🎲 Revenir au hasard',
+      liked: (names: string, _n: number) => `Tu as aimé ${names}`,
+      whyTip: 'Pourquoi ce titre : tes titres aimés qui le recommandent, et la personne qui compte le plus pour toi',
+      explore: '🧭 À découvrir : un pari pour mieux cerner tes goûts',
+      exploreTip: 'Le modèle hésite sur ce titre : ta réponse lui en apprend le plus',
+    },
   },
   /** Accueil. */
   home: {

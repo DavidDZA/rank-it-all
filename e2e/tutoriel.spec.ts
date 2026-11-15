@@ -24,6 +24,7 @@ test.describe('astuces de première visite', () => {
     await expect(tip).toContainText('Touche l’affiche pour sa fiche complète');
     await expect(tip).toContainText('« 💤 Pas envie de la saga »');
     await expect(tip).not.toContainText('lire le résumé');
+    await expect(tip).toContainText('🎯 en haut : des propositions choisies selon tes goûts'); // 15/11
     await tip.getByRole('button', { name: 'Fermer' }).click(); // la croix compte aussi
     await page.goto('/#/swipe/tv');
     await expect(page.locator('.swipe-page')).toBeVisible();

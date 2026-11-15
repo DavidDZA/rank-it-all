@@ -50,6 +50,22 @@ body.rate-phase::after {
   text-overflow: ellipsis;
 }
 
+/* Bouton 🎯 (propositions selon tes goûts) et son bandeau. */
+.reco-btn {
+  flex-shrink: 0;
+  font-size: 1.25rem;
+}
+.reco-btn.active {
+  background: var(--grad);
+  border-color: transparent;
+}
+.theme-strip.reco-strip {
+  background: rgb(255 95 162 / 0.22);
+}
+.reco-preparing .progress-bar {
+  width: min(280px, 80%);
+}
+
 /* ---------- Carte ---------- */
 
 /* La carte occupe toute la hauteur disponible : largeur = (hauteur - texte) × 2/3. */
@@ -88,6 +104,27 @@ body.rate-phase::after {
 }
 .swipe-card .title-text {
   text-align: center;
+}
+/* Propositions : une ligne de plus sous le titre (pourquoi ce titre), la carte garde ses proportions. */
+.swipe-page.reco .swipe-card {
+  width: min(100%, calc((100cqh - 150px) * 2 / 3 + 20px));
+}
+/* Deux lignes au plus (place réservée : la carte garde sa taille d'une proposition à l'autre). */
+.reco-why {
+  margin: -4px 0 0;
+  min-height: 2.6em;
+  text-align: center;
+  font-size: 0.8rem;
+  line-height: 1.3;
+  color: var(--yellow);
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+}
+.reco-why.explore {
+  color: var(--muted);
 }
 .swipe-card .poster {
   box-shadow: none;

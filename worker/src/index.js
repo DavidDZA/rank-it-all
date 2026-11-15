@@ -4,6 +4,7 @@
 // par adresse IP. Déployé par .github/workflows/worker.yml.
 
 import { ROUTES } from './routes.js';
+import { compactTaste, TASTE_APPEND } from './taste.js';
 
 const TMDB = 'https://api.themoviedb.org/3';
 /** Pause avant de redemander à TMDB après un refus « trop de demandes ». */
@@ -37,13 +38,19 @@ export default {
       if (!success) return error(429, 'Trop de demandes, réessaie dans un instant', { ...cors, 'Retry-After': '10' });
     }
 
+    // Résumé pour les propositions « selon tes goûts » (/taste/<type>/<id>) : la fiche demandée à TMDB avec ses
+    // mots-clés, son équipe et ses recommandations, renvoyée résumée (taste.js).
+    const taste = url.pathname.match(/^\/taste\/(movie|tv)\/(\d+)$/);
+
     // Adresse TMDB, paramètres triés : deux demandes identiques partagent la même entrée du cache.
-    const target = new URL(TMDB + url.pathname);
+    const target = new URL(TMDB + (taste ? `/${taste[1]}/${taste[2]}` : url.pathname));
     [...url.searchParams.entries()]
-      .filter(([key]) => key !== 'api_key')
+      .filter(([key]) => key !== 'api_key' && !(taste && key === 'append_to_response'))
       .sort(([a], [b]) => a.localeCompare(b))
       .forEach(([key, value]) => target.searchParams.append(key, value));
-    const cacheKey = new Request(target.toString());
+    if (taste) target.searchParams.set('append_to_response', TASTE_APPEND[taste[1]]);
+    // Le résumé a sa propre entrée du cache (la fiche complète demandée avec les mêmes paramètres n'est pas résumée).
+    const cacheKey = new Request(taste ? `${target}&_resume=taste` : target.toString());
     const cache = caches.default;
 
     let response = await cache.match(cacheKey);
@@ -67,7 +74,8 @@ export default {
       // était resservi par le navigateur pendant 24 h, sans redemander : la fiche ne revenait jamais (12/11).
       const headers = { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': upstream.ok ? `public, max-age=${route[1]}` : 'no-store' };
       if (upstream.status === 429) headers['Retry-After'] = upstream.headers.get('Retry-After') ?? '2';
-      response = new Response(upstream.body, { status: upstream.status, headers });
+      const body = taste && upstream.ok ? JSON.stringify(compactTaste(taste[1], await upstream.json())) : upstream.body;
+      response = new Response(body, { status: upstream.status, headers });
       if (upstream.ok) ctx.waitUntil(cache.put(cacheKey, response.clone()));
     }
 

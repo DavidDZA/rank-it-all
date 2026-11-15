@@ -8,6 +8,8 @@ En 6 langues (français, anglais, espagnol, allemand, italien, portugais du Bré
 ## Modes
 
 1. **Swiper les films** : un titre à la fois, tiré au hasard (pondéré par la popularité). Droite = vu, gauche = pas vu → second swipe : droite = wishlist, gauche = non.
+   Bouton **🎯 Selon tes goûts** : à la place du hasard, des titres choisis par un modèle appris sur toutes tes réponses
+   (et ton classement), chacun avec son « pourquoi » (« Tu as aimé Heat et Collatéral · 🎬 Michael Mann »).
 2. **Swiper les séries** : idem.
 3. **Classer les films** : duels entre deux films vus ; chaque film est placé par insertion dichotomique (~log₂(n) duels). Filtre « dispo sur mes abonnements » sur le classement et la tier list, pour voir ce qu'on peut revoir.
 4. **Classer les séries** : idem.
@@ -19,7 +21,7 @@ En 6 langues (français, anglais, espagnol, allemand, italien, portugais du Bré
 Autres fonctions : filtres (période, réalisateur, acteur, genre, langue, note TMDB minimum) sur le swipe, le classement, la tier list et la wishlist, sagas enchaînées en entier dans l’ordre de sortie,
 fiche complète d'un titre (en le touchant, ou ℹ dans les duels : résumé, durée, note, bande-annonce, où regarder), partage de son top 10 en image,
 rappels de sauvegarde et de mise à jour du catalogue, « Ce soir, je regarde quoi ? » (tirage dans la wishlist),
-tier list partageable, duels de vérification (les titres « bien » classés en priorité), recommandations d'après les titres aimés, note TMDB sur les cartes.
+tier list partageable, duels de vérification (les titres « bien » classés en priorité), recommandations d'après les titres aimés, propositions selon tes goûts, note TMDB sur les cartes.
 
 Trois catégories : **films**, **séries** et **animes** (séries d'animation japonaises : une série TMDB du genre Animation en japonais ; les films d'animation japonais restent dans les films). Chacune a son swipe, son classement et sa wishlist ; la catégorie Animes peut être masquée (Réglages → Catalogue).
 
@@ -40,7 +42,7 @@ Exclus : documentaires, courts métrages (< 40 min), émissions (télé-réalit�
 - **Amis** (avec un compte) : ajout par code ou lien d'invitation, puis page « À deux » : wishlist commune,
   tirage du soir, conseils croisés, compatibilité des classements. Chacun choisit ce qu'il partage.
 - La clé TMDB n'est jamais dans le site : le site appelle un **relais TMDB** (Cloudflare Worker, dossier `worker/`)
-  qui ajoute la clé (secret GitHub `TMDB_TOKEN`). Une clé personnelle peut être saisie dans les réglages
+  qui ajoute la clé (secret GitHub `TMDB_TOKEN`) ; il résume aussi les fiches pour les propositions (`/taste/…`). Une clé personnelle peut être saisie dans les réglages
   (prioritaire, appel direct à TMDB). En local : `VITE_TMDB_TOKEN` dans `.env.local`, ou une clé dans les réglages.
 
 ## Développement
@@ -74,6 +76,8 @@ src/
     stats.ts badges.ts activity.ts   statistiques, badges, séries de jours
     themes.ts tonight.ts recommend.ts tiers.ts   thèmes de swipe, tirage du soir,
                                                   recommandations, tier list
+    taste.ts tasteModel.ts proposals.ts   propositions « selon tes goûts » : résumés TMDB, modèle
+                                          appris sur tes réponses, choix et explications
     settings.ts backup.ts share.ts   préférences, sauvegarde, images à partager
     fun.ts hooks.ts    confettis / messages, hooks React partagés
   components/        briques d'interface réutilisées (carte de swipe, duels, listes, fiche…)

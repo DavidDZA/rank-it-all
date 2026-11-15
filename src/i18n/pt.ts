@@ -214,6 +214,7 @@ export const pt: Dict = {
         'Toque no pôster para ver a ficha completa (sinopse, trailer, onde assistir). Na dúvida? “Pular”: ele volta mais tarde.',
         'Os filmes de uma saga vêm em ordem; “💤 Não curto essa saga” descarta todos de uma vez.',
         'O funil filtra por gênero, época, nota, ou por ator e diretor.',
+        '**🎯** no alto: sugestões escolhidas de acordo com o seu gosto.',
       ],
     },
     'swipe-horizontal': {
@@ -225,6 +226,17 @@ export const pt: Dict = {
         'Toque no pôster para ver a ficha completa (sinopse, trailer, onde assistir). Na dúvida? “Pular”: ele volta mais tarde.',
         'Os filmes de uma saga vêm em ordem; “💤 Não curto essa saga” descarta todos de uma vez.',
         'O funil filtra por gênero, época, nota, ou por ator e diretor.',
+        '**🎯** no alto: sugestões escolhidas de acordo com o seu gosto.',
+      ],
+    },
+    reco: {
+      title: '🎯 Para você',
+      ordered: false,
+      note: 'O 🎯 no alto volta para o sorteio aleatório.',
+      points: [
+        'Títulos **escolhidos para você** a partir de tudo o que você classificou: seus 👍, seus 😐, sua wishlist, seus “sem interesse” e a posição dos seus títulos no ranking.',
+        'Embaixo de cada título, **por que** ele está ali: os títulos que você curtiu que o recomendam, o diretor ou o ator que conta para você.',
+        'Cada resposta **refina** as próximas. 🧭 **Para descobrir**: de vez em quando, uma aposta para entender melhor o seu gosto.',
       ],
     },
     rank: {
@@ -485,6 +497,22 @@ export const pt: Dict = {
     allSorted: 'Tudo classificado! Atualize o catálogo de vez em quando para receber as novidades.',
     diagonal: '↖ ↗ ↙ ↘ Deslize na diagonal, para um canto',
     go: (n: string) => `Bora (${n})`,
+    reco: {
+      button: '🎯 Para você',
+      onTip: 'Sugestões de acordo com o seu gosto: títulos escolhidos a partir de tudo o que você classificou',
+      offTip: 'Voltar ao sorteio aleatório',
+      strip: (n: string, count: number) => `🎯 Para você · ${n} ${count === 1 ? 'sugestão' : 'sugestões'}`,
+      locked: (n: number) => `🎯 Mais ${n} título${n > 1 ? 's' : ''} curtido${n > 1 ? 's' : ''} (👍) para abrir as sugestões de acordo com o seu gosto`,
+      preparing: 'Analisando o seu gosto…',
+      preparingNote: (pct: number) => `${pct}% · mais demorado na primeira vez`,
+      error: 'Não foi possível preparar as sugestões (sem conexão?).',
+      empty: 'Sem mais sugestões por enquanto: classifique mais alguns títulos aleatórios e volte!',
+      backToRandom: '🎲 Voltar ao aleatório',
+      liked: (names: string, _n: number) => `Você curtiu ${names}`,
+      whyTip: 'Por que este título: os títulos que você curtiu que o recomendam, e a pessoa que mais conta para você',
+      explore: '🧭 Para descobrir: uma aposta para entender melhor o seu gosto',
+      exploreTip: 'O modelo está em dúvida sobre este título: a sua resposta é a que mais o ensina',
+    },
   },
   home: {
     taglines: ['Pipoca pronta? 🍿', '5 minutos, e sua coleção cresce 🌱', 'O que vamos organizar hoje?', 'Só mais um deslize? 🎬', 'Sua memória de cinéfilo, em ordem ✨'],

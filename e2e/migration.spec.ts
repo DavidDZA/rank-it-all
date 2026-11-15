@@ -68,7 +68,7 @@ test('base d’une ancienne version : reprise sous le nouveau nom, fiches rangé
         };
       }),
   );
-  expect(db).toEqual({ version: 30, details: 1, inTitle: false });
+  expect(db).toEqual({ version: 40, details: 1, inTitle: false }); // schéma 4 (résumés des propositions, 15/11)
   // L'ancienne base n'existe plus ; les réponses ont suivi (wishlist ci-dessus).
   expect(await page.evaluate(async () => (await indexedDB.databases()).map((d) => d.name))).toEqual(['rank-it-all']);
 

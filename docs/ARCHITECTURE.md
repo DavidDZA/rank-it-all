@@ -1,6 +1,6 @@
 # Architecture — comment marche Rank It All
 
-> **À lire en premier par toute nouvelle session de travail.** État au 14/11/2026. Ce qui reste à faire est dans
+> **À lire en premier par toute nouvelle session de travail.** État au 15/11/2026. Ce qui reste à faire est dans
 > [ROADMAP.md](ROADMAP.md).
 
 ## 1. L'appli
@@ -14,6 +14,8 @@ espagnol, allemand, italien, portugais du Brésil : § 2.2).
   `SwipeCard`, `.swipe-guide`). Tirage pondéré par les votes TMDB, filtres (période, genre, langue, note, personne),
   recommandations des titres aimés (tirées plus souvent, sans étiquette depuis le 13/11), sagas enchaînées dans
   l'ordre, avec « 💤 Pas envie de la saga » (tous ses films restant à trier en « pas envie », annulable d'un coup).
+  **🎯 Selon tes goûts** (15/11) : bouton du swipe qui remplace le tirage au hasard par des propositions choisies par
+  un modèle appris sur toutes les réponses, chacune avec son « pourquoi » (§ 3.6).
 - **Fiche complète** d'un titre : en touchant la carte du swipe ou une ligne de liste, ou ℹ sur une affiche de duel
   (plus de résumé intermédiaire depuis le 13/11). ⚠️ Une fenêtre s'ouvre au **clic**, jamais au lever du doigt : le
   clic que le téléphone envoie juste après tomberait sur le fond de la fenêtre et la refermerait (bug du 13/11 : la
@@ -33,7 +35,7 @@ espagnol, allemand, italien, portugais du Brésil : § 2.2).
 | Élément | Choix |
 |---|---|
 | Front | Vite, React 19, TypeScript, CSS par écran (`src/styles/`) ; pages chargées à la demande (`App.tsx`) |
-| Base locale | IndexedDB via **Dexie** (`src/lib/db.ts`), base `rank-it-all`, schéma 3 : `titles`, `details`, `answers`, `meta`, `synced` |
+| Base locale | IndexedDB via **Dexie** (`src/lib/db.ts`), base `rank-it-all`, schéma 4 : `titles`, `details`, `answers`, `meta`, `synced`, `tastes` |
 | Catalogue | API **TMDB** depuis le navigateur (`src/lib/tmdb.ts`, `src/lib/sync.ts`) |
 | Comptes | **Supabase** (auth + PostgreSQL + règles RLS), schéma dans `supabase/schema.sql`, types dans `src/lib/database.types.ts` |
 | Hébergement | **GitHub Pages** (`https://daviddza.github.io/rank-it-all/`), déployé par GitHub Actions à chaque push sur `main`. L'ancienne adresse `/Sort-your-stuffs/` redirige (dépôt `Sort-your-stuffs`, fichiers dans `tools/ancienne-adresse/`, dont un `sw.js` qui retire l'ancienne version installée) |
@@ -51,6 +53,7 @@ src/
     ranking.ts         classement : insertion, vérifications, déplacement, séparation des animes
     cloud.ts cloudMerge.ts supabase.ts database.types.ts   compte et synchro
     friends.ts together.ts   amis, comparaison entre deux comptes
+    taste.ts tasteModel.ts proposals.ts   propositions « selon tes goûts » : résumés TMDB, modèle, choix (§ 3.6)
     stats badges activity themes tonight recommend tiers share backup settings fun hooks
   components/        Duel, DuelCard, RankedList, TierList, SwipeCard, Fiche, FilterSheet, common…
   pages/             un fichier par écran ; swipe/, settings/ (une rubrique par fichier), duo/ (un onglet par fichier)
@@ -151,9 +154,12 @@ version Android n'est utile que pour changer ses réglages (nom, icône, couleur
   donc sans réalisateur, acteurs, plateformes ni bande-annonce, jamais rafraîchies.
 - `answers` : une réponse par titre (`seen` / `unseen` / `wish`, avis `good` / `meh`, `updatedAt`).
 - `meta` : classements `ranking:<catégorie>` et `ranking:wish:<catégorie>`, placement en cours `insert:…`,
-  `activity`, `badges`, `boosts:movie|tv`, `saga:<id>`, `min-votes`, `show-anime`, `custom-imports`, `lastSync`, `lastExport`.
+  `activity`, `badges`, `boosts:movie|tv`, `saga:<id>`, `min-votes`, `show-anime`, `custom-imports`, `reco-stats:<catégorie>`
+  (réponses aux propositions, § 3.6), `lastSync`, `lastExport`.
   `setMeta` date chaque écriture (`updatedAt`, pour la synchro).
 - `synced` : état de la synchro (voir 4.1).
+- `tastes` (schéma 4, 15/11) : résumés TMDB des titres pour les propositions « selon tes goûts » (§ 3.6). Cache
+  propre à l'appareil, ni synchronisé ni sauvegardé ; `data: null` pour un titre inconnu de TMDB.
 - `localStorage` : préférences propres à l'appareil (clé TMDB, abonnements, mode de swipe, filtres, astuces vues).
   Astuces de première visite : `lib/tutorial.ts` (identifiants, une par type d'écran : swipe 4 coins / 2 directions,
   classement… communes aux films, séries et animes), textes dans `components/Tutorial.tsx` ; « Revoir les astuces »
@@ -215,7 +221,9 @@ site et les chemins utilisés, limite le débit par IP et garde les réponses en
 Clé TMDB reste prioritaire : l'appli appelle alors TMDB directement ; si TMDB la refuse (clé régénérée, par exemple
 l'ancienne clé du site, régénérée le 11/11), elle est oubliée et l'appli repasse par le relais. Les chemins acceptés
 par le relais sont dans `worker/src/routes.js` : tout nouvel appel TMDB doit y être ajouté (`tests/relais.test.ts`
-le vérifie ; `/search/person` manquait, recherche par réalisateur ou acteur en panne du 11 au 12/11). En local, sans relais, `VITE_TMDB_TOKEN` dans
+le vérifie ; `/search/person` manquait, recherche par réalisateur ou acteur en panne du 11 au 12/11). Seul chemin propre au
+relais : `/taste/<type>/<id>` (15/11), la fiche demandée à TMDB avec mots-clés, équipe et recommandations, renvoyée
+résumée (`worker/src/taste.js`, § 3.6). En local, sans relais, `VITE_TMDB_TOKEN` dans
 `.env.local`. Les affiches (`image.tmdb.org`) ne demandent pas de clé.
 
 ### 3.5 Performances (12/11/2026)
@@ -240,6 +248,85 @@ fiches, fiches qui ne revenaient pas, « Annuler » sans effet dans les duels) :
 - **Nouveautés du démarrage** : seuls les titres absents de la base sont écrits.
 - **Stats** : recalculées toutes les 3 s pendant le complément des fiches, avec un compteur qui descend.
 
+### 3.6 Propositions « selon tes goûts » (15/11/2026)
+
+Bouton **🎯** dans la barre du swipe (chaque catégorie) : le tirage au hasard laisse la place à des titres jamais
+triés, choisis pour l'utilisateur, dans l'ordre. Ouvert à partir de **10 titres « bien »** dans la catégorie
+(`RECO_MIN_LIKED`, sinon un message dit combien il en manque) ; mode retenu par catégorie (`swipe-reco:<catégorie>`,
+localStorage). Bandeau « 🎯 Selon tes goûts · n propositions » (le toucher ramène au hasard), astuce `reco` au premier
+usage. Les filtres du swipe s'appliquent aussi aux propositions ; les sagas s'enchaînent comme au hasard.
+
+**Pourquoi pas l'ancien « ✨ Comme … »** (retiré le 13/11, « toujours à côté de la plaque » d'après l'utilisateur) : il
+tirait plus souvent les recommandations TMDB (`/recommendations`) de chaque titre aimé et affichait le dernier titre
+aimé qui les avait recommandées. Une seule source à la fois, des recommandations TMDB bruitées titre par titre
+(notes et listes d'une petite communauté, gros succès du moment), et le classement ignoré.
+
+**Le choix du modèle, mesuré** (test hors ligne sur la sauvegarde de l'utilisateur, 4 116 réponses, scripts gardés hors
+du dépôt) : réponses cachées par cinquième, devinées à partir des autres. Mesure principale : parmi les 20 titres non
+vus mis en tête, la part que l'utilisateur avait mise en wishlist plutôt qu'en « pas envie ».
+
+| Méthode | Films | Séries |
+|---|---|---|
+| Au hasard | 34 % | 11 % |
+| Ancien « Comme » | 46 % | 29 % |
+| Recommandations TMDB additionnées sur tous les titres, pondérées | 60 % | 36 % |
+| Profil de contenu (mots-clés, équipe… en TF-IDF) | 71 % | 45 % |
+| **Modèle appris (retenu)** | **75-77 %** | **49-53 %** |
+
+Variantes essayées sans gain net (écarts dans le bruit sur 4 découpages) : points « bien = 1 » pour tous, paires du
+classement (« A au-dessus de B »), deux modèles séparés (« ça te tente ? » × « tu vas aimer ? »). L'ordre exact du
+classement n'est retrouvé par aucune (0,6 des paires ; 0,5 = hasard) : le contenu ne dit pas pourquoi Fight Club passe
+devant Matrix, il trouve des titres pour le haut du classement.
+
+**Fonctionnement** :
+
+- **Résumés** (`taste.ts`, `worker/src/taste.js` partagé avec le relais) : pour chaque titre, ses caractéristiques
+  (`kw:` mots-clés, `g:` genres, `dec:` décennie, `lang:`, `sg:` saga, `st:` 3 studios, `nw:` chaînes, `cr:` créateurs,
+  `dir:` `wr:` `mu:` `dop:` équipe des films — pas celle des séries, des dizaines de scénaristes d'épisodes —, `ac:` 6
+  premiers rôles), noms des personnes (pour les explications), note, votes, et les 20 recommandations TMDB (sans
+  résumé). ≈ 5 Ko par titre au lieu de 30 à 60 pour la fiche complète. Relais : `/taste/<type>/<id>` ; clé personnelle :
+  fiche complète demandée à TMDB, résumée par l'appli avec le même code. Un 404 du relais est vérifié sur la fiche
+  complète avant de noter le titre « inconnu » : un relais pas encore déployé (chemin `/taste` absent) ne fait pas
+  passer tous les titres pour inconnus pendant 90 jours (`relais.test.ts`). Gardés 90 jours (`TASTE_MAX_AGE`). Après
+  chaque réponse au swipe, le résumé du titre est préparé en arrière-plan (`rememberTaste`) : la première préparation
+  a alors peu à télécharger.
+- **Points** (`userPoints`, idée de l'utilisateur) : « bof » et « pas envie » 0, wishlist 0,5, « bien » 1, et un « bien »
+  classé de 1 (dernier des « bien » classés) à 5 (n° 1), courbe `1 + 4 (1 − p)²` (p : place relative, 0 = premier) ;
+  séries et animes chacun leur classement.
+- **Modèle** (`tasteModel.ts`) : régression logistique (Adagrad, 12 passes, tirage reproductible), « bien » ou wishlist
+  contre « bof » ou « pas envie », chaque titre aimé compté selon ses points. Entrées : les caractéristiques présentes
+  dans au moins 2 titres répondus, note et popularité TMDB, et les recommandations TMDB additionnées (chaque titre
+  répondu pousse ceux qu'il recommande selon ses points, « pas envie » et « bof » un peu en négatif ; dans les deux
+  sens). Appris sur toutes les réponses sauf les « pas envie » au-delà des 600 plus récents (`UNSEEN_SAMPLE`) :
+  0,1 à 0,2 s sur PC pour 2 000 réponses.
+- **Candidats** (`proposals.ts`) : les 400 titres les plus recommandés par les titres répondus (`CANDIDATES`), plus
+  les filmographies des 5 réalisateurs ou créateurs au plus fort poids appris (`PEOPLE`) ; jamais triés, de la
+  catégorie (un anime recommandé par une série va dans les Animes), 50 votes au moins.
+- **Ordre** (`orderProposals`) : meilleur score d'abord ; au plus 2 titres d'une même saga, d'un même réalisateur ou
+  créateur parmi 20 de suite ; une carte sur 5 est **🧭 à découvrir** : le titre connu (300 votes) et bien noté (6,5)
+  sur lequel le modèle hésite le plus (probabilité la plus proche de 0,5) — la réponse qui lui apprend le plus, et de
+  quoi ne pas tourner en rond.
+- **Explication** sous le titre (`RecoWhy`) : « 🎯 Tu as aimé A et B · 🎬 réalisateur » — les 2 titres aimés les mieux
+  classés qui recommandent le titre (ou qu'il recommande), et la personne de sa fiche au plus fort poids appris (🎭 pour un
+  acteur ; à égalité, le réalisateur). Pas de mots-clés : TMDB ne les a qu'en anglais. Rien d'affiché si aucun lien
+  n'est assez fort.
+- **Apprentissage continu** : toutes les 10 réponses (`RECO_REFRESH`), le modèle réapprend et la suite des
+  propositions change (la file affichée ne bouge pas). Rien de changé (réponses, classements) : propositions reprises
+  sans recalcul.
+- **Mesure en usage** : meta synchronisée `reco-stats:<catégorie>` (`{ good, meh, wish, unseen, explore: {…} }`),
+  retirée par « Annuler ». Taux de réussite = (bien + wishlist) / total, hors cartes « à découvrir ». Chez les
+  testeurs (SQL Editor de Supabase) :
+  ```sql
+  select key, count(*) as comptes, sum((value->>'good')::int + (value->>'wish')::int) as reussies,
+         sum((value->>'good')::int + (value->>'wish')::int + (value->>'meh')::int + (value->>'unseen')::int) as total
+  from user_meta where key like 'reco-stats:%' and not deleted group by key;
+  ```
+  À comparer à la part de « bien » + wishlist au tirage au hasard (réponses des mêmes comptes).
+- **Première préparation** : un résumé par titre répondu (et par candidat), en arrière-plan, avec une barre de
+  progression (« Analyse de tes goûts… ») ; quelques secondes ensuite. Pour 4 000 réponses, ≈ 3 000 résumés la
+  première fois (une à deux minutes).
+- Le tirage au hasard garde les mises en avant de l'ancien système (`boosts:`, recommandations des titres aimés ×4).
+
 ## 4. Compte et amis (Supabase)
 
 ### 4.1 Synchro (`cloud.ts`, `cloudMerge.ts`)
@@ -253,7 +340,7 @@ modification, au retour sur l'onglet ou du réseau, toutes les 2 min).
 - Conflit : la date la plus récente gagne (à égalité, le compte) ; activité et badges fusionnés. Suppressions en
   pierres tombales (`deleted`). Relecture de 60 s de recouvrement. La lecture filtre sur son propre `user_id`
   (les règles laissent aussi lire ce que partagent les amis).
-- Meta synchronisées : `isUserMeta` (`ranking:`, `saga:`, `boosts:`, `activity`, `badges`, `min-votes`,
+- Meta synchronisées : `isUserMeta` (`ranking:`, `saga:`, `boosts:`, `reco-stats:`, `activity`, `badges`, `min-votes`,
   `show-anime`, `custom-imports`) — les mêmes que la sauvegarde JSON.
 - Chaque réponse envoyée porte une **copie allégée du titre** (`titleCopy` : clé, type, id TMDB, titres, année,
   affiche, genres, langue, note), pour l'afficher chez un ami ou sur un nouvel appareil ; aucune pour « pas vu ».
@@ -305,9 +392,16 @@ Restaurer (dans un projet Supabase neuf, ou le même vidé) :
   machine GitHub **en anglais** : `tests/setup.ts` fixe la langue de l'appareil au français pour tous les tests
   (sinon un test qui passe ici y échoue et bloque le déploiement, comme le 13/11) ; Playwright fixe la sienne
   (`locale: 'fr-FR'`, sauf `langue.spec.ts`).
-- `node worker/test.mjs` : le relais TMDB, avec Cloudflare et TMDB simulés. `tests/relais.test.ts` (Vitest) branche
+- `node worker/test.mjs` : le relais TMDB, avec Cloudflare et TMDB simulés (dont le résumé `/taste/…` : fiche demandée
+  avec mots-clés, équipe et recommandations, réponse résumée, cache à part de la fiche complète). `tests/relais.test.ts` (Vitest) branche
   l'appli sur le code du relais : chaque appel TMDB du code est accepté, la fiche revient complète (réalisateur,
-  acteurs, plateformes, bande-annonce), fiches vides redemandées, clé personnelle refusée remplacée par le relais.
+  acteurs, plateformes, bande-annonce), fiches vides redemandées, clé personnelle refusée remplacée par le relais ; résumés des propositions (film, série,
+  clé personnelle : même résumé fait par l'appli, titre inconnu noté et pas redemandé).
+- Propositions « selon tes goûts » (`propositions.test.ts`) : résumé d'un film et d'une série, points (place relative,
+  séries et animes), modèle (ce qui ressemble aux « bien » noté plus haut, tirage reproductible, liens par les
+  recommandations, explication), ordre (carte « à découvrir » toutes les 5, 2 titres au plus par réalisateur ou saga
+  sur 20), tirage ordonné du swipe, propositions depuis la base (déjà triés exclus, animes à part, recalcul seulement
+  si les réponses changent), seuil des 10 « bien », mesure en usage et « Annuler ».
 - Vitest couvre aussi la sauvegarde (aller-retour, anciennes sauvegardes « Sort my stuffs », fichier refusé :
   `backup.test.ts`), les stats et badges (`stats.test.ts` : chiffres de découverte, jours actifs, titres aimés,
   wishlist priorisée, nanars ; 51 badges aux noms et emojis uniques, nouveaux badges débloqués aux bons chiffres), la
@@ -332,7 +426,9 @@ Restaurer (dans un projet Supabase neuf, ou le même vidé) :
   sans les animes, plus de rubrique « Sagas complètes ») et 51 badges à 3 par ligne, tier list, partage en image
   (partage du téléphone simulé, ou téléchargement), filtres du swipe (`ecrans.spec.ts`), astuces à jour
   (`tutoriel.spec.ts`), ordre des rubriques des Réglages (Compte en tête, puis Langue et pays depuis le 14/11) et
-  seuils de votes (`reglages.spec.ts`), traduction (chaque écran dans chaque langue sans texte français oublié, manifeste et page
+  seuils de votes (`reglages.spec.ts`), propositions « selon tes goûts » avec TMDB simulé (seuil des 10 « bien », titre le
+  plus proche d'abord avec son pourquoi, mesure et « Annuler », retour au hasard, mode retenu, tout trié, mise en page
+  aux deux formats, astuce au premier 🎯 : `propositions.spec.ts`), traduction (chaque écran dans chaque langue sans texte français oublié, manifeste et page
   de confidentialité de la langue, langue et pays changés dans les Réglages, fiche TMDB en anglais avec les
   plateformes des États-Unis ou de Belgique, catalogue retéléchargé dans la nouvelle langue : `traduction.spec.ts`),
   langue du catalogue avec un navigateur en espagnol, portugais, japonais, français, allemand,

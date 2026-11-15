@@ -214,6 +214,7 @@ export const it: Dict = {
         'Tocca la locandina per la scheda completa (trama, trailer, dove guardarlo). Non sei sicuro? «Salta»: tornerà più tardi.',
         'I film di una saga arrivano in ordine; «💤 Questa saga non mi interessa» li scarta tutti in un colpo.',
         'L’imbuto filtra per genere, epoca, voto, o per attore e regista.',
+        '**🎯** in alto: proposte scelte in base ai tuoi gusti.',
       ],
     },
     'swipe-horizontal': {
@@ -225,6 +226,17 @@ export const it: Dict = {
         'Tocca la locandina per la scheda completa (trama, trailer, dove guardarlo). Non sei sicuro? «Salta»: tornerà più tardi.',
         'I film di una saga arrivano in ordine; «💤 Questa saga non mi interessa» li scarta tutti in un colpo.',
         'L’imbuto filtra per genere, epoca, voto, o per attore e regista.',
+        '**🎯** in alto: proposte scelte in base ai tuoi gusti.',
+      ],
+    },
+    reco: {
+      title: '🎯 Per te',
+      ordered: false,
+      note: 'Il 🎯 in alto riporta all’estrazione casuale.',
+      points: [
+        'Titoli **scelti per te** in base a tutto ciò che hai ordinato: i tuoi 👍, i tuoi 😐, la tua wishlist, i tuoi «non mi interessa» e il posto dei tuoi titoli in classifica.',
+        'Sotto ogni titolo, **perché** è lì: i titoli che ti sono piaciuti che lo consigliano, il regista o l’attore che conta per te.',
+        'Ogni risposta **affina** le successive. 🧭 **Da scoprire**: ogni tanto, una scommessa per capire meglio i tuoi gusti.',
       ],
     },
     rank: {
@@ -485,6 +497,22 @@ export const it: Dict = {
     allSorted: 'È tutto classificato! Aggiorna il catalogo ogni tanto per ricevere le novità.',
     diagonal: '↖ ↗ ↙ ↘ Swipa in diagonale, verso un angolo',
     go: (n: string) => `Si parte (${n})`,
+    reco: {
+      button: '🎯 Per te',
+      onTip: 'Proposte in base ai tuoi gusti: titoli scelti in base a tutto ciò che hai ordinato',
+      offTip: 'Torna all’estrazione casuale',
+      strip: (n: string, count: number) => `🎯 Per te · ${n} ${count === 1 ? 'proposta' : 'proposte'}`,
+      locked: (n: number) => `🎯 Ancora ${n} titol${n > 1 ? 'i' : 'o'} piaciut${n > 1 ? 'i' : 'o'} (👍) per aprire le proposte in base ai tuoi gusti`,
+      preparing: 'Analisi dei tuoi gusti…',
+      preparingNote: (pct: number) => `${pct}% · più lungo la prima volta`,
+      error: 'Impossibile preparare le proposte (offline?).',
+      empty: 'Nessun’altra proposta per ora: ordina ancora qualche titolo a caso, poi torna!',
+      backToRandom: '🎲 Torna al caso',
+      liked: (names: string, n: number) => `${n > 1 ? 'Ti sono piaciuti' : 'Ti è piaciuto'} ${names}`,
+      whyTip: 'Perché questo titolo: i titoli che ti sono piaciuti che lo consigliano, e la persona che conta di più per te',
+      explore: '🧭 Da scoprire: una scommessa per capire meglio i tuoi gusti',
+      exploreTip: 'Il modello è incerto su questo titolo: la tua risposta gli insegna di più',
+    },
   },
   home: {
     taglines: ['Popcorn pronti? 🍿', '5 minuti, e la tua collezione cresce 🌱', 'Cosa classifichiamo oggi?', 'Un ultimo swipe prima di andare? 🎬', 'La tua memoria da cinefilo, in ordine ✨'],

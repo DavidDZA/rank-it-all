@@ -10,6 +10,19 @@ globalThis.fetch = async (url, init) => {
   // /movie/429 : refusé la première fois seulement ; /movie/4290 : refusé à chaque fois.
   if (String(url).includes('/movie/4290') || (String(url).includes('/movie/429') && calls.filter((c) => c.url.includes('/movie/429')).length === 1))
     return new Response('{"status_code":25,"status_message":"Too many requests."}', { status: 429 });
+  if (String(url).includes('/movie/600'))
+    return Response.json({
+      id: 600,
+      overview: 'Long résumé',
+      vote_count: 9000,
+      vote_average: 7.9,
+      release_date: '1990-09-12',
+      original_language: 'en',
+      genres: [{ id: 80, name: 'Crime' }],
+      keywords: { keywords: [{ id: 1, name: 'heist' }] },
+      credits: { cast: [{ id: 5, name: 'Ray Liotta', order: 0 }], crew: [{ id: 7, name: 'Martin Scorsese', job: 'Director' }, { id: 8, name: 'Mixeur', job: 'Sound' }] },
+      recommendations: { results: [{ id: 601, title: 'Casino', overview: 'Résumé à ne pas garder', poster_path: '/c.jpg', vote_count: 5000 }] },
+    });
   return new Response(JSON.stringify({ ok: true, url: String(url) }), { status: 200 });
 };
 const pending = [];
@@ -53,6 +66,19 @@ check('429 persistant : transmis, pas à garder, avec Retry-After', r.status ===
 r = await req('/movie/4290');
 check('429 pas resservi par le cache du relais', calls.length - before === 4);
 check('réponse correcte : à garder', (await req('/movie/550')).headers.get('Cache-Control') === 'public, max-age=86400');
+// Résumé « selon tes goûts » : fiche demandée avec mots-clés, équipe et recommandations, renvoyée résumée.
+before = calls.length;
+r = await req('/taste/movie/600?language=fr-FR&append_to_response=videos');
+await Promise.all(pending);
+const asked = new URL(calls.at(-1).url);
+check('résumé : fiche demandée à TMDB', asked.pathname === '/3/movie/600' && asked.searchParams.get('append_to_response') === 'keywords,credits,recommendations');
+const resume = await r.json();
+check('résumé : caractéristiques et noms', r.status === 200 && resume.v === 1 && ['kw:1', 'g:80', 'dec:1990', 'lang:en', 'dir:7', 'ac:5'].every((f) => resume.f.includes(f)) && resume.names['dir:7'] === 'Martin Scorsese');
+check('résumé : recommandations sans résumé, rien d’autre', resume.recs.length === 1 && resume.recs[0].title === 'Casino' && !('overview' in resume.recs[0]) && !('credits' in resume) && !resume.f.includes('mu:8'));
+r = await req('/taste/movie/600?language=fr-FR');
+check('résumé : 2e demande servie par le cache', r.status === 200 && calls.length - before === 1);
+r = await req('/movie/600?append_to_response=keywords%2Ccredits%2Crecommendations&language=fr-FR');
+check('fiche complète : pas le résumé gardé en cache', (await r.json()).overview === 'Long résumé' && calls.length - before === 2);
 allowedHits = 2; // limite simulée de 4 : comme si seules les 2 premières demandes avaient compté
 r = await req('/account');
 check('chemin non relayé (404)', r.status === 404);
