@@ -4,11 +4,11 @@ import { titlesOf, useTitleMap } from '../lib/hooks';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db, type Title } from '../lib/db';
 import { keysOfCategory, mediaOf, type Category } from '../lib/category';
-import { changeStatus, readRanking, unrank, type Scope } from '../lib/ranking';
+import { readRanking, unrank, type Scope } from '../lib/ranking';
 import { matchesTheme, missingFilterInfo, themeFilter, themeLabel } from '../lib/themes';
 import { prefetchDetails, WEEK } from '../lib/tmdb';
 import { loadMyProviders, mineFilter } from '../lib/providers';
-import { MineChip, ProviderLine, TopBar, TypeFilter } from '../components/common';
+import { IconCaption, MineChip, ProviderLine, TopBar, TypeFilter } from '../components/common';
 import { Duel } from '../components/Duel';
 import { RankedList } from '../components/RankedList';
 import { TierList } from '../components/TierList';
@@ -16,6 +16,7 @@ import { FilterButton, FilterSheet, FilterStrip, useSavedFilter } from '../compo
 import { shareTop } from '../lib/share';
 import { toast } from '../lib/fun';
 import { Tutorial } from '../components/Tutorial';
+import { StatusButton } from '../components/StatusPicker';
 
 type View = 'duel' | 'list' | 'tiers';
 
@@ -50,11 +51,8 @@ export default function Rank({ category }: { category: Category }) {
     if (byMine && seen) prefetchDetails(seen, WEEK);
   }, [!!byMine, seen?.length]);
 
-  const toWishlist = async (t: Title) => {
-    if (confirm(T.rankPage.confirmWish(t.title))) {
-      await changeStatus(t, 'wish');
-    }
-  };
+  // Avis bien / bof de chaque titre vu, pour le bouton d'état des lignes (une seule lecture pour toute la liste).
+  const seenAnswers = useLiveQuery(async () => new Map((await db.answers.where('[type+status]').equals([media, 'seen']).toArray()).map((a) => [a.key, a])), [media]);
 
   const share = async () => {
     const all = (await db.titles.bulkGet(await readRanking(scope))).filter((t): t is Title => !!t);
@@ -114,13 +112,11 @@ export default function Rank({ category }: { category: Category }) {
             actions={(t, ranked) => (
               <>
                 {ranked && (
-                  <button className="btn small" onClick={() => unrank(scope, t.key)} title={T.rankPage.rerankTip} aria-label={T.rankPage.rerank}>
-                    ↺
+                  <button className="btn small labeled" onClick={() => unrank(scope, t.key)} title={T.rankPage.rerankTip} aria-label={T.rankPage.rerank}>
+                    <IconCaption icon="↺" caption={T.actions.rerank} />
                   </button>
                 )}
-                <button className="btn small" onClick={() => toWishlist(t)} title={T.rankPage.toWishTip} aria-label={T.rankPage.toWish}>
-                  ♥
-                </button>
+                <StatusButton title={t} current={seenAnswers?.get(t.key)} ranked={ranked} />
               </>
             )}
           />

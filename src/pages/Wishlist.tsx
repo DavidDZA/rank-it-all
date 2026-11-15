@@ -3,16 +3,17 @@ import { num, T } from '../i18n';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db, type Title } from '../lib/db';
 import { categoryOf, categoryOptions, mediaOf, useCategories, type Category } from '../lib/category';
-import { changeStatus, scopeId, unrank, type Scope } from '../lib/ranking';
+import { scopeId, unrank, type Scope } from '../lib/ranking';
 import { prefetchDetails, WEEK } from '../lib/tmdb';
 import { loadMyProviders, mineFilter } from '../lib/providers';
 import { matchesSearch, titlesOf, useTitleMap } from '../lib/hooks';
 import { matchesTheme, missingFilterInfo, themeFilter, themeLabel } from '../lib/themes';
-import { MineChip, ProviderLine, SearchBox, SeenButtons, TitleRow, TopBar, TypeFilter } from '../components/common';
+import { IconCaption, MineChip, ProviderLine, SearchBox, TitleRow, TopBar, TypeFilter } from '../components/common';
 import { FilterButton, FilterSheet, FilterStrip, useSavedFilter } from '../components/FilterSheet';
 import { Duel } from '../components/Duel';
 import { RankedList } from '../components/RankedList';
 import { Tutorial } from '../components/Tutorial';
+import { StatusButton } from '../components/StatusPicker';
 
 type View = 'list' | 'duel';
 type Filter = 'all' | Category;
@@ -49,8 +50,8 @@ export default function Wishlist() {
   const actions = (t: Title, ranked: boolean): ReactNode => (
     <>
       {ranked && (
-        <button className="btn small" onClick={() => unrank(scope, t.key)} title={T.wishPage.reprioritizeTip} aria-label={T.wishPage.reprioritize}>
-          ↺
+        <button className="btn small labeled" onClick={() => unrank(scope, t.key)} title={T.wishPage.reprioritizeTip} aria-label={T.wishPage.reprioritize}>
+          <IconCaption icon="↺" caption={T.actions.rerank} />
         </button>
       )}
       <WishActions title={t} />
@@ -118,16 +119,11 @@ export default function Wishlist() {
   );
 }
 
+/** Titre de la wishlist : son état (envie), à changer d'un geste (vu bien, vu bof, pas envie, à trier). */
 function WishActions({ title }: { title: Title }) {
-  return (
-    <>
-      <SeenButtons title={title} />
-      <button className="btn small" onClick={() => changeStatus(title, 'unseen')} title={T.wishPage.remove} aria-label={T.wishPage.remove}>
-        ✕
-      </button>
-    </>
-  );
+  return <StatusButton title={title} current={WISH} />;
 }
+const WISH = { status: 'wish' } as const;
 
 /** Toutes catégories mélangées, du plus récent ajout au plus ancien. */
 function AllWishes({ filter, below }: { filter: ((t: Title) => boolean) | null; below: (t: Title) => ReactNode }) {

@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react';
 import { T } from '../i18n';
 import { useLiveQuery } from 'dexie-react-hooks';
-import { db, type Answer, type Status, type Title } from '../lib/db';
-import { changeStatus } from '../lib/ranking';
+import { db, type Answer, type Title } from '../lib/db';
 import { KNOWN_VOTES, personFilmography, search, searchPeople, type Person, type PersonRole } from '../lib/tmdb';
-import { PersonAvatar, SeenButtons, TitleRow, TopBar, TypeFilter } from '../components/common';
+import { PersonAvatar, TitleRow, TopBar, TypeFilter } from '../components/common';
 import { Tutorial } from '../components/Tutorial';
+import { StatusButton } from '../components/StatusPicker';
 import { tutorialSeen } from '../lib/tutorial';
 
 type Mode = 'title' | PersonRole;
@@ -87,8 +87,7 @@ export default function AddManual() {
 
   const row = (t: Title) => (
     <TitleRow key={t.key} title={t} showType>
-      <SeenButtons title={t} current={statuses?.get(t.key)} />
-      <StatusButton title={t} status="wish" current={statuses?.get(t.key)?.status} label="♥" tip={T.fiche.wishTip} />
+      <StatusButton title={t} current={statuses ? (statuses.get(t.key) ?? null) : undefined} />
     </TitleRow>
   );
 
@@ -171,16 +170,3 @@ export default function AddManual() {
 }
 
 
-function StatusButton({ title, status, current, label, tip }: { title: Title; status: Status; current?: Status; label: string; tip: string }) {
-  const active = current === status;
-  return (
-    <button
-      className={`btn small ${active ? 'primary' : ''}`}
-      onClick={() => changeStatus(title, status)}
-      disabled={active}
-      title={active ? (status === 'seen' ? T.add.alreadySeen : T.add.alreadyWish) : tip}
-    >
-      {active && status === 'seen' ? T.fiche.status.seen : label}
-    </button>
-  );
-}

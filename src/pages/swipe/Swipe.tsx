@@ -6,7 +6,7 @@ import { recordActivity } from '../../lib/activity';
 import { boostFactor, boostFrom, loadBoosts, type Boosts } from '../../lib/recommend';
 import { getSwipeMode, readPref, writePref } from '../../lib/settings';
 import { isNoTheme, matchesTheme, NO_THEME, ratingMissing, themeLabel, type Theme } from '../../lib/themes';
-import { BackLink, Poster, RatingBadge, TitleText } from '../../components/common';
+import { BackLink, IconCaption, Poster, RatingBadge, TitleText } from '../../components/common';
 import SwipeCard, { type Dir, type Tone } from '../../components/SwipeCard';
 import { openFiche } from '../../components/Fiche';
 import { ARROWS, CORNERS, isCorner, PHASES, TONES, type Corner, type Phase } from './config';
@@ -469,13 +469,13 @@ export default function Swipe({ category }: { category: Category }) {
           {mode === 'horizontal' && current ? p.question : typeTitle}
         </h2>
         <button
-          className={`icon-btn reco-btn ${reco ? 'active' : ''}`}
+          className={`icon-btn labeled reco-btn ${reco ? 'active' : ''}`}
           onClick={toggleReco}
           aria-pressed={reco}
           aria-label={T.swipe.reco.button}
           title={reco ? T.swipe.reco.offTip : T.swipe.reco.onTip}
         >
-          🎯
+          <IconCaption icon="🎯" caption={T.actions.reco} />
         </button>
         <FilterButton
           active={!isNoTheme(theme)}

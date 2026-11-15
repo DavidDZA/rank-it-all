@@ -2,10 +2,10 @@ import { useEffect, useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db, type Provider, type Status, type Title } from '../lib/db';
 import { CATEGORY_LABEL, categoryOf } from '../lib/category';
-import { changeStatus } from '../lib/ranking';
 import { providerLogo, WEEK } from '../lib/tmdb';
 import { groupProviders, isMineGroup, loadMyProviders } from '../lib/providers';
-import { Poster, SeenButtons, Sheet, useDetails } from './common';
+import { Poster, Sheet, useDetails } from './common';
+import { StatusChoices } from './StatusPicker';
 import { num, REGION, regionName, T } from '../i18n';
 
 /** Ouvre la fiche complète d'un titre (voir <FicheHost /> dans App). */
@@ -119,19 +119,8 @@ function Fiche({ title, onClose }: { title: Title; onClose: () => void }) {
         )}
       </section>
 
-      <div className="row center fiche-actions">
-        <SeenButtons title={title} current={answer} labels />
-        {(['wish', 'unseen'] as const).map((s) => (
-          <button
-            key={s}
-            className={`btn ${status === s ? 'primary' : ''}`}
-            onClick={() => changeStatus(title, s)}
-            disabled={status === s}
-            title={s === 'wish' ? T.fiche.wishTip : T.fiche.unseenTip}
-          >
-            {STATUS_LABEL[s]}
-          </button>
-        ))}
+      <div className="fiche-actions">
+        <StatusChoices title={title} current={answer === undefined ? undefined : answer} compact />
       </div>
     </Sheet>
   );

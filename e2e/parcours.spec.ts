@@ -1,6 +1,6 @@
 import { readFileSync, writeFileSync } from 'node:fs';
 import { expect, test, type Page } from '@playwright/test';
-import { openRanking, rankedNames, readAnswers, readMeta, seed, title } from './helpers';
+import { openRanking, rankedNames, readAnswers, readMeta, seed, title, moveTo } from './helpers';
 
 /** Parcours principaux : classer par duels, corriger ses listes, « Ce soir ? », sauvegarde. */
 const ORDER = ['Le Parrain', 'Parasite', 'Inception', 'Drive', 'Her']; // préférence de l'utilisateur simulé
@@ -65,10 +65,10 @@ test('Mes listes : corriger une erreur (vu → pas vu → reproposé au swipe)',
   const [a, b] = films;
   await seed(page, { titles: [a, b], answers: [{ key: a.key, status: 'seen' }, { key: b.key, status: 'seen' }] }, '#/lists');
   await expect(page.locator('.list-item')).toHaveCount(2);
-  await page.locator('.list-item', { hasText: a.title }).getByRole('button', { name: 'Marquer pas vu' }).click();
+  await moveTo(page, page.locator('.list-item', { hasText: a.title }), 'Pas envie');
   await expect(page.locator('.list-item')).toHaveCount(1);
   await page.getByRole('button', { name: '🙈 Pas vus' }).click();
-  await page.locator('.list-item', { hasText: a.title }).getByRole('button', { name: 'Reproposer au swipe' }).click();
+  await moveTo(page, page.locator('.list-item', { hasText: a.title }), 'À trier');
   await expect(page.getByText('Cette liste est vide.')).toBeVisible();
   expect(await readAnswers(page)).toEqual({ [b.key]: 'seen' });
 });

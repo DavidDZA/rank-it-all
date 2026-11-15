@@ -6,6 +6,8 @@ import {
   duelsLeft,
   loadInsert,
   loadRanking,
+  moveTitle,
+  placeOf,
   moveInRanking,
   pickVerifyPair,
   priorityPool,
@@ -137,5 +139,62 @@ describe('déplacement à la main', () => {
     expect(await moveInRanking(seen, k(1), 99)).toEqual([k(5), k(2), k(3), k(4), k(1)]); // au-delà : dernier
     expect(await moveInRanking(seen, k(8), 0)).toEqual([k(5), k(2), k(3), k(4), k(1)]); // pas classé : rien
     expect(await loadRanking(seen)).toEqual([k(5), k(2), k(3), k(4), k(1)]);
+  });
+});
+
+describe("état d'un titre : déplacé de n'importe quel état vers n'importe quel autre", () => {
+  const heat = makeTitle(1);
+  const casino = makeTitle(2);
+
+  it('placeOf : bien, bof, vu sans avis, envie, pas envie, à trier', () => {
+    expect(placeOf({ status: 'seen', tier: 'good' })).toBe('good');
+    expect(placeOf({ status: 'seen', tier: 'meh' })).toBe('meh');
+    expect(placeOf({ status: 'seen' })).toBe('seen');
+    expect(placeOf({ status: 'seen', tier: null })).toBe('seen');
+    expect(placeOf({ status: 'wish' })).toBe('wish');
+    expect(placeOf({ status: 'unseen' })).toBe('unseen');
+    expect(placeOf(null)).toBe('none');
+    expect(placeOf(undefined)).toBe('none');
+  });
+
+  it('bien ↔ bof : le titre garde sa place au classement', async () => {
+    await setStatus(heat, 'seen', 'good');
+    await setStatus(casino, 'seen', 'meh');
+    await saveRanking(seen, [k(1), k(2)]);
+    await moveTitle(heat, 'meh');
+    await moveTitle(casino, 'good');
+    expect((await db.answers.get(k(1)))?.tier).toBe('meh');
+    expect((await db.answers.get(k(2)))?.tier).toBe('good');
+    expect(await readRanking(seen)).toEqual([k(1), k(2)]);
+  });
+
+  it('vu → envie, pas envie : retiré du classement des vus', async () => {
+    await setStatus(heat, 'seen', 'good');
+    await setStatus(casino, 'seen', 'good');
+    await saveRanking(seen, [k(1), k(2)]);
+    await moveTitle(heat, 'wish');
+    await moveTitle(casino, 'unseen');
+    expect(await loadRanking(seen)).toEqual([]);
+    expect((await db.answers.get(k(1)))?.status).toBe('wish');
+    expect((await db.answers.get(k(2)))?.status).toBe('unseen');
+  });
+
+  it('à trier : réponse effacée (le titre revient au swipe), retiré du classement de sa liste', async () => {
+    await setStatus(heat, 'wish');
+    await saveRanking(wish, [k(1)]);
+    await moveTitle(heat, 'none');
+    expect(await db.answers.get(k(1))).toBeUndefined();
+    expect(await db.meta.get('ranking:wish:movie')).toMatchObject({ value: [] });
+    // Déjà à trier, ou « pas envie » (sans classement) : rien ne casse.
+    await moveTitle(heat, 'none');
+    await setStatus(casino, 'unseen');
+    await moveTitle(casino, 'none');
+    expect(await db.answers.count()).toBe(0);
+  });
+
+  it('titre jamais vu dans la base (ajout manuel, ami) : ajouté avec son état', async () => {
+    await moveTitle(makeTitle(3), 'meh');
+    expect(await db.titles.get(k(3))).toBeTruthy();
+    expect((await db.answers.get(k(3)))?.tier).toBe('meh');
   });
 });

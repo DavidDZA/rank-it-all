@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
-import { details, mockTmdbApi, openRanking, readAnswers, readMeta, seed, title } from './helpers';
+import { details, mockTmdbApi, moveTo, openRanking, readAnswers, readMeta, seed, title } from './helpers';
 
 /**
  * Fiche d'un titre et ajout manuel, TMDB simulé (clé de test dans les réglages). Les fiches avaient perdu réalisateur,
@@ -204,8 +204,8 @@ test.describe('ajout manuel', () => {
     await page.getByPlaceholder('Titre d’un film ou d’une série…').fill('fight');
     const rows = page.locator('.list-item');
     await expect(rows).toHaveCount(2);
-    await rows.filter({ hasText: 'Fight Club' }).first().getByRole('button', { name: 'Vu, bien' }).click();
-    await rows.filter({ hasText: 'la série' }).getByRole('button', { name: '♥' }).click();
+    await moveTo(page, rows.filter({ hasText: 'Fight Club' }).first(), 'Vu · bien');
+    await moveTo(page, rows.filter({ hasText: 'la série' }), 'Envie (wishlist)');
     await expect.poll(() => readAnswers(page)).toEqual({ 'movie:550': 'seen:good', 'tv:77': 'wish' });
   });
 
@@ -220,7 +220,7 @@ test.describe('ajout manuel', () => {
     await page.getByPlaceholder('Nom d’un réalisateur ou d’une réalisatrice…').fill('nolan');
     await page.locator('.person-row', { hasText: 'Christopher Nolan' }).click();
     await expect(page.locator('.person-name')).toContainText('3 réalisé(s) · 0 vu');
-    await page.locator('.list-item', { hasText: 'Inception' }).getByRole('button', { name: 'Vu, bien' }).click();
+    await moveTo(page, page.locator('.list-item', { hasText: 'Inception' }), 'Vu · bien');
     await expect(page.locator('.person-name')).toContainText('1 vu');
     await expect(page.getByText('Moins connus (1)')).toBeVisible(); // le court métrage, rangé à part
     expect(await readAnswers(page)).toEqual({ 'movie:27205': 'seen:good' });

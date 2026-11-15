@@ -15,7 +15,9 @@ En 6 langues (français, anglais, espagnol, allemand, italien, portugais du Bré
 4. **Classer les séries** : idem.
 5. **Ajout manuel** : recherche par titre, par réalisateur ou par acteur (filmographie complète), pour marquer des titres vus ou les ajouter à la wishlist.
 6. **Wishlist** : filtre films / séries, priorisation par duels, plateformes de streaming (et filtre « dispo sur mes abonnements »).
-7. **Mes listes** : tous les titres vus / pas vus, avec recherche, pour corriger une erreur.
+7. **Mes listes** : tous les titres vus / pas vus, avec recherche, pour corriger une erreur. Partout (listes, classement,
+   wishlist, ajout manuel, amis, fiche), un titre peut passer de n'importe quel état à n'importe quel autre : vu · bien,
+   vu · bof, envie, pas envie, ou à trier (il revient au swipe).
 8. **Stats & badges** : décennies, genres, réalisateurs, acteurs, temps passé, couverture des titres populaires, activité, badges.
 
 Autres fonctions : filtres (période, réalisateur, acteur, genre, langue, note TMDB minimum) sur le swipe, le classement, la tier list et la wishlist, sagas enchaînées en entier dans l’ordre de sortie,

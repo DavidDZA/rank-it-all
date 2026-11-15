@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
-import { readAnswers, seed, title } from './helpers';
+import { readAnswers, seed, title, moveTo } from './helpers';
 import { copyOf, fakeSupabase, SUPABASE_URL, type FakeUser } from './fakeSupabase';
 
 /** « À deux » avec un ami, Supabase simulé (fakeSupabase.ts) : son top, wishlist commune, conseils, compatibilité. */
@@ -42,6 +42,17 @@ async function openDuo(page: Page, friend: FakeUser) {
 
 const names = (page: Page) => page.locator('.list-item .title-main').allTextContents();
 
+test('son top : chaque titre a mon état, que je peux changer (vu, pas seulement wishlist)', async ({ page }) => {
+  await openDuo(page, camille());
+  const row = (name: string) => page.locator('.list-item', { hasText: name }).first();
+  await expect(row('Inception').locator('.status-btn .btn-cap')).toHaveText('Bien'); // vu et aimé chez moi aussi
+  await expect(row('Whiplash').locator('.status-btn .btn-cap')).toHaveText('À trier');
+  // Vu chez Camille, et par moi aussi finalement : directement « vu · bof ».
+  await moveTo(page, row('Whiplash'), 'Vu · bof');
+  await expect.poll(async () => (await readAnswers(page))[f['Whiplash'].key]).toBe('seen:meh');
+  await expect(row('Whiplash').locator('.status-btn .btn-cap')).toHaveText('Bof');
+});
+
 test('son top, wishlist commune, conseils croisés et compatibilité', async ({ page }) => {
   const server = await openDuo(page, camille());
 
@@ -57,8 +68,8 @@ test('son top, wishlist commune, conseils croisés et compatibilité', async ({ 
   await expect(forMe.locator('.title-main')).toHaveText(['Whiplash']);
   await expect(forThem.locator('.title-main')).toHaveText(['Le Parrain']);
   // Un conseil ajouté à ma wishlist : enregistré chez moi, titre compris.
-  await forMe.getByRole('button', { name: 'Ajouter à ta wishlist' }).click();
-  await expect(page.getByText('« Whiplash » ajouté à ta wishlist')).toBeVisible();
+  await moveTo(page, forMe.locator('.list-item', { hasText: 'Whiplash' }), 'Envie (wishlist)');
+  await expect(page.getByText('✓ Whiplash → 💖 Envie (wishlist)')).toBeVisible();
   await expect.poll(async () => (await readAnswers(page))[f['Whiplash'].key]).toBe('wish');
 
   await page.getByRole('button', { name: '🎯 Compatibilité' }).click();

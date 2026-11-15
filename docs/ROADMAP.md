@@ -1,6 +1,6 @@
 # Feuille de route — ce qui reste à faire
 
-> État au 15/11/2026. Comment l'appli marche aujourd'hui : [ARCHITECTURE.md](ARCHITECTURE.md).
+> État au 16/11/2026. Comment l'appli marche aujourd'hui : [ARCHITECTURE.md](ARCHITECTURE.md).
 > Fait : comptes et synchro, amis et « À deux », catégorie Animes, seuils français / vieux films, classement à
 > la main, refonte (fiches à part, chargement découpé, types Supabase, tests de bout en bout) ; puis (01-02/11)
 > renommage en **Rank It All** (base locale migrée, ancienne adresse redirigée), filtre « dispo sur mes
@@ -30,7 +30,9 @@
 >
 > (15/11) **Propositions « selon tes goûts »** (bouton 🎯 du swipe), demandées par les testeurs : modèle appris sur toutes
 > les réponses et le classement, choisi par un test hors ligne sur le profil de l'utilisateur (ARCHITECTURE § 3.6) ;
-> nouveau chemin du relais `/taste/…` (déployé avec le dossier `worker/`).
+> nouveau chemin du relais `/taste/…` (déployé avec le dossier `worker/`). « Ça marche plutôt bien » d'après l'utilisateur.
+> (16/11) Un mot court sous chaque petite icône (listes, filtres, 🎯), en 6 langues ; **état d'un titre modifiable
+> partout** (vu bien, vu bof, envie, pas envie, à trier), un seul bouton par ligne, chez les amis aussi (ARCHITECTURE § 1).
 >
 > **Reprendre ici** (noté le 14/11 au soir) — test fermé en cours depuis le 11/11 (12 testeurs inscrits le 12/11) :
 > 14 jours écoulés vers le 26/11 (§ 2 étapes 5-6), puis demander la production.

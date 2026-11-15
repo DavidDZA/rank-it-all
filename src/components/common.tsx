@@ -31,6 +31,23 @@ export function BackLink() {
   );
 }
 
+/**
+ * Contenu d'un petit bouton à icône : l'icône, et dessous un mot court qui dit ce qu'il fait (« Bien », « Envie »,
+ * « Filtres »…). Le bouton porte la classe `labeled` et garde son aria-label complet (nom lu et utilisé par les tests).
+ */
+export function IconCaption({ icon, caption }: { icon: ReactNode; caption: string }) {
+  return (
+    <>
+      <span className="btn-icon" aria-hidden>
+        {icon}
+      </span>
+      <span className="btn-cap" aria-hidden>
+        {caption}
+      </span>
+    </>
+  );
+}
+
 export function TopBar({ title, right }: { title: string; right?: ReactNode }) {
   return (
     <header className="topbar">
@@ -270,22 +287,22 @@ export function SeenButtons({
   return (
     <>
       <button
-        className={`btn ${size} seen-btn good ${isActive('good') ? 'active' : ''}`}
+        className={`btn ${size} seen-btn good ${isActive('good') ? 'active' : ''} ${labels ? '' : 'labeled'}`}
         onClick={() => mark('good')}
         disabled={isActive('good')}
         title={isActive('good') ? T.seen.goodActive : T.seen.goodTip}
         aria-label={T.seen.goodAria}
       >
-        {labels ? T.seen.goodLabel : '👍'}
+        {labels ? T.seen.goodLabel : <IconCaption icon="👍" caption={T.actions.good} />}
       </button>
       <button
-        className={`btn ${size} seen-btn meh ${isActive('meh') ? 'active' : ''}`}
+        className={`btn ${size} seen-btn meh ${isActive('meh') ? 'active' : ''} ${labels ? '' : 'labeled'}`}
         onClick={() => mark('meh')}
         disabled={isActive('meh')}
         title={isActive('meh') ? T.seen.mehActive : T.seen.mehTip}
         aria-label={T.seen.mehAria}
       >
-        {labels ? T.seen.mehLabel : '😐'}
+        {labels ? T.seen.mehLabel : <IconCaption icon="😐" caption={T.actions.meh} />}
       </button>
     </>
   );

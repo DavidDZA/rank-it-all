@@ -287,7 +287,7 @@ export const fr = {
       title: '📚 Mes listes',
       ordered: false,
       note: '',
-      points: ['Tout ce que tu as trié, pour corriger une erreur : un titre peut être remis en wishlist, ou reproposé au swipe.'],
+      points: ['Tout ce que tu as trié, pour corriger une erreur.', 'Touche l’**état** d’un titre (👍 Bien ▾…) pour le ranger ailleurs : vu bien, vu bof, envie, pas envie, ou **à trier** (il revient au swipe). Pareil dans le classement, la wishlist et chez tes amis.'],
     },
     add: {
       title: '🔍 Ajout manuel',
@@ -397,8 +397,6 @@ export const fr = {
     allOffers: 'Voir toutes les offres →',
     allOffersTip: 'Voir toutes les offres sur TMDB',
     justwatch: 'Disponibilités : JustWatch',
-    wishTip: 'Ajouter à la wishlist',
-    unseenTip: 'Marquer comme pas vu',
   },
   /** Listes classées (classement, priorités). */
   list: {
@@ -458,6 +456,32 @@ export const fr = {
     removeTip: 'Retirer ce filtre',
     filmography: (name: string) => `Filmographie de ${name}…`,
     filterOn: (name: string) => `Filtrer sur ${name}`,
+  },
+  /** Mots courts sous les icônes des petits boutons (listes, filtres, 🎯) : ce que fait le bouton, en un ou deux mots. */
+  actions: {
+    good: 'Bien',
+    meh: 'Bof',
+    rerank: 'Reclasser',
+    filters: 'Filtres',
+    reco: 'Pour toi',
+  },
+  /** État d’un titre (bouton d’état des listes et de la fiche : StatusPicker). */
+  status: {
+    label: { good: 'Vu · bien', meh: 'Vu · bof', wish: 'Envie (wishlist)', unseen: 'Pas envie', none: 'À trier', seen: 'Vu' },
+    short: { good: 'Bien', meh: 'Bof', wish: 'Envie', unseen: 'Pas envie', none: 'À trier', seen: 'Vu' },
+    hint: {
+      good: 'Vu et aimé : classé avec les « bien »',
+      meh: 'Vu, sans plus : en duel après les « bien »',
+      wish: 'Pas vu, envie de le voir',
+      unseen: 'Pas vu, pas envie : il ne sera plus proposé',
+      none: 'Comme jamais trié : il reviendra au swipe',
+    },
+    here: 'Actuel',
+    sheetTitle: (t: string) => `Ranger « ${t} »`,
+    buttonAria: (t: string, state: string) => `${t} : ${state}. Changer`,
+    buttonTip: 'Changer d’état : vu bien, vu bof, envie, pas envie, à trier',
+    moved: (t: string, state: string) => `✓ ${t} → ${state}`,
+    confirmLeave: (t: string) => `« ${t} » quittera ton classement. Continuer ?`,
   },
   /** Swipe : questions, coins, messages. */
   swipe: {
@@ -907,13 +931,6 @@ export const fr = {
     allTip: 'Tous les titres',
     only: { movie: 'Films seulement', tv: 'Séries seulement', anime: 'Animes seulement' },
     empty: 'Cette liste est vide.',
-    toWish: 'Mettre en wishlist',
-    toWishTip: 'Pas vu finalement : mettre dans la wishlist',
-    toUnseen: 'Marquer pas vu',
-    toUnseenTip: 'Pas vu finalement, et pas envie',
-    wishAfterAllTip: 'Finalement, envie de le voir : wishlist',
-    reset: 'Reproposer au swipe',
-    resetTip: 'Le reproposer au swipe',
     more: (n: string) => `Afficher plus (${n} restants)`,
     moreTip: 'Afficher les titres suivants',
   },
@@ -941,7 +958,6 @@ export const fr = {
   /** Classement d'une catégorie (duels, liste, tier list). */
   rankPage: {
     title: (c: Category) => ({ movie: '🏆 Films', tv: '🥇 Séries', anime: '🏯 Animes' })[c],
-    confirmWish: (title: string) => `Remettre « ${title} » dans la wishlist ? Il sera retiré des titres vus et du classement.`,
     nothingToShare: 'Classe au moins un titre pour partager ton top !',
     duels: 'Duels',
     duelsTip: 'Classer en choisissant entre deux titres',
@@ -957,8 +973,6 @@ export const fr = {
     shareTip: 'Créer une image de ton top 10 (filtré) à partager',
     rerank: 'Reclasser',
     rerankTip: 'Retirer du classement pour le replacer avec de nouveaux duels',
-    toWish: 'Remettre en wishlist',
-    toWishTip: 'Remettre dans la wishlist (pas vu finalement)',
     apply: (n: string) => `Appliquer (${n} vus)`,
   },
   /** Wishlist. */
@@ -975,7 +989,6 @@ export const fr = {
     empty: 'Rien dans la wishlist pour l’instant.',
     reprioritize: 'Re-prioriser',
     reprioritizeTip: 'Retirer de l’ordre de priorité pour le replacer avec de nouveaux duels',
-    remove: 'Retirer de la wishlist',
     apply: (n: string) => `Appliquer (${n} titres)`,
   },
   /** À deux (page d'un ami). */
@@ -1003,8 +1016,6 @@ export const fr = {
     notShared: (pseudo: string, what: string) => `${pseudo} ne partage pas ${what}. Il ou elle peut l’activer dans sa page Amis.`,
     theirSeen: 'ses titres vus',
     theirRanking: 'son classement',
-    wished: (title: string) => `💖 « ${title} » ajouté à ta wishlist`,
-    addToWish: 'Ajouter à ta wishlist',
     noCommon: (c: Category) => `Aucun${fem(c) ? 'e' : ''} ${{ movie: 'film', tv: 'série', anime: 'anime' }[c]} dans vos deux wishlists pour l’instant.`,
     common: (n: number) => `${n} titre${n > 1 ? 's' : ''} que vous voulez voir tous les deux, par priorités combinées.`,
     positions: (mine: string, pseudo: string, theirs: string) => `Toi : ${mine} · ${pseudo} : ${theirs}`,
@@ -1016,7 +1027,6 @@ export const fr = {
     you: 'toi',
     rankFor: (rank: number, who: string) => `n°${rank} pour ${who}`,
     advises: (pseudo: string) => `💡 ${pseudo} te conseille`,
-    inYourWishlist: 'Dans ta wishlist',
     nothingNew: (pseudo: string) => `Rien de nouveau : tu as déjà vu tout ce que ${pseudo} a aimé.`,
     toAdvise: (pseudo: string) => `🎁 À conseiller à ${pseudo}`,
     inTheirWishlist: 'Déjà dans sa wishlist',

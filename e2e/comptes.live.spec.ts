@@ -1,5 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { expect, test } from '@playwright/test';
+import { moveTo } from './helpers';
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 
 /**
@@ -79,8 +80,8 @@ test.describe('comptes et amis @live', () => {
       await page.getByRole('link', { name: 'À deux →' }).click();
       await expect(page.locator('.row-text', { hasText: 'Le conseil de Bob' })).toBeVisible(); // son top
       await page.locator('button.chip', { hasText: 'Conseils' }).click();
-      await page.getByRole('button', { name: 'Ajouter à ta wishlist' }).first().click();
-      await expect(page.getByText('Dans ta wishlist')).toBeVisible();
+      await moveTo(page, page.locator('.list-item').first(), 'Envie (wishlist)');
+      await expect(page.locator('.list-item').first().locator('.status-btn .btn-cap')).toHaveText('Envie');
       // Seulement les lignes de A : une fois amis, A lit aussi ce que B partage.
       await expect.poll(async () => (await a!.from('answers').select('status').eq('user_id', A).eq('key', 'movie:2')).data, { timeout: 20_000 }).toEqual([{ status: 'wish' }]);
 

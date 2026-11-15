@@ -6,7 +6,7 @@ import { fixMinVotes, readPref, writePref } from '../lib/settings';
 import { requestPersistentStorage } from '../lib/db';
 import { syncCatalogue } from '../lib/sync';
 import { syncAndWait } from '../lib/cloud';
-import { PersonAvatar, Rich, Sheet } from './common';
+import { IconCaption, PersonAvatar, Rich, Sheet } from './common';
 import { num, T } from '../i18n';
 
 /**
@@ -246,8 +246,8 @@ export function FilterIcon() {
 /** Bouton rond d'ouverture des filtres, en couleur quand un filtre est actif. */
 export function FilterButton({ active, label, onClick }: { active: boolean; label: string; onClick: () => void }) {
   return (
-    <button className={`icon-btn filter-btn ${active ? 'active' : ''}`} onClick={onClick} aria-label={T.filterSheet.title} title={T.filterSheet.buttonTip(label)}>
-      <FilterIcon />
+    <button className={`icon-btn labeled filter-btn ${active ? 'active' : ''}`} onClick={onClick} aria-label={T.filterSheet.title} title={T.filterSheet.buttonTip(label)}>
+      <IconCaption icon={<FilterIcon />} caption={T.actions.filters} />
     </button>
   );
 }

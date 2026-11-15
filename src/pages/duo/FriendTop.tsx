@@ -5,7 +5,8 @@ import { type Category } from '../../lib/category';
 import type { Side } from '../../lib/together';
 import { matchesSearch } from '../../lib/hooks';
 import { SearchBox, TitleRow } from '../../components/common';
-import { addToWishlist, NeedsSharing, type Loaded } from './shared';
+import { NeedsSharing, type Loaded } from './shared';
+import { StatusButton } from '../../components/StatusPicker';
 
 const MEDALS = ['🥇', '🥈', '🥉'];
 const PAGE = 100;
@@ -42,7 +43,6 @@ export function FriendTop({ data, category, onWish }: { data: Loaded; category: 
     return <p className="muted center">{T.duo.nothingSeen(pseudo, category)}</p>;
   }
 
-  const wish = (t: Title) => addToWishlist(t, onWish);
   const row = (t: Title, prefix?: ReactNode) => {
     const tier = data.them.answers.get(t.key)?.tier;
     const mine = myStatus(data.me, t.key, category);
@@ -57,11 +57,7 @@ export function FriendTop({ data, category, onWish }: { data: Loaded; category: 
           </span>
         }
       >
-        {!mine && (
-          <button className="btn small" onClick={() => wish(t)} title={T.duo.addToWish} aria-label={T.duo.addToWish}>
-            💖
-          </button>
-        )}
+        <StatusButton title={t} current={data.me.answers.get(t.key) ?? null} onChanged={onWish} />
       </TitleRow>
     );
   };

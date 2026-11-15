@@ -1,4 +1,4 @@
-import type { Page } from '@playwright/test';
+import type { Locator, Page } from '@playwright/test';
 
 /** Outils communs aux tests de bout en bout : base locale préremplie, glisser au doigt ou à la souris. */
 
@@ -50,6 +50,15 @@ export const details = (key: string, providers: string[] = []) => ({
   providers: { flatrate: providers.map((name, i) => ({ id: 100 + i, name, logo: null })), rent: [], buy: [], link: null },
   complete: true,
 });
+
+/**
+ * Change l'état d'un titre depuis sa ligne : son bouton d'état, puis l'un des 5 choix (« Vu · bien », « Vu · bof »,
+ * « Envie (wishlist) », « Pas envie », « À trier »).
+ */
+export async function moveTo(page: Page, row: Locator, state: string): Promise<void> {
+  await row.locator('.status-btn').click();
+  await page.getByRole('dialog', { name: /^Ranger/ }).getByRole('button', { name: state, exact: true }).click();
+}
 
 /** Ouvre l'appli (qui crée sa base), y écrit les données de test, puis recharge la page `hash`. */
 export async function seed(page: Page, data: Seed, hash = '#/'): Promise<void> {

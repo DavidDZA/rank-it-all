@@ -1,12 +1,12 @@
 import { useMemo, useState } from 'react';
 import { num, T } from '../i18n';
 import { useLiveQuery } from 'dexie-react-hooks';
-import { clearStatus, db, type Answer, type Title } from '../lib/db';
+import { db, type Answer, type Title } from '../lib/db';
 import { categoryOf, categoryOptions, useCategories, type Category } from '../lib/category';
-import { changeStatus } from '../lib/ranking';
 import { matchesSearch, useTitleMap } from '../lib/hooks';
-import { SearchBox, SeenButtons, TitleRow, TopBar, TypeFilter } from '../components/common';
+import { SearchBox, TitleRow, TopBar, TypeFilter } from '../components/common';
 import { Tutorial } from '../components/Tutorial';
+import { StatusButton } from '../components/StatusPicker';
 
 type ListId = 'seen' | 'unseen';
 type Filter = 'all' | Category;
@@ -78,27 +78,7 @@ export default function Lists() {
         <ul className="list">
           {shown.slice(0, limit).map(({ t, a }) => (
             <TitleRow key={t.key} title={t} showType={filter === 'all'}>
-              {list === 'seen' ? (
-                <>
-                  <SeenButtons title={t} current={a} />
-                  <button className="btn small" onClick={() => changeStatus(t, 'wish')} title={T.lists.toWishTip} aria-label={T.lists.toWish}>
-                    ♥
-                  </button>
-                  <button className="btn small" onClick={() => changeStatus(t, 'unseen')} title={T.lists.toUnseenTip} aria-label={T.lists.toUnseen}>
-                    ✕
-                  </button>
-                </>
-              ) : (
-                <>
-                  <SeenButtons title={t} />
-                  <button className="btn small" onClick={() => changeStatus(t, 'wish')} title={T.lists.wishAfterAllTip} aria-label={T.lists.toWish}>
-                    ♥
-                  </button>
-                  <button className="btn small" onClick={() => clearStatus(t.key)} title={T.lists.resetTip} aria-label={T.lists.reset}>
-                    ↺
-                  </button>
-                </>
-              )}
+              <StatusButton title={t} current={a} />
             </TitleRow>
           ))}
         </ul>

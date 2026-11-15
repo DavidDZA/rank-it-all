@@ -4,7 +4,8 @@ import type { Title } from '../../lib/db';
 import type { Category } from '../../lib/category';
 import { advice, type Advice } from '../../lib/together';
 import { TitleRow } from '../../components/common';
-import { addToWishlist, NeedsSharing, type Loaded } from './shared';
+import { NeedsSharing, type Loaded } from './shared';
+import { StatusButton } from '../../components/StatusPicker';
 
 export function AdviceLists({ data, category, onWish }: { data: Loaded; category: Category; onWish: () => void }) {
   const pseudo = data.friend.pseudo;
@@ -12,7 +13,6 @@ export function AdviceLists({ data, category, onWish }: { data: Loaded; category
   const forThem = useMemo(() => advice(data.me, data.them, category, data.catOf), [data, category]);
   if (!data.friend.shareRanking) return <NeedsSharing pseudo={pseudo} what={T.duo.theirSeen} />;
 
-  const wish = (t: Title) => addToWishlist(t, onWish);
 
   const rows = (list: Advice[], who: string, action?: (t: Title, a: Advice) => ReactNode) => (
     <ul className="list">
@@ -42,15 +42,7 @@ export function AdviceLists({ data, category, onWish }: { data: Loaded; category
       <section className="duo-section">
         <h3>{T.duo.advises(pseudo)}</h3>
         {forMe.length ? (
-          rows(forMe, pseudo, (t, a) =>
-            a.inWishlist ? (
-              <span className="muted tiny">{T.duo.inYourWishlist}</span>
-            ) : (
-              <button className="btn small" onClick={() => wish(t)} title={T.duo.addToWish} aria-label={T.duo.addToWish}>
-                💖
-              </button>
-            ),
-          )
+          rows(forMe, pseudo, (t) => <StatusButton title={t} current={data.me.answers.get(t.key) ?? null} onChanged={onWish} />)
         ) : (
           <p className="muted small">{T.duo.nothingNew(pseudo)}</p>
         )}

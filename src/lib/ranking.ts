@@ -75,6 +75,30 @@ export async function changeStatus(title: Title, status: Status, tier?: Tier): P
   await setStatus(title, status, status === 'seen' ? tier : undefined);
 }
 
+/** Les états où l'on peut ranger un titre, partout (StatusPicker) : vu bien, vu bof, envie, pas envie, à trier. */
+export type Place = 'good' | 'meh' | 'wish' | 'unseen' | 'none';
+export const PLACES: Place[] = ['good', 'meh', 'wish', 'unseen', 'none'];
+
+/** État d'une réponse ; « seen » : vu sans avis (anciennes réponses). Pas de réponse : « none » (à trier). */
+export function placeOf(a: { status: Status; tier?: Tier | null } | null | undefined): Place | 'seen' {
+  if (!a) return 'none';
+  if (a.status === 'seen') return a.tier ?? 'seen';
+  return a.status;
+}
+
+/**
+ * Range un titre dans un état, d'où qu'il vienne. Bien ↔ bof : il garde sa place au classement (l'avis ne décide que
+ * de l'ordre de passage en duel). Vers la wishlist, « pas envie » ou « à trier » : retiré du classement de son ancienne
+ * liste. « À trier » efface la réponse : le titre revient au swipe, comme jamais trié.
+ */
+export async function moveTitle(title: Title, place: Place): Promise<void> {
+  if (place === 'good' || place === 'meh') return changeStatus(title, 'seen', place);
+  if (place === 'wish' || place === 'unseen') return changeStatus(title, place);
+  const current = await db.answers.get(title.key);
+  if (current && current.status !== 'unseen') await unrank({ category: categoryOf(title), list: current.status }, title.key);
+  await db.answers.delete(title.key);
+}
+
 /**
  * Titres à placer en priorité : les « bien » d'abord, puis ceux sans avis,
  * et les « bof » seulement quand il ne reste plus qu'eux. Tous sont ensuite comparés

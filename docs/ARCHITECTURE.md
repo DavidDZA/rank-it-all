@@ -1,6 +1,6 @@
 # Architecture — comment marche Rank It All
 
-> **À lire en premier par toute nouvelle session de travail.** État au 15/11/2026. Ce qui reste à faire est dans
+> **À lire en premier par toute nouvelle session de travail.** État au 16/11/2026. Ce qui reste à faire est dans
 > [ROADMAP.md](ROADMAP.md).
 
 ## 1. L'appli
@@ -21,6 +21,22 @@ espagnol, allemand, italien, portugais du Brésil : § 2.2).
   clic que le téléphone envoie juste après tomberait sur le fond de la fenêtre et la refermerait (bug du 13/11 : la
   fiche ne restait ouverte qu'en touchant le bas de l'affiche ; `SwipeCard` attend ce clic, 400 ms au plus). Sous l'affiche du swipe et des duels : année et genres sur une
   ligne, réalisateur et acteurs sur la suivante (`TitleText credits`, `cardGenres`).
+- **État d'un titre, modifiable partout** (16/11, demande de l'utilisateur : « on devrait toujours pouvoir déplacer un
+  titre, dans n'importe quel état ») : 👍 vu · bien, 😐 vu · bof, 💖 envie, 💤 pas envie, ↺ à trier. Chaque ligne de
+  titre (Mon classement, wishlist, Mes listes, ajout manuel, « À deux » : son top et ses conseils) a **un seul bouton
+  d'état** (`StatusButton`, `components/StatusPicker.tsx`) : l'état actuel, son mot et ▾, bordure de sa couleur ; le
+  toucher ouvre les 5 choix avec leur explication (l'actuel marqué « Actuel »). La fiche les montre directement
+  (`StatusChoices compact`). Un message confirme le changement. Logique : `moveTitle` (`ranking.ts`) — bien ↔ bof
+  garde la place au classement (l'avis ne décide que de l'ordre des duels) ; vers envie, pas envie ou à trier, le titre
+  quitte le classement de son ancienne liste (confirmation si l'on part du classement) ; « à trier » efface la réponse,
+  le titre revient au swipe comme jamais trié. Remplace les boutons 👍 😐 ♥ ✕ ↺ d'avant, différents d'un écran à
+  l'autre (chez un ami, seulement 💖). Restent à part : « Reclasser » (↺, classement et wishlist priorisée), le swipe,
+  et « Ce soir ? » (👍 / 😐 du titre tiré).
+- **Mots sous les icônes** (16/11, retour de l'utilisateur : « pas toujours clair ») : chaque petit bouton à icône porte
+  dessous un mot court (`IconCaption`, textes `T.actions` et `T.status`) — l'état des lignes (Bien ▾, Envie ▾…),
+  ↺ Reclasser, « Filtres » sous l'entonnoir, « Pour toi » sous 🎯, 👍 Bien / 😐 Bof dans « Ce soir ? ». Le bouton garde
+  son nom complet (`aria-label`). Pas de mot sous ce qui est déjà clair ou déjà écrit (retour ‹, croix des fenêtres,
+  ℹ des duels, poignée ⠿ expliquée au-dessus de la liste).
 - **Classement** par duels (insertion dichotomique), vérifications entre voisins, **déplacement à la main**
   (poignée ⠿ ou numéro), tier list, partage en image, filtre « dispo sur mes abonnements » (ce qu'on peut revoir).
   Même chose pour prioriser la wishlist.
@@ -428,7 +444,12 @@ Restaurer (dans un projet Supabase neuf, ou le même vidé) :
   (`tutoriel.spec.ts`), ordre des rubriques des Réglages (Compte en tête, puis Langue et pays depuis le 14/11) et
   seuils de votes (`reglages.spec.ts`), propositions « selon tes goûts » avec TMDB simulé (seuil des 10 « bien », titre le
   plus proche d'abord avec son pourquoi, mesure et « Annuler », retour au hasard, mode retenu, tout trié, mise en page
-  aux deux formats, astuce au premier 🎯 : `propositions.spec.ts`), traduction (chaque écran dans chaque langue sans texte français oublié, manifeste et page
+  aux deux formats, astuce au premier 🎯 : `propositions.spec.ts`), mots sous les icônes de chaque écran (swipe, classement,
+  wishlist, Mes listes, ajout manuel), boutons qui tiennent dans leur ligne au format téléphone (`libelles.spec.ts`),
+  état d'un titre (fenêtre des 5 états à l'écran, bien ↔ bof sans perdre sa place au classement, sortie du classement
+  après confirmation, « à trier » qui efface la réponse et la priorité de wishlist, pas envie → envie → bof → à trier,
+  fiche : `etats.spec.ts` ; chez un ami, noter « vu · bof » un titre de son top : `duo.spec.ts` ; `moveTitle` et
+  `placeOf` dans `ranking.test.ts`), traduction (chaque écran dans chaque langue sans texte français oublié, manifeste et page
   de confidentialité de la langue, langue et pays changés dans les Réglages, fiche TMDB en anglais avec les
   plateformes des États-Unis ou de Belgique, catalogue retéléchargé dans la nouvelle langue : `traduction.spec.ts`),
   langue du catalogue avec un navigateur en espagnol, portugais, japonais, français, allemand,
@@ -459,6 +480,11 @@ Restaurer (dans un projet Supabase neuf, ou le même vidé) :
 
 ## 6. Conventions de travail
 
+- Un nouveau petit bouton à icône reçoit son mot court dessous (`IconCaption`, `T.actions`, classe `labeled`) ; rester
+  sobre (un ou deux mots), et vérifier qu'il tient au format téléphone (`libelles.spec.ts`).
+- Une nouvelle ligne de titre propose son état avec `StatusButton` (jamais de boutons 👍 😐 ♥ ✕ séparés) ; une fenêtre
+  ouverte depuis une ligne passe par un portail (`createPortal`) : une ligne déplaçable du classement décale ce qu'elle
+  contient, la fenêtre s'ouvrait au milieu de la liste.
 - Messages de commit et commentaires **en français**, sobres. Textes de l'interface : **jamais écrits en dur**,
   toujours dans les dictionnaires `src/i18n/` (les 6 langues), sinon `tests/i18n.test.ts` échoue (§ 2.2).
 - L'utilisateur a un **téléphone Android professionnel** (pas d'APK hors magasin) et utilise aussi l'appli sur

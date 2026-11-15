@@ -260,3 +260,89 @@
   background: var(--surface-2);
   border: 1px solid var(--border);
 }
+
+/* ---------- État d'un titre (StatusPicker) ---------- */
+
+/* Fenêtre des 5 états : une ligne par état, icône, nom et explication ; l'état actuel marqué. */
+.status-choices {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 12px;
+}
+.status-choice {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 10px 14px;
+  text-align: left;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+}
+.status-choice:disabled {
+  opacity: 1;
+  border-color: var(--violet);
+  background: rgb(139 124 255 / 0.18);
+}
+.status-icon {
+  font-size: 1.5rem;
+  width: 32px;
+  text-align: center;
+  flex-shrink: 0;
+}
+.status-text {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+}
+.status-here {
+  font-size: 0.75rem;
+  color: var(--violet);
+  font-weight: 600;
+}
+
+/* Fiche : les 5 états sur une ligne, en petits boutons à mot. */
+.fiche-actions {
+  display: flex;
+  justify-content: center;
+}
+.status-choices.compact {
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 0;
+}
+.status-choices.compact .status-choice {
+  width: auto;
+  min-width: 56px;
+  padding: 4px 8px 3px;
+  border-radius: 999px;
+}
+.status-choices.compact .status-choice:disabled {
+  background: var(--grad-cool);
+  border-color: transparent;
+}
+.status-choices.compact .status-choice:disabled .btn-cap {
+  color: #fff;
+}
+
+/* Bouton d'état dans une ligne : la couleur de l'état, et ▾ (on le touche pour changer). */
+.status-btn .btn-cap::after {
+  content: ' ▾';
+}
+.status-btn.place-good {
+  border-color: rgb(62 224 143 / 0.6);
+}
+.status-btn.place-meh {
+  border-color: rgb(255 209 102 / 0.6);
+}
+.status-btn.place-wish {
+  border-color: rgb(255 95 162 / 0.6);
+}
+.status-btn.place-none {
+  border-style: dashed;
+}
