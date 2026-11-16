@@ -1,10 +1,11 @@
 /**
  * Bannière du Play Store (« image de présentation », 1024 × 500), dans chaque langue :
- * `node tools/captures-store/banniere.mjs [en es de it pt fr]` (sans argument : les 5 langues traduites).
+ * `node tools/captures-store/banniere.mjs [fr en es de it pt]` (sans argument : les 6 langues).
  *
  * Même composition que la bannière française d'origine (store/banniere-1024x500.png) : icône, nom, slogan et
  * points forts traduits, et un téléphone qui montre la tier list de la langue (store/captures/<langue>/5-tier-list.png,
- * faite par captures.mjs). Rien à télécharger. Résultat : store/bannieres/banniere-<langue>.png.
+ * faite par captures.mjs). Rien à télécharger. Résultat : store/bannieres/banniere-<langue>.png, et pour le français
+ * store/banniere-1024x500.png (la bannière de la fiche principale).
  */
 import { mkdirSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
@@ -69,7 +70,7 @@ export async function makeBanners(langs, browser) {
       <div class="phone"></div>
     </body></html>`);
     await page.evaluate(() => document.fonts.ready);
-    const file = resolve(outDir, `banniere-${lang}.png`);
+    const file = lang === 'fr' ? resolve(ROOT, 'store/banniere-1024x500.png') : resolve(outDir, `banniere-${lang}.png`);
     await page.screenshot({ path: file });
     written.push(file);
   }
@@ -80,6 +81,6 @@ export async function makeBanners(langs, browser) {
 
 // Lancé directement.
 if (import.meta.url === pathToFileURL(process.argv[1]).href) {
-  const langs = process.argv.slice(2).length ? process.argv.slice(2) : ['en', 'es', 'de', 'it', 'pt'];
+  const langs = process.argv.slice(2).length ? process.argv.slice(2) : ['fr', 'en', 'es', 'de', 'it', 'pt'];
   for (const file of await makeBanners(langs)) console.log(file);
 }

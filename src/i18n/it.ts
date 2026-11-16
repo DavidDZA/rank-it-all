@@ -972,6 +972,7 @@ export const it: Dict = {
     notShared: (pseudo: string, what: string) => `${pseudo} non condivide ${what}. Può attivarlo nella sua pagina Amici.`,
     theirSeen: 'i suoi titoli visti',
     theirRanking: 'la sua classifica',
+    theirWishlist: 'la sua wishlist',
     noCommon: (c: Category) => `Ancora nessun${fem(c) ? 'a' : ''} ${({ movie: 'film', tv: 'serie', anime: 'anime' } as const)[c]} in entrambe le vostre wishlist.`,
     common: (n: number) => `${n} ${pl(n, 'titolo', 'titoli')} che volete vedere entrambi, per priorità combinata.`,
     positions: (mine: string, pseudo: string, theirs: string) => `Tu: ${mine} · ${pseudo}: ${theirs}`,

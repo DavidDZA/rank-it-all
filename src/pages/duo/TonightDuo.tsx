@@ -23,7 +23,7 @@ export function TonightDuo({ data, category }: { data: Loaded; category: Categor
     prefetchDetails(titles, WEEK);
   }, [list.length]);
 
-  if (!data.friend.shareWishlist) return <NeedsSharing pseudo={data.friend.pseudo} what="sa wishlist" />;
+  if (!data.friend.shareWishlist) return <NeedsSharing pseudo={data.friend.pseudo} what={T.duo.theirWishlist} />;
   if (!list.length) return <p className="muted center">{T.duo.nothingToRoll}</p>;
 
   const candidates = list.filter((w) => {

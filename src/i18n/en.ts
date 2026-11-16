@@ -971,6 +971,7 @@ export const en: Dict = {
     notShared: (pseudo: string, what: string) => `${pseudo} doesn’t share ${what}. They can turn it on in their Friends page.`,
     theirSeen: 'their seen titles',
     theirRanking: 'their ranking',
+    theirWishlist: 'their wishlist',
     noCommon: (c: Category) => `No ${ONE[c]} in both your wishlists yet.`,
     common: (n: number) => `${n} title${s(n)} you both want to watch, by combined priority.`,
     positions: (mine: string, pseudo: string, theirs: string) => `You: ${mine} · ${pseudo}: ${theirs}`,

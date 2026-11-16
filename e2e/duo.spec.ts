@@ -24,7 +24,7 @@ const camille = (extra: Partial<FakeUser> = {}): FakeUser => ({
 });
 
 /** Mon côté, dans la base locale : les 5 communs et Le Parrain vus et classés, Amélie et Matrix en wishlist. */
-async function openDuo(page: Page, friend: FakeUser) {
+async function openDuo(page: Page, friend: FakeUser, heading = '👥 Toi & Camille') {
   const server = await fakeSupabase(page, me, [friend]);
   const mine = [...SHARED, 'Le Parrain'];
   await seed(
@@ -36,7 +36,7 @@ async function openDuo(page: Page, friend: FakeUser) {
     },
     `#/duo/${friend.id}`,
   );
-  await expect(page.getByRole('heading', { name: '👥 Toi & Camille' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: heading })).toBeVisible();
   return server;
 }
 
@@ -84,6 +84,25 @@ test('ami qui ne partage pas son classement : message à la place de son top et 
   await expect(page.getByText('Camille ne partage pas son classement.')).toBeVisible();
   await page.getByRole('button', { name: '🎯 Compatibilité' }).click();
   await expect(page.getByText('Camille ne partage pas son classement.')).toBeVisible();
+});
+
+test('ami qui ne partage pas sa wishlist : message à la place de la wishlist commune et du tirage du soir', async ({ page }) => {
+  await openDuo(page, camille({ shareWishlist: false }));
+  await page.getByRole('button', { name: '💖 En commun' }).click();
+  await expect(page.getByText('Camille ne partage pas sa wishlist.')).toBeVisible();
+  await page.getByRole('button', { name: '🍿 Ce soir' }).click();
+  await expect(page.getByText('Camille ne partage pas sa wishlist.')).toBeVisible();
+});
+
+test.describe('appareil en anglais', () => {
+  test.use({ locale: 'en-US' });
+  test('wishlist pas partagée : message en anglais, sans mot français', async ({ page }) => {
+    await openDuo(page, camille({ shareWishlist: false }), '👥 You & Camille');
+    await page.getByRole('button', { name: '💖 In common' }).click();
+    await expect(page.getByText('Camille doesn’t share their wishlist.')).toBeVisible();
+    await page.getByRole('button', { name: '🍿 Tonight' }).click();
+    await expect(page.getByText('Camille doesn’t share their wishlist.')).toBeVisible();
+  });
 });
 
 test('pas (ou plus) ami : message et retour à la liste des amis', async ({ page }) => {

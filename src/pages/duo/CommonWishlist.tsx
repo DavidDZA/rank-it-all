@@ -9,7 +9,7 @@ import { NeedsSharing, nth, type Loaded } from './shared';
 export function CommonWishlist({ data, category }: { data: Loaded; category: Category }) {
   const list = useMemo(() => commonWishlist(data.me, data.them, category, data.catOf), [data, category]);
   const pseudo = data.friend.pseudo;
-  if (!data.friend.shareWishlist) return <NeedsSharing pseudo={pseudo} what="sa wishlist" />;
+  if (!data.friend.shareWishlist) return <NeedsSharing pseudo={pseudo} what={T.duo.theirWishlist} />;
   if (!list.length) return <p className="muted center">{T.duo.noCommon(category)}</p>;
   return (
     <>

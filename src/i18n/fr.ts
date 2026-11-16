@@ -1018,6 +1018,7 @@ export const fr = {
     notShared: (pseudo: string, what: string) => `${pseudo} ne partage pas ${what}. Il ou elle peut l’activer dans sa page Amis.`,
     theirSeen: 'ses titres vus',
     theirRanking: 'son classement',
+    theirWishlist: 'sa wishlist',
     noCommon: (c: Category) => `Aucun${fem(c) ? 'e' : ''} ${{ movie: 'film', tv: 'série', anime: 'anime' }[c]} dans vos deux wishlists pour l’instant.`,
     common: (n: number) => `${n} titre${n > 1 ? 's' : ''} que vous voulez voir tous les deux, par priorités combinées.`,
     positions: (mine: string, pseudo: string, theirs: string) => `Toi : ${mine} · ${pseudo} : ${theirs}`,

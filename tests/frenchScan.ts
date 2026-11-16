@@ -13,7 +13,7 @@ import { parse } from '@babel/parser';
 const FRENCH_CHARS = /[éèêëàâçùûüôîïœÉÈÊÀÂÇÙÛÔÎŒ’«»]/;
 /** Mots français courants, pour les textes sans accent (« Passer », « Films vus »). */
 const FRENCH_WORDS =
-  /\b(le|la|les|des|du|une?|tes|ton|ta|mes|mon|ma|pour|avec|sans|dans|sur|pas|vus?|vues?|films?|titres?|classement|envie|fermer|annuler|passer|choisir|chargement|ajouter|supprimer|retour|filtres?|tous|toutes|aucune?|oui|non|ou|et|est|sont|ce|cette|plus|moins|jours?|heures?|amis?|compte|ami|chercher|rechercher|bien|bof|tri[ée]?s?|liste|soir|regarder|catalogue|mettre|jour|duels?|connexion|impossible|erreur|r[ée]essaie)\b/i;
+  /\b(le|la|les|des|du|une?|tes|ton|ta|mes|mon|ma|sa|ses|leurs?|pour|avec|sans|dans|sur|pas|vus?|vues?|films?|titres?|classement|envie|fermer|annuler|passer|choisir|chargement|ajouter|supprimer|retour|filtres?|tous|toutes|aucune?|oui|non|ou|et|est|sont|ce|cette|plus|moins|jours?|heures?|amis?|compte|ami|chercher|rechercher|bien|bof|tri[ée]?s?|liste|soir|regarder|catalogue|mettre|jour|duels?|connexion|impossible|erreur|r[ée]essaie)\b/i;
 /** Espace avant « : », « ! », « ? » ou « ; » après un mot : typographie française (« Connexion impossible : … »). */
 const FRENCH_PUNCTUATION = /\p{L} [:!?;](\s|$)/u;
 
@@ -27,7 +27,7 @@ export interface Hit {
 const IGNORED: RegExp[] = [/^sort-my-stuffs$/, /^renamed-from:/, /^Sort my stuffs$/, /^"Fredoka Variable"/, /^Rank It All$/, /^This product uses the TMDB API/];
 
 /** Attributs JSX et propriétés dont la valeur est affichée telle quelle. */
-const DISPLAYED_ATTRS = new Set(['title', 'placeholder', 'aria-label', 'alt', 'label']);
+const DISPLAYED_ATTRS = new Set(['title', 'placeholder', 'aria-label', 'alt', 'label', 'what']);
 const DISPLAYED_PROPS = new Set(['label', 'caption', 'tip', 'text', 'title', 'question', 'desc', 'name', 'placeholder', 'message', 'emptyText', 'empty', 'leftCap', 'rightCap', 'leftTip', 'rightTip']);
 
 function looksFrench(text: string, jsx: boolean): boolean {

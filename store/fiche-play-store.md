@@ -66,7 +66,8 @@ complète ci-dessous, et remplacer les **captures téléphone** par celles de la
 par `bannieres/banniere-<langue>.png`. L'icône reste la même. Aucune nouvelle version de l'appli n'est nécessaire.
 
 Les captures se refont (après un changement visible de l'appli) avec `node tools/captures-store/captures.mjs`
-(`… fr` pour le français, `… en de` pour quelques langues) : le site construit avec le relais TMDB, un téléphone
+(les 6 langues, le français dans `captures/` et sa bannière dans `banniere-1024x500.png` ; `… en de` pour quelques
+langues) : le site construit avec le relais TMDB, un téléphone
 réglé sur chaque langue et son pays, le vrai catalogue (affiches et titres de la langue), un profil de démonstration,
 puis les 6 écrans en 1080 × 1920, et enfin les bannières. Il faut le réseau ; quelques minutes en tout. Les bannières
 seules (texte changé, sans réseau) : `node tools/captures-store/banniere.mjs` (slogans dans `BANNER_TEXT`).

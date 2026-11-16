@@ -1,12 +1,13 @@
 /**
- * Captures du Play Store, dans chaque langue : `node tools/captures-store/captures.mjs [en es de it pt fr]`
- * (sans argument : les 5 langues traduites ; le français existe déjà dans store/captures/).
+ * Captures du Play Store, dans chaque langue : `node tools/captures-store/captures.mjs [fr en es de it pt]`
+ * (sans argument : les 6 langues).
  *
  * Construit le site avec le relais TMDB (dossier dist-captures, servi sur localhost:5173, adresse acceptée par le
  * relais), puis pour chaque langue : un téléphone (360 × 640, densité 3 → 1080 × 1920) réglé sur la langue et le pays,
  * l'appli télécharge le vrai catalogue (vraies affiches, titres traduits), reçoit un profil plausible (titres vus et
  * aimés, wishlist, classement, quelques jours d'activité), et les 6 écrans de la fiche sont capturés dans
- * store/captures/<langue>/ : accueil, swipe, duel, classement, tier list, wishlist. Puis les bannières (banniere.mjs).
+ * store/captures/<langue>/ (le français directement dans store/captures/) : accueil, swipe, duel, classement, tier list,
+ * wishlist. Puis les bannières (banniere.mjs).
  *
  * Demande le réseau (relais TMDB, environ 900 demandes par langue) ; quelques minutes en tout.
  */
@@ -15,6 +16,7 @@ import { mkdirSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { chromium } from '@playwright/test';
 import { makeBanners } from './banniere.mjs';
+import { ALL_SEEN, TUTORIALS_KEY } from '../../src/lib/tutorial.ts';
 
 const ROOT = resolve(import.meta.dirname, '../..');
 const RELAY = 'https://rank-it-all-tmdb.rankitall.workers.dev';
@@ -26,7 +28,7 @@ const LOCALES = { fr: 'fr-FR', en: 'en-US', es: 'es-ES', de: 'de-DE', it: 'it-IT
 const TMDB = { fr: 'fr-FR', en: 'en-US', es: 'es-ES', de: 'de-DE', it: 'it-IT', pt: 'pt-BR' };
 const SHOTS = ['1-accueil', '2-swipe', '3-duel', '4-classement', '5-tier-list', '6-wishlist'];
 
-const langs = process.argv.slice(2).length ? process.argv.slice(2) : ['en', 'es', 'de', 'it', 'pt'];
+const langs = process.argv.slice(2).length ? process.argv.slice(2) : ['fr', 'en', 'es', 'de', 'it', 'pt'];
 for (const l of langs) if (!LOCALES[l]) throw new Error(`Langue inconnue : ${l}`);
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -55,14 +57,15 @@ try {
       hasTouch: true,
     });
     const page = await context.newPage();
-    // Astuces de première visite déjà vues (elles masqueraient les écrans).
-    await page.addInitScript(() => localStorage.setItem('tutorials-seen', JSON.stringify(['home', 'swipe-corners', 'swipe-horizontal', 'rank', 'wishlist', 'tonight', 'lists', 'add', 'friends', 'duo'])));
+    // Astuces de première visite déjà vues, dans leur version actuelle (elles masqueraient les écrans ; une astuce
+    // récrite revient tant que sa nouvelle version n'est pas marquée vue : liste tirée de src/lib/tutorial.ts).
+    await page.addInitScript(([key, seen]) => localStorage.setItem(key, JSON.stringify(seen)), [TUTORIALS_KEY, ALL_SEEN]);
     await page.goto(`${BASE}/`);
     await waitForCatalogue(page, TMDB[lang]);
     console.log(`${lang} : profil de démonstration…`);
     await page.evaluate(seedProfile);
     await page.reload(); // l'accueil relit ses compteurs (titres vus, activité)
-    const dir = resolve(ROOT, 'store/captures', lang);
+    const dir = resolve(ROOT, 'store/captures', lang === 'fr' ? '' : lang);
     mkdirSync(dir, { recursive: true });
     for (const shot of SHOTS) {
       await capture(page, shot);
@@ -72,7 +75,7 @@ try {
     await context.close();
   }
   // Bannières du Store, avec les nouvelles captures de la tier list (store/bannieres/).
-  for (const file of await makeBanners(langs.filter((l) => l !== 'fr'), browser)) console.log(file);
+  for (const file of await makeBanners(langs, browser)) console.log(file);
   await browser.close();
 } finally {
   stop();
@@ -188,6 +191,7 @@ async function capture(page, shot) {
     await page.locator('.list-item img').first().waitFor();
   }
   await hideNoise();
+  if (await page.locator('.tutorial').count()) throw new Error(`${shot} : une astuce masque l'écran (TUTORIAL_REVISIONS changé ?)`);
   await page.evaluate(() => window.scrollTo(0, 0));
   // Affiches visibles chargées, et un peu de temps pour les fiches (réalisateur, note, plateformes).
   await page.waitForFunction(() => [...document.images].filter((img) => img.getBoundingClientRect().top < innerHeight).every((img) => img.complete), null, { timeout: 30_000 });

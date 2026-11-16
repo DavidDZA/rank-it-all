@@ -131,7 +131,9 @@ version Android n'est utile que pour changer ses réglages (nom, icône, couleur
   confidentialité (un `<template>`) et à `e2e/traduction.spec.ts`.
 - **Garde-fou** : `tests/frenchScan.ts` (analyse du code par `@babel/parser`, TypeScript 7 n'ayant plus d'API
   JavaScript) cherche tout texte français écrit en dur hors des dictionnaires (chaînes, textes JSX, attributs
-  `title` / `placeholder` / `aria-label`, propriétés `label`, `caption`…). `tests/i18n.test.ts` exige zéro résultat.
+  `title` / `placeholder` / `aria-label` / `what`, propriétés `label`, `caption`…). `tests/i18n.test.ts` exige zéro
+  résultat. (16/11 : « sa wishlist », passé comme `what` à `NeedsSharing` dans « À deux », lui avait échappé — sans
+  accent ni mot connu ; `what` et « sa / ses / leur » ajoutés.)
   Lancé seul : `npx tsx tests/frenchScan.ts [--all] [fichier]`.
 - **TMDB** : titres, résumés et genres dans la langue de l'interface (`TMDB_LANGUAGE` : variante es-MX pour
   l'Amérique latine, pt-PT pour le Portugal) ; plateformes du pays (`results[REGION]`, `watch_region`). Chaque fiche
@@ -143,11 +145,13 @@ version Android n'est utile que pour changer ses réglages (nom, icône, couleur
   manifeste par langue (`manifest-xx.webmanifest`, plugin de `vite.config.ts`, choisi par `index.html`) ; page de
   confidentialité en 6 langues (`<template>` par langue, `?lang=` depuis l'appli, sinon la langue du navigateur ;
   ancres `#suppression` identiques) ; fiche du Play Store dans `store/fiche-play-store.md`, avec ses **captures dans
-  chaque langue** (`store/captures/<langue>/`), refaites par `node tools/captures-store/captures.mjs` (site construit
+  chaque langue** (`store/captures/<langue>/`, le français directement dans `store/captures/`), refaites pour les 6
+  langues par `node tools/captures-store/captures.mjs` (ou `… fr en` pour quelques-unes ; site construit
   avec le relais TMDB dans `dist-captures`, servi sur `localhost:5173`, vrai catalogue de la langue, profil de
-  démonstration ; vérifiées par `i18n.test.ts` : présentes, 1080 × 1920), et sa **bannière** dans chaque langue
+  démonstration, astuces marquées vues dans leur version actuelle via `ALL_SEEN` de `src/lib/tutorial.ts` ; le script
+  s'arrête si une astuce reste affichée ; vérifiées par `i18n.test.ts` : présentes, 1080 × 1920), et sa **bannière** dans chaque langue
   (`store/bannieres/`, 1024 × 500, `tools/captures-store/banniere.mjs` : icône, slogan traduit, tier list de la
-  langue ; la française d'origine reste `store/banniere-1024x500.png`).
+  langue ; la française est `store/banniere-1024x500.png`, celle de la fiche principale).
 - Le badge « Cocorico » (identifiant `french25`, gardé) compte les titres dans la langue de l'interface (en anglais :
   ceux qui ne sont pas en anglais).
 - **E-mail « mot de passe oublié »** (14/11) : Supabase n'a qu'un modèle par e-mail ; il choisit ses textes selon
@@ -278,7 +282,7 @@ fiches, fiches qui ne revenaient pas, « Annuler » sans effet dans les duels) :
 Bouton **🎯** dans la barre du swipe (chaque catégorie) : le tirage au hasard laisse la place à des titres jamais
 triés, choisis pour l'utilisateur, dans l'ordre. Ouvert à partir de **10 titres « bien »** dans la catégorie
 (`RECO_MIN_LIKED`, sinon un message dit combien il en manque) ; mode retenu par catégorie (`swipe-reco:<catégorie>`,
-localStorage, lu par `readPref` : un oui / non est relu tel quel ; jusqu'au 17/11, il était « complété » comme un
+localStorage, lu par `readPref` : un oui / non est relu tel quel ; jusqu'au 16/11, il était « complété » comme un
 objet — `{ ...false }`, un objet vide, donc vrai — et « Pour toi » revenait activé après l'avoir désactivé). Bandeau « 🎯 Selon tes goûts · n propositions » (le toucher ramène au hasard), astuce `reco` au premier
 usage. Les filtres du swipe s'appliquent aussi aux propositions ; les sagas s'enchaînent comme au hasard.
 

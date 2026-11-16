@@ -970,6 +970,7 @@ export const de: Dict = {
     notShared: (pseudo: string, what: string) => `${pseudo} teilt ${what} nicht. Das lässt sich auf der eigenen Freunde-Seite einschalten.`,
     theirSeen: 'die gesehenen Titel',
     theirRanking: 'das Ranking',
+    theirWishlist: 'die Wishlist',
     noCommon: (c: Category) => `Noch ${c === 'tv' ? 'keine Serie' : `kein ${c === 'movie' ? 'Film' : 'Anime'}`} auf euren beiden Wishlists.`,
     common: (n: number) => `${n} Titel, die ihr beide sehen wollt, nach gemeinsamer Priorität.`,
     positions: (mine: string, pseudo: string, theirs: string) => `Du: ${mine} · ${pseudo}: ${theirs}`,

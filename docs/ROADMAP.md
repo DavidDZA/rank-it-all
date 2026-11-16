@@ -34,17 +34,17 @@
 > (16/11) Un mot court sous chaque petite icône (listes, filtres, 🎯), en 6 langues ; **état d'un titre modifiable
 > partout** (vu bien, vu bof, envie, pas envie, à trier), un seul bouton par ligne, chez les amis aussi (ARCHITECTURE § 1) ;
 > puis mots agrandis, bouton d'état dessiné comme une liste déroulante, astuces récrites et remontrées une fois (§ 3.1) ;
-> « Reclasser » / « Re-prioriser » rangés dans la liste du bouton d'état (une ligne de classement = un seul bouton).
+> « Reclasser » / « Re-prioriser » rangés dans la liste du bouton d'état (une ligne de classement = un seul bouton) ;
+> le soir, « sa wishlist » (message « pas partagé » de « À deux ») passé dans les dictionnaires, garde-fou du texte en
+> dur renforcé (ARCHITECTURE § 2.2), et captures + bannières du Play Store refaites dans les 6 langues avec les
+> nouveaux boutons.
 >
 > **Reprendre ici** (noté le 16/11) — test fermé en cours depuis le 11/11 (12 testeurs inscrits le 12/11) :
 > 14 jours écoulés vers le 26/11 (§ 2 étapes 5-6), puis demander la production.
 >
-> **Petites choses notées le 16/11** :
-> - Captures du Play Store à refaire : celles du classement et de la wishlist montrent encore les anciens boutons
->   (👍 😐 ♥ ✕) et l'entonnoir sans mot : `node tools/captures-store/captures.mjs` (réseau, quelques minutes), puis
->   les remplacer dans la Play Console (6 langues, sans nouvelle version de l'appli).
-> - « sa wishlist » écrit en dur (en français) dans `duo/CommonWishlist.tsx` et `duo/TonightDuo.tsx` (message « pas
->   partagé ») : à passer dans les dictionnaires.
+> **À faire par l'utilisateur** : remplacer les captures (6 langues : `store/captures/` pour le français,
+> `store/captures/<langue>/` pour les autres) et les bannières (`store/banniere-1024x500.png`, `store/bannieres/`) dans la
+> Play Console (*Fiche principale* et chaque traduction), sans nouvelle version de l'appli.
 >
 > **Bug « figé sur le logo » signalé le 14/11 : pas reproduit, abandonné le 14/11 au soir.** S'il revient, pistes :
 > ARCHITECTURE § 2.1 (secours des 8 s, `generate.mjs`), écran « Chargement… » d'`index.html` (BOOT, manifeste),
