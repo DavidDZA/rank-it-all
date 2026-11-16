@@ -44,7 +44,8 @@
 >
 > **À faire par l'utilisateur** : remplacer les captures (6 langues : `store/captures/` pour le français,
 > `store/captures/<langue>/` pour les autres) et les bannières (`store/banniere-1024x500.png`, `store/bannieres/`) dans la
-> Play Console (*Fiche principale* et chaque traduction), sans nouvelle version de l'appli.
+> Play Console (*Fiche principale* et chaque traduction), sans nouvelle version de l'appli ; et recopier les
+> descriptions complètes (rubrique « 🎯 Selon tes goûts » ajoutée le 16/11, `store/fiche-play-store.md`).
 >
 > **Bug « figé sur le logo » signalé le 14/11 : pas reproduit, abandonné le 14/11 au soir.** S'il revient, pistes :
 > ARCHITECTURE § 2.1 (secours des 8 s, `generate.mjs`), écran « Chargement… » d'`index.html` (BOOT, manifeste),

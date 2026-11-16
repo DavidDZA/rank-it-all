@@ -15,13 +15,17 @@ le français est une traduction comme les autres. Images : `captures/` (1080 × 
 Swipe, classe et compare tes films, séries et animes préférés avec tes amis.
 ```
 
-**Description complète** (4 000 max) :
+**Description complète** (4 000 max ; rubrique « 🎯 » ajoutée le 16/11/2026 dans les 6 langues, à recopier dans la Play
+Console avec les nouvelles captures) :
 
 ```
 Rank It All t'aide à faire le tri dans tout ce que tu as vu — films, séries et animes — par petites sessions de quelques minutes.
 
 🎬 SWIPE
 Un titre à la fois, tiré parmi les plus connus : vu (bien ou bof), envie de le voir, ou pas envie. Ta liste se construit toute seule, sans rien taper.
+
+🎯 SELON TES GOÛTS
+Après quelques titres aimés, l'appli te propose ceux qui devraient te plaire, avec la raison : « Tu as aimé Interstellar et Tenet · 🎬 Christopher Nolan ».
 
 🏆 CLASSE PAR DUELS
 « Lequel préfères-tu ? » Deux titres, un choix : chaque titre trouve sa place en quelques duels. Déplace-les à la main si tu veux, et obtiens ta tier list S, A, B, C, D.
@@ -92,6 +96,9 @@ Rank It All helps you sort out everything you've watched — movies, TV shows an
 🎬 SWIPE
 One title at a time, picked among the best known: seen (liked it or meh), want to watch, or not interested. Your list builds itself, no typing needed.
 
+🎯 PICKED FOR YOU
+After a few titles you liked, the app suggests the ones you should enjoy, and tells you why: "You liked Interstellar and Tenet · 🎬 Christopher Nolan".
+
 🏆 RANK WITH DUELS
 "Which one do you prefer?" Two titles, one choice: each title finds its place in a few duels. Move them by hand if you like, and get your S, A, B, C, D tier list.
 
@@ -131,6 +138,9 @@ Rank It All te ayuda a ordenar todo lo que has visto — películas, series y an
 
 🎬 DESLIZA
 Un título cada vez, elegido entre los más conocidos: visto (te gustó o regular), quiero verlo o no me interesa. Tu lista se crea sola, sin escribir nada.
+
+🎯 PARA TI
+Cuando te hayan gustado unos cuantos títulos, la app te propone los que deberían gustarte y te dice por qué: «Te gustaron Interstellar y Tenet · 🎬 Christopher Nolan».
 
 🏆 CLASIFICA CON DUELOS
 «¿Cuál prefieres?» Dos títulos, una elección: cada título encuentra su sitio en pocos duelos. Muévelos a mano si quieres y consigue tu tier list S, A, B, C, D.
@@ -172,6 +182,9 @@ Rank It All hilft dir, alles zu sortieren, was du gesehen hast — Filme, Serien
 🎬 SWIPEN
 Ein Titel nach dem anderen, ausgewählt unter den bekanntesten: gesehen (gut oder naja), will ich sehen oder kein Interesse. Deine Liste entsteht von selbst, ganz ohne Tippen.
 
+🎯 FÜR DICH
+Nach ein paar Titeln, die dir gefallen haben, schlägt dir die App vor, was dir gefallen dürfte – und sagt dir, warum: „Du mochtest Interstellar und Tenet · 🎬 Christopher Nolan“.
+
 🏆 RANKEN MIT DUELLEN
 „Welchen findest du besser?“ Zwei Titel, eine Wahl: Jeder Titel findet in wenigen Duellen seinen Platz. Verschieb sie von Hand, wenn du willst, und hol dir deine Tier-List S, A, B, C, D.
 
@@ -212,6 +225,9 @@ Rank It All ti aiuta a mettere in ordine tutto ciò che hai visto — film, seri
 🎬 SWIPE
 Un titolo alla volta, scelto tra i più conosciuti: visto (bello o così così), voglio vederlo o non mi interessa. La tua lista si crea da sola, senza scrivere niente.
 
+🎯 PER TE
+Dopo qualche titolo che ti è piaciuto, l’app ti propone quelli che dovrebbero piacerti e ti dice perché: «Ti sono piaciuti Interstellar e Tenet · 🎬 Christopher Nolan».
+
 🏆 CLASSIFICA CON I DUELLI
 «Quale preferisci?» Due titoli, una scelta: ogni titolo trova il suo posto in pochi duelli. Spostali a mano se vuoi, e ottieni la tua tier list S, A, B, C, D.
 
@@ -251,6 +267,9 @@ O Rank It All ajuda você a organizar tudo o que já assistiu — filmes, série
 
 🎬 DESLIZE
 Um título por vez, escolhido entre os mais conhecidos: vi (gostei ou mais ou menos), quero ver ou sem interesse. Sua lista se monta sozinha, sem digitar nada.
+
+🎯 PARA VOCÊ
+Depois de alguns títulos que você curtiu, o app sugere os que devem te agradar e diz por quê: “Você curtiu Interstellar e Tenet · 🎬 Christopher Nolan”.
 
 🏆 CLASSIFIQUE COM DUELOS
 “Qual você prefere?” Dois títulos, uma escolha: cada título encontra seu lugar em poucos duelos. Mova-os à mão se quiser e tenha sua tier list S, A, B, C, D.
