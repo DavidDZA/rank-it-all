@@ -278,7 +278,8 @@ fiches, fiches qui ne revenaient pas, « Annuler » sans effet dans les duels) :
 Bouton **🎯** dans la barre du swipe (chaque catégorie) : le tirage au hasard laisse la place à des titres jamais
 triés, choisis pour l'utilisateur, dans l'ordre. Ouvert à partir de **10 titres « bien »** dans la catégorie
 (`RECO_MIN_LIKED`, sinon un message dit combien il en manque) ; mode retenu par catégorie (`swipe-reco:<catégorie>`,
-localStorage). Bandeau « 🎯 Selon tes goûts · n propositions » (le toucher ramène au hasard), astuce `reco` au premier
+localStorage, lu par `readPref` : un oui / non est relu tel quel ; jusqu'au 17/11, il était « complété » comme un
+objet — `{ ...false }`, un objet vide, donc vrai — et « Pour toi » revenait activé après l'avoir désactivé). Bandeau « 🎯 Selon tes goûts · n propositions » (le toucher ramène au hasard), astuce `reco` au premier
 usage. Les filtres du swipe s'appliquent aussi aux propositions ; les sagas s'enchaînent comme au hasard.
 
 **Pourquoi pas l'ancien « ✨ Comme … »** (retiré le 13/11, « toujours à côté de la plaque » d'après l'utilisateur) : il
@@ -422,6 +423,8 @@ Restaurer (dans un projet Supabase neuf, ou le même vidé) :
   l'appli sur le code du relais : chaque appel TMDB du code est accepté, la fiche revient complète (réalisateur,
   acteurs, plateformes, bande-annonce), fiches vides redemandées, clé personnelle refusée remplacée par le relais ; résumés des propositions (film, série,
   clé personnelle : même résumé fait par l'appli, titre inconnu noté et pas redemandé).
+- Préférences de l'appareil (`preferences.test.ts`) : oui / non relu tel quel, objet complété par les valeurs par
+  défaut, valeur abîmée ou d'un autre type remplacée par la valeur par défaut.
 - Propositions « selon tes goûts » (`propositions.test.ts`) : résumé d'un film et d'une série, points (place relative,
   séries et animes), modèle (ce qui ressemble aux « bien » noté plus haut, tirage reproductible, liens par les
   recommandations, explication), ordre (carte « à découvrir » toutes les 5, 2 titres au plus par réalisateur ou saga
@@ -452,7 +455,7 @@ Restaurer (dans un projet Supabase neuf, ou le même vidé) :
   (partage du téléphone simulé, ou téléchargement), filtres du swipe (`ecrans.spec.ts`), astuces à jour
   (`tutoriel.spec.ts`), ordre des rubriques des Réglages (Compte en tête, puis Langue et pays depuis le 14/11) et
   seuils de votes (`reglages.spec.ts`), propositions « selon tes goûts » avec TMDB simulé (seuil des 10 « bien », titre le
-  plus proche d'abord avec son pourquoi, mesure et « Annuler », retour au hasard, mode retenu, tout trié, mise en page
+  plus proche d'abord avec son pourquoi, mesure et « Annuler », retour au hasard, mode retenu activé comme désactivé (retour au menu, rechargement), tout trié, mise en page
   aux deux formats, astuce au premier 🎯 : `propositions.spec.ts`), mots sous les icônes de chaque écran (swipe, classement,
   wishlist, Mes listes, ajout manuel), boutons qui tiennent dans leur ligne au format téléphone (`libelles.spec.ts`),
   état d'un titre (fenêtre des 5 états à l'écran, bien ↔ bof sans perdre sa place au classement, sortie du classement

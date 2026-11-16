@@ -154,11 +154,21 @@ export function getMyProviderFamilies(): string[] {
 
 export const setMyProviderFamilies = (families: string[]) => write(FAMILIES_KEY, JSON.stringify(families));
 
-/** Lecture / écriture JSON générique pour les petites préférences (thème de swipe…). */
+const isPlainObject = (v: unknown): v is Record<string, unknown> => typeof v === 'object' && v !== null && !Array.isArray(v);
+
+/**
+ * Lecture / écriture JSON générique pour les petites préférences (thème de swipe, mode « Pour toi »…). Un objet est
+ * complété par les valeurs par défaut (champs ajoutés depuis) ; une autre valeur (oui / non, nombre…) est rendue telle
+ * quelle, ou la valeur par défaut si elle n'est pas du même type. Avant le 17/11, un oui / non était lui aussi
+ * « complété » ({ ...false } : un objet vide, donc vrai) : « Pour toi » revenait toujours activé.
+ */
 export function readPref<T>(key: string, fallback: T): T {
   try {
     const raw = read(key);
-    return raw ? { ...fallback, ...JSON.parse(raw) } : fallback;
+    if (!raw) return fallback;
+    const value: unknown = JSON.parse(raw);
+    if (isPlainObject(fallback)) return isPlainObject(value) ? ({ ...fallback, ...value } as T) : fallback;
+    return typeof value === typeof fallback ? (value as T) : fallback;
   } catch {
     return fallback;
   }

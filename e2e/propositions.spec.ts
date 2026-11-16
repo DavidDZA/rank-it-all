@@ -112,6 +112,29 @@ test.describe('propositions selon tes goûts', () => {
     await expect(current(page)).toHaveText(/Au hasard/);
   });
 
+  test('désactivé, il le reste : retour au menu puis au swipe, ou rechargement (bug du 16/11)', async ({ page }) => {
+    await open(page);
+    await recoButton(page).click();
+    await expect(current(page)).toHaveText('Collateral');
+    await recoButton(page).click(); // désactivé
+    await expect(recoButton(page)).toHaveAttribute('aria-pressed', 'false');
+    await page.getByRole('link', { name: 'Retour' }).click();
+    await expect(page.locator('.tiles')).toBeVisible();
+    await page.goto('/#/swipe/movie');
+    await expect(current(page)).toHaveText(/Au hasard/);
+    await expect(recoButton(page)).toHaveAttribute('aria-pressed', 'false');
+    await expect(strip(page)).toHaveCount(0);
+    await page.reload();
+    await expect(current(page)).toHaveText(/Au hasard/);
+    await expect(recoButton(page)).toHaveAttribute('aria-pressed', 'false');
+    // Réactivé : il revient activé, lui aussi.
+    await recoButton(page).click();
+    await expect(current(page)).toHaveText('Collateral');
+    await page.getByRole('link', { name: 'Retour' }).click();
+    await page.goto('/#/swipe/movie');
+    await expect(recoButton(page)).toHaveAttribute('aria-pressed', 'true');
+  });
+
   test('mise en page : bouton, bandeau et explication tiennent dans l’écran et dans la carte', async ({ page }) => {
     await open(page);
     await recoButton(page).click();
