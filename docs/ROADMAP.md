@@ -42,10 +42,8 @@
 > **Reprendre ici** (noté le 16/11) — test fermé en cours depuis le 11/11 (12 testeurs inscrits le 12/11) :
 > 14 jours écoulés vers le 26/11 (§ 2 étapes 5-6), puis demander la production.
 >
-> **À faire par l'utilisateur** : remplacer les captures (6 langues : `store/captures/` pour le français,
-> `store/captures/<langue>/` pour les autres) et les bannières (`store/banniere-1024x500.png`, `store/bannieres/`) dans la
-> Play Console (*Fiche principale* et chaque traduction), sans nouvelle version de l'appli ; et recopier les
-> descriptions complètes (rubrique « 🎯 Selon tes goûts » ajoutée le 16/11, `store/fiche-play-store.md`).
+> **Play Store** : captures, bannières et descriptions (rubrique « 🎯 ») remplacées dans la Play Console par
+> l'utilisateur le 16/11 au soir, dans les 6 langues.
 >
 > **Bug « figé sur le logo » signalé le 14/11 : pas reproduit, abandonné le 14/11 au soir.** S'il revient, pistes :
 > ARCHITECTURE § 2.1 (secours des 8 s, `generate.mjs`), écran « Chargement… » d'`index.html` (BOOT, manifeste),

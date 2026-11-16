@@ -15,7 +15,7 @@ le français est une traduction comme les autres. Images : `captures/` (1080 × 
 Swipe, classe et compare tes films, séries et animes préférés avec tes amis.
 ```
 
-**Description complète** (4 000 max ; rubrique « 🎯 » ajoutée le 16/11/2026 dans les 6 langues, à recopier dans la Play
+**Description complète** (4 000 max ; rubrique « 🎯 » ajoutée le 16/11/2026 dans les 6 langues, recopiée dans la Play
 Console avec les nouvelles captures) :
 
 ```
