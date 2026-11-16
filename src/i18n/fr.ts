@@ -266,7 +266,7 @@ export const fr = {
         '**ℹ** sur une affiche : sa fiche complète (résumé, bande-annonce…).',
         '**Égalité** si tu ne sais pas départager, **Passer** pour le garder pour plus tard.',
         'Dans **Mon classement**, déplace un titre avec la poignée ⠿, ou touche son numéro pour lui donner une place.',
-        'Le bouton d’**état** (👍 Bien, avec sa flèche) change un titre de liste : bien ↔ bof sans perdre sa place, ou envie, pas envie, à trier. **Reclasser** (↺) le replace par de nouveaux duels.',
+        'Le bouton d’**état** (👍 Bien, avec sa flèche) change un titre de liste : bien ↔ bof sans perdre sa place, ou envie, pas envie, à trier. Pour un titre déjà classé, la même liste propose aussi **Reclasser** (↺) : il est replacé par de nouveaux duels.',
       ],
     },
     wishlist: {
@@ -276,7 +276,7 @@ export const fr = {
       points: [
         '**Prioriser** : des duels pour mettre en tête ce que tu veux voir en premier.',
         'Tes priorités servent au tirage « Ce soir, je regarde quoi ? » et à la wishlist commune avec tes amis.',
-        'Le bouton d’**état** (💖 Envie, avec sa flèche) : vu bien, vu bof, pas envie, ou à trier.',
+        'Le bouton d’**état** (💖 Envie, avec sa flèche) : vu bien, vu bof, pas envie, ou à trier. Pour un titre priorisé, aussi **Re-prioriser** (↺).',
       ],
     },
     tonight: {
@@ -464,7 +464,6 @@ export const fr = {
   actions: {
     good: 'Bien',
     meh: 'Bof',
-    rerank: 'Reclasser',
     filters: 'Filtres',
     reco: 'Pour toi',
   },

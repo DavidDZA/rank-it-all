@@ -246,7 +246,7 @@ export const de: Dict = {
         '**ℹ** auf einem Poster: alle Infos (Inhalt, Trailer…).',
         '**Unentschieden**, wenn du dich nicht entscheiden kannst, **Überspringen**, um ihn für später aufzuheben.',
         'In **Mein Ranking** verschiebst du einen Titel mit dem Griff ⠿ oder tippst auf seine Nummer, um ihm einen Platz zu geben.',
-        'Der **Status**-Knopf (👍 Gut, mit seinem Pfeil) verschiebt einen Titel: gut ↔ naja, ohne seinen Platz zu verlieren, oder will ich, kein Interesse, offen. **Neu ranken** (↺) ordnet ihn mit neuen Duellen ein.',
+        'Der **Status**-Knopf (👍 Gut, mit seinem Pfeil) verschiebt einen Titel: gut ↔ naja, ohne seinen Platz zu verlieren, oder will ich, kein Interesse, offen. Für einen bereits gerankten Titel bietet dieselbe Liste auch **Neu ranken** (↺): Er wird mit neuen Duellen neu eingeordnet.',
       ],
     },
     wishlist: {
@@ -256,7 +256,7 @@ export const de: Dict = {
       points: [
         '**Priorisieren**: Duelle, um nach oben zu holen, was du zuerst sehen willst.',
         'Deine Prioritäten zählen bei der Auslosung „Was schaue ich heute Abend?“ und bei der gemeinsamen Wishlist mit deinen Freunden.',
-        'Der **Status**-Knopf (💖 Will ich, mit seinem Pfeil): gut, naja, kein Interesse oder offen.',
+        'Der **Status**-Knopf (💖 Will ich, mit seinem Pfeil): gut, naja, kein Interesse oder offen. Für einen priorisierten Titel auch **Neu priorisieren** (↺).',
       ],
     },
     tonight: {
@@ -436,7 +436,6 @@ export const de: Dict = {
   actions: {
     good: 'Gut',
     meh: 'Naja',
-    rerank: 'Neu ranken',
     filters: 'Filter',
     reco: 'Für dich',
   },

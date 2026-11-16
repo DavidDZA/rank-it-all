@@ -247,7 +247,7 @@ export const en: Dict = {
         '**ℹ** on a poster: its full details (summary, trailer…).',
         '**Tie** if you can’t decide, **Skip** to keep it for later.',
         'In **My ranking**, move a title with the ⠿ handle, or tap its number to give it a place.',
-        'The **state** button (👍 Liked, with its arrow) moves a title: liked ↔ meh without losing its place, or want, not interested, to sort. **Re-rank** (↺) places it again with new duels.',
+        'The **state** button (👍 Liked, with its arrow) moves a title: liked ↔ meh without losing its place, or want, not interested, to sort. For a ranked title, the same list also offers **Re-rank** (↺): it gets placed again with new duels.',
       ],
     },
     wishlist: {
@@ -257,7 +257,7 @@ export const en: Dict = {
       points: [
         '**Prioritize**: duels to put first what you want to watch first.',
         'Your priorities are used for the “What should I watch tonight?” draw and the shared wishlist with your friends.',
-        'The **state** button (💖 Want, with its arrow): liked, meh, not interested, or to sort.',
+        'The **state** button (💖 Want, with its arrow): liked, meh, not interested, or to sort. For a prioritized title, also **Re-prioritize** (↺).',
       ],
     },
     tonight: {
@@ -437,7 +437,6 @@ export const en: Dict = {
   actions: {
     good: 'Liked',
     meh: 'Meh',
-    rerank: 'Re-rank',
     filters: 'Filters',
     reco: 'For you',
   },

@@ -86,6 +86,32 @@ test.describe('état d’un titre', () => {
     await expect.poll(() => rankedNames(page)).toEqual(['Heat', 'Collateral', 'Casino']);
   });
 
+  test('mon classement : « Reclasser » dans la liste d’un titre classé seulement ; il redevient « non classé »', async ({ page }) => {
+    await open(page, '#/rank/movie');
+    await openRanking(page);
+    // Plus de bouton à part sur la ligne : seulement l'état.
+    await expect(row(page, 'Heat').locator('.btn')).toHaveCount(1);
+    await row(page, 'Heat').locator('.status-btn').click();
+    await expect(sheet(page).locator('.status-choice')).toHaveText([/Vu · bien/, /Vu · bof/, /Envie/, /Pas envie/, /À trier/, /Reclasser.*nouveaux duels/]);
+    await sheet(page).getByRole('button', { name: 'Reclasser', exact: true }).click();
+    await expect(sheet(page)).toHaveCount(0);
+    await expect(page.locator('.toast')).toContainText('Heat → ↺ Reclasser');
+    await expect.poll(() => rankedNames(page)).toEqual(['Collateral', 'Casino']);
+    expect((await readAnswers(page))[key('Heat')]).toBe('seen:good'); // toujours vu et aimé
+    // Titre non classé : pas de « Reclasser ».
+    await row(page, 'Heat').locator('.status-btn').click();
+    await expect(sheet(page).getByRole('button', { name: 'Reclasser', exact: true })).toHaveCount(0);
+  });
+
+  test('wishlist priorisée : « Re-prioriser » dans la liste, le titre quitte l’ordre de priorité', async ({ page }) => {
+    await open(page, '#/wishlist');
+    await page.locator('button.chip', { hasText: 'Films' }).click(); // l'ordre de priorité est par catégorie
+    await row(page, 'Memento').locator('.status-btn').click();
+    await sheet(page).getByRole('button', { name: 'Re-prioriser', exact: true }).click();
+    await expect.poll(() => readMeta(page, 'ranking:wish:movie')).toEqual([]);
+    expect((await readAnswers(page))[key('Memento')]).toBe('wish');
+  });
+
   test('mon classement : vers la wishlist, après confirmation ; retiré du classement', async ({ page }) => {
     await open(page, '#/rank/movie');
     await openRanking(page);

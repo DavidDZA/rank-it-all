@@ -11,9 +11,10 @@ export const TUTORIALS_KEY = 'tutorials-seen';
 /**
  * Version de chaque astuce (1 si absente). Une astuce récrite pour expliquer quelque chose de nouveau prend la version
  * suivante : elle est remontrée une fois à ceux qui avaient vu l'ancienne. Version 2 (16/11/2026) : le bouton d'état
- * des titres (vu bien, vu bof, envie, pas envie, à trier).
+ * des titres (vu bien, vu bof, envie, pas envie, à trier). Classement en version 3 (16/11 au soir) : « Reclasser » passe
+ * dans la liste du bouton d'état ; wishlist en version 3 : « Re-prioriser » aussi.
  */
-export const TUTORIAL_REVISIONS: Partial<Record<TutorialId, number>> = { rank: 2, wishlist: 2, lists: 2, add: 2, duo: 2 };
+export const TUTORIAL_REVISIONS: Partial<Record<TutorialId, number>> = { rank: 3, wishlist: 3, lists: 2, add: 2, duo: 2 };
 
 /** Repère enregistré pour une astuce vue : son identifiant, suivi de « @version » à partir de la version 2. */
 export const seenMark = (id: TutorialId) => {

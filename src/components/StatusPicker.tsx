@@ -48,10 +48,15 @@ export interface PickerProps {
   /** Le titre est dans le classement : le sortir des vus le retire du classement, on demande d'abord. */
   ranked?: boolean;
   onChanged?: () => void;
+  /**
+   * Titre classé (classement, ou wishlist priorisée) : « Reclasser » en dernier choix, sous les 5 états, pour le
+   * replacer par de nouveaux duels (16/11 : un bouton à part prenait de la place sur chaque ligne).
+   */
+  rerank?: { label: string; hint: string; run: () => Promise<void> };
 }
 
 /** Bouton de l'état d'un titre dans une ligne de liste : l'état actuel et son mot ; le toucher ouvre les 5 choix. */
-export function StatusButton({ title, current, ranked, onChanged }: PickerProps) {
+export function StatusButton({ title, current, ranked, onChanged, rerank }: PickerProps) {
   const answer = useAnswer(title, current);
   const [open, setOpen] = useState(false);
   const place = placeOf(answer);
@@ -81,6 +86,7 @@ export function StatusButton({ title, current, ranked, onChanged }: PickerProps)
               title={title}
               current={answer ?? null}
               ranked={ranked}
+              rerank={rerank}
               onChanged={() => {
                 setOpen(false);
                 onChanged?.();
@@ -94,7 +100,7 @@ export function StatusButton({ title, current, ranked, onChanged }: PickerProps)
 }
 
 /** Les 5 états d'un titre, l'actuel marqué ; `compact` : sur une ligne (fiche), sinon en liste avec leur explication. */
-export function StatusChoices({ title, current, ranked, onChanged, compact = false }: PickerProps & { compact?: boolean }) {
+export function StatusChoices({ title, current, ranked, onChanged, rerank, compact = false }: PickerProps & { compact?: boolean }) {
   const answer = useAnswer(title, current);
   const place = placeOf(answer);
   const choose = async (p: Place) => {
@@ -136,6 +142,28 @@ export function StatusChoices({ title, current, ranked, onChanged, compact = fal
           </button>
         );
       })}
+      {rerank && !compact && (
+        <>
+          <hr className="status-sep" />
+          <button
+            className="status-choice rerank"
+            onClick={async () => {
+              await rerank.run();
+              toast(T.status.moved(title.title, `↺ ${rerank.label}`));
+              onChanged?.();
+            }}
+            aria-label={rerank.label}
+          >
+            <span className="status-icon" aria-hidden>
+              ↺
+            </span>
+            <span className="status-text">
+              <b>{rerank.label}</b>
+              <span className="muted small">{rerank.hint}</span>
+            </span>
+          </button>
+        </>
+      )}
     </div>
   );
 }

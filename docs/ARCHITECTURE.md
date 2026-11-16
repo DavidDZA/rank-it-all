@@ -32,11 +32,13 @@ espagnol, allemand, italien, portugais du Brésil : § 2.2).
   garde la place au classement (l'avis ne décide que de l'ordre des duels) ; vers envie, pas envie ou à trier, le titre
   quitte le classement de son ancienne liste (confirmation si l'on part du classement) ; « à trier » efface la réponse,
   le titre revient au swipe comme jamais trié. Remplace les boutons 👍 😐 ♥ ✕ ↺ d'avant, différents d'un écran à
-  l'autre (chez un ami, seulement 💖). Restent à part : « Reclasser » (↺, classement et wishlist priorisée), le swipe,
-  et « Ce soir ? » (👍 / 😐 du titre tiré).
+  l'autre (chez un ami, seulement 💖). **Reclasser** (↺) : dernier choix de la même liste, sous un trait, seulement pour
+  un titre classé (`rerank` de `StatusButton`) — « Reclasser » dans Mon classement, « Re-prioriser » dans la wishlist
+  priorisée d'une catégorie ; le titre redevient « non classé » et garde son état. (Bouton à part sur chaque ligne
+  jusqu'au 16/11 au soir : il prenait de la place.) Restent à part : le swipe et « Ce soir ? » (👍 / 😐 du titre tiré).
 - **Mots sous les icônes** (16/11, retour de l'utilisateur : « pas toujours clair ») : chaque petit bouton à icône porte
   dessous un mot court (`IconCaption`, textes `T.actions` et `T.status`) — l'état des lignes (Bien ▾, Envie ▾…),
-  ↺ Reclasser, « Filtres » sous l'entonnoir, « Pour toi » sous 🎯, 👍 Bien / 😐 Bof dans « Ce soir ? » ; 0,68 rem dans les
+  « Filtres » sous l'entonnoir, « Pour toi » sous 🎯, 👍 Bien / 😐 Bof dans « Ce soir ? » ; 0,68 rem dans les
   listes, 0,64 rem dans la barre du haut (agrandis le 16/11 : trop petits au départ). Le bouton garde
   son nom complet (`aria-label`). Pas de mot sous ce qui est déjà clair ou déjà écrit (retour ‹, croix des fenêtres,
   ℹ des duels, poignée ⠿ expliquée au-dessus de la liste).
@@ -184,7 +186,8 @@ version Android n'est utile que pour changer ses réglages (nom, icône, couleur
   classement… communes aux films, séries et animes), textes dans `components/Tutorial.tsx` ; « Revoir les astuces »
   en bas des réglages. **Versions** (`TUTORIAL_REVISIONS`) : une astuce récrite pour expliquer du nouveau prend la
   version suivante, et elle est remontrée une fois à qui avait vu l'ancienne (repère `<id>@<version>`, `seenMark`).
-  Version 2 le 16/11 : classement, wishlist, Mes listes, ajout manuel, « À deux » (le bouton d'état). Les tests de bout
+  Version 2 le 16/11 : classement, wishlist, Mes listes, ajout manuel, « À deux » (le bouton d'état) ; version 3 le
+  soir pour le classement et la wishlist (« Reclasser » / « Re-prioriser » dans la liste du bouton d'état). Les tests de bout
   en bout les marquent toutes vues dans leur version actuelle (`ALL_SEEN`, `playwright.config.ts`), sauf
   `tutoriel.spec.ts`.
 
@@ -454,7 +457,8 @@ Restaurer (dans un projet Supabase neuf, ou le même vidé) :
   wishlist, Mes listes, ajout manuel), boutons qui tiennent dans leur ligne au format téléphone (`libelles.spec.ts`),
   état d'un titre (fenêtre des 5 états à l'écran, bien ↔ bof sans perdre sa place au classement, sortie du classement
   après confirmation, « à trier » qui efface la réponse et la priorité de wishlist, pas envie → envie → bof → à trier,
-  fiche, bouton dessiné comme une liste déroulante avec sa flèche : `etats.spec.ts` ; taille des mots sous les
+  fiche, bouton dessiné comme une liste déroulante avec sa flèche, « Reclasser » / « Re-prioriser » dans la liste d'un
+  titre classé seulement : `etats.spec.ts` ; taille des mots sous les
   icônes : `libelles.spec.ts` ; astuces récrites remontrées une fois, pas les autres : `tutoriel.spec.ts` et
   `tutorial.test.ts` ; chez un ami, noter « vu · bof » un titre de son top : `duo.spec.ts` ; `moveTitle` et
   `placeOf` dans `ranking.test.ts`), traduction (chaque écran dans chaque langue sans texte français oublié, manifeste et page

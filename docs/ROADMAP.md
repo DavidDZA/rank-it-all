@@ -33,7 +33,8 @@
 > nouveau chemin du relais `/taste/…` (déployé avec le dossier `worker/`). « Ça marche plutôt bien » d'après l'utilisateur.
 > (16/11) Un mot court sous chaque petite icône (listes, filtres, 🎯), en 6 langues ; **état d'un titre modifiable
 > partout** (vu bien, vu bof, envie, pas envie, à trier), un seul bouton par ligne, chez les amis aussi (ARCHITECTURE § 1) ;
-> puis mots agrandis, bouton d'état dessiné comme une liste déroulante, astuces récrites et remontrées une fois (§ 3.1).
+> puis mots agrandis, bouton d'état dessiné comme une liste déroulante, astuces récrites et remontrées une fois (§ 3.1) ;
+> « Reclasser » / « Re-prioriser » rangés dans la liste du bouton d'état (une ligne de classement = un seul bouton).
 >
 > **Reprendre ici** (noté le 16/11) — test fermé en cours depuis le 11/11 (12 testeurs inscrits le 12/11) :
 > 14 jours écoulés vers le 26/11 (§ 2 étapes 5-6), puis demander la production.
@@ -44,8 +45,6 @@
 >   les remplacer dans la Play Console (6 langues, sans nouvelle version de l'appli).
 > - « sa wishlist » écrit en dur (en français) dans `duo/CommonWishlist.tsx` et `duo/TonightDuo.tsx` (message « pas
 >   partagé ») : à passer dans les dictionnaires.
-> - Classement au format téléphone : un titre un peu long passe sur deux lignes à côté de « Reclasser » et du bouton
->   d'état (lisible, mais serré).
 >
 > **Bug « figé sur le logo » signalé le 14/11 : pas reproduit, abandonné le 14/11 au soir.** S'il revient, pistes :
 > ARCHITECTURE § 2.1 (secours des 8 s, `generate.mjs`), écran « Chargement… » d'`index.html` (BOOT, manifeste),

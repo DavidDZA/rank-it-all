@@ -8,12 +8,12 @@ import { prefetchDetails, WEEK } from '../lib/tmdb';
 import { loadMyProviders, mineFilter } from '../lib/providers';
 import { matchesSearch, titlesOf, useTitleMap } from '../lib/hooks';
 import { matchesTheme, missingFilterInfo, themeFilter, themeLabel } from '../lib/themes';
-import { IconCaption, MineChip, ProviderLine, SearchBox, TitleRow, TopBar, TypeFilter } from '../components/common';
+import { MineChip, ProviderLine, SearchBox, TitleRow, TopBar, TypeFilter } from '../components/common';
 import { FilterButton, FilterSheet, FilterStrip, useSavedFilter } from '../components/FilterSheet';
 import { Duel } from '../components/Duel';
 import { RankedList } from '../components/RankedList';
 import { Tutorial } from '../components/Tutorial';
-import { StatusButton } from '../components/StatusPicker';
+import { StatusButton, type PickerProps } from '../components/StatusPicker';
 
 type View = 'list' | 'duel';
 type Filter = 'all' | Category;
@@ -48,14 +48,7 @@ export default function Wishlist() {
   const label = themeLabel(listType, theme);
 
   const actions = (t: Title, ranked: boolean): ReactNode => (
-    <>
-      {ranked && (
-        <button className="btn small labeled" onClick={() => unrank(scope, t.key)} title={T.wishPage.reprioritizeTip} aria-label={T.wishPage.reprioritize}>
-          <IconCaption icon="↺" caption={T.actions.rerank} />
-        </button>
-      )}
-      <WishActions title={t} />
-    </>
+    <WishActions title={t} rerank={ranked ? { label: T.wishPage.reprioritize, hint: T.wishPage.reprioritizeTip, run: () => unrank(scope, t.key) } : undefined} />
   );
   const providers = (t: Title) => <ProviderLine title={t} maxAge={WEEK} />;
 
@@ -120,8 +113,8 @@ export default function Wishlist() {
 }
 
 /** Titre de la wishlist : son état (envie), à changer d'un geste (vu bien, vu bof, pas envie, à trier). */
-function WishActions({ title }: { title: Title }) {
-  return <StatusButton title={title} current={WISH} />;
+function WishActions({ title, rerank }: { title: Title; rerank?: PickerProps['rerank'] }) {
+  return <StatusButton title={title} current={WISH} rerank={rerank} />;
 }
 const WISH = { status: 'wish' } as const;
 

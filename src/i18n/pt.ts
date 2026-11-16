@@ -248,7 +248,7 @@ export const pt: Dict = {
         '**ℹ** em um pôster: a ficha completa (sinopse, trailer…).',
         '**Empate** se você não conseguir decidir, **Pular** para deixar para depois.',
         'Em **Meu ranking**, mova um título pela alça ⠿, ou toque no número dele para escolher a posição.',
-        'O botão de **estado** (👍 Gostei, com a seta) muda um título de lista: gostei ↔ mais ou menos sem perder a posição, ou quero, sem interesse, pendente. **Reordenar** (↺) o recoloca com novos duelos.',
+        'O botão de **estado** (👍 Gostei, com a seta) muda um título de lista: gostei ↔ mais ou menos sem perder a posição, ou quero, sem interesse, pendente. Para um título já no ranking, a mesma lista também oferece **Reclassificar** (↺): ele é recolocado com novos duelos.',
       ],
     },
     wishlist: {
@@ -258,7 +258,7 @@ export const pt: Dict = {
       points: [
         '**Priorizar**: duelos para colocar no topo o que você quer ver primeiro.',
         'Suas prioridades valem para o sorteio “O que eu assisto hoje?” e para a wishlist em comum com seus amigos.',
-        'O botão de **estado** (💖 Quero, com a seta): gostei, mais ou menos, sem interesse ou pendente.',
+        'O botão de **estado** (💖 Quero, com a seta): gostei, mais ou menos, sem interesse ou pendente. Para um título priorizado, também **Priorizar de novo** (↺).',
       ],
     },
     tonight: {
@@ -438,7 +438,6 @@ export const pt: Dict = {
   actions: {
     good: 'Gostei',
     meh: 'Regular',
-    rerank: 'Reordenar',
     filters: 'Filtros',
     reco: 'Para você',
   },

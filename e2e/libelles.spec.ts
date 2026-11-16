@@ -58,10 +58,10 @@ test.describe('mots sous les icônes', () => {
     for (const sel of ['.reco-btn', '.filter-btn', '.swipe-top .pill']) expect((await page.locator(sel).boundingBox())!.x + (await page.locator(sel).boundingBox())!.width).toBeLessThanOrEqual(width);
   });
 
-  test('mon classement : « Reclasser » et l’état (« Bien ») ; filtres de la barre du haut', async ({ page }) => {
+  test('mon classement : un seul bouton, l’état (« Bien ») ; filtres de la barre du haut', async ({ page }) => {
     await open(page, '#/rank/movie');
     await page.locator('button.chip', { hasText: 'Mon classement' }).click();
-    await expect(captions(page, 'Heat')).toHaveText(['Reclasser', 'Bien']);
+    await expect(captions(page, 'Heat')).toHaveText(['Bien']); // « Reclasser » est dans sa liste (16/11)
     await expect(captions(page, 'Collateral')).toHaveText(['Bien']); // pas encore classé
     await expect(page.locator('.topbar .filter-btn .btn-cap')).toHaveText('Filtres');
     await fits(page);

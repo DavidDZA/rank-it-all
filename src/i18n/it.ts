@@ -248,7 +248,7 @@ export const it: Dict = {
         '**ℹ** su una locandina: la sua scheda completa (trama, trailer…).',
         '**Pari** se non sai decidere, **Salta** per tenerlo per dopo.',
         'In **La mia classifica**, sposta un titolo con la maniglia ⠿, o tocca il suo numero per dargli una posizione.',
-        'Il pulsante di **stato** (👍 Bello, con la sua freccia) sposta un titolo: bello ↔ così così senza perdere il suo posto, oppure voglio, non mi interessa, da ordinare. **Riordina** (↺) lo ricolloca con nuovi duelli.',
+        'Il pulsante di **stato** (👍 Bello, con la sua freccia) sposta un titolo: bello ↔ così così senza perdere il suo posto, oppure voglio, non mi interessa, da ordinare. Per un titolo già in classifica, lo stesso elenco offre anche **Riclassifica** (↺): viene ricollocato con nuovi duelli.',
       ],
     },
     wishlist: {
@@ -258,7 +258,7 @@ export const it: Dict = {
       points: [
         '**Dai priorità**: duelli per mettere in cima ciò che vuoi vedere per primo.',
         'Le tue priorità servono per l’estrazione «Cosa guardo stasera?» e per la wishlist in comune con i tuoi amici.',
-        'Il pulsante di **stato** (💖 Voglio, con la sua freccia): bello, così così, non mi interessa o da ordinare.',
+        'Il pulsante di **stato** (💖 Voglio, con la sua freccia): bello, così così, non mi interessa o da ordinare. Per un titolo con priorità, anche **Ridai priorità** (↺).',
       ],
     },
     tonight: {
@@ -438,7 +438,6 @@ export const it: Dict = {
   actions: {
     good: 'Bello',
     meh: 'Così così',
-    rerank: 'Riordina',
     filters: 'Filtri',
     reco: 'Per te',
   },

@@ -8,7 +8,7 @@ import { readRanking, unrank, type Scope } from '../lib/ranking';
 import { matchesTheme, missingFilterInfo, themeFilter, themeLabel } from '../lib/themes';
 import { prefetchDetails, WEEK } from '../lib/tmdb';
 import { loadMyProviders, mineFilter } from '../lib/providers';
-import { IconCaption, MineChip, ProviderLine, TopBar, TypeFilter } from '../components/common';
+import { MineChip, ProviderLine, TopBar, TypeFilter } from '../components/common';
 import { Duel } from '../components/Duel';
 import { RankedList } from '../components/RankedList';
 import { TierList } from '../components/TierList';
@@ -111,12 +111,12 @@ export default function Rank({ category }: { category: Category }) {
             empty={T.rankPage.empty}
             actions={(t, ranked) => (
               <>
-                {ranked && (
-                  <button className="btn small labeled" onClick={() => unrank(scope, t.key)} title={T.rankPage.rerankTip} aria-label={T.rankPage.rerank}>
-                    <IconCaption icon="↺" caption={T.actions.rerank} />
-                  </button>
-                )}
-                <StatusButton title={t} current={seenAnswers?.get(t.key)} ranked={ranked} />
+                <StatusButton
+                  title={t}
+                  current={seenAnswers?.get(t.key)}
+                  ranked={ranked}
+                  rerank={ranked ? { label: T.rankPage.rerank, hint: T.rankPage.rerankTip, run: () => unrank(scope, t.key) } : undefined}
+                />
               </>
             )}
           />

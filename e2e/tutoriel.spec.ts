@@ -60,10 +60,11 @@ test.describe('astuces de première visite', () => {
     await page.waitForTimeout(400);
     await expect(page.getByRole('dialog')).toHaveCount(0); // une fois seulement
     await page.goto('/#/rank/movie');
-    await expect(page.getByRole('dialog', { name: '🏆 Classer par duels' })).toContainText('Reclasser (↺) le replace par de nouveaux duels');
+    await expect(page.getByRole('dialog', { name: '🏆 Classer par duels' })).toContainText('la même liste propose aussi Reclasser (↺) : il est replacé par de nouveaux duels');
     await page.getByRole('dialog').getByRole('button', { name: 'Compris' }).click();
     await page.goto('/#/wishlist');
     await expect(page.getByRole('dialog', { name: '💖 Ta wishlist' })).toContainText('Le bouton d’état (💖 Envie, avec sa flèche)');
+    await expect(page.getByRole('dialog', { name: '💖 Ta wishlist' })).toContainText('Pour un titre priorisé, aussi Re-prioriser (↺)');
     await page.getByRole('dialog').getByRole('button', { name: 'Compris' }).click();
     await page.goto('/#/add');
     await expect(page.getByRole('dialog', { name: '🔍 Ajout manuel' })).toContainText('Le bouton d’état (↺ À trier, avec sa flèche)');

@@ -387,3 +387,11 @@
 .status-btn.place-none {
   border-style: dashed;
 }
+
+/* « Reclasser » : sous les 5 états, séparé d'un trait (ce n'est pas un état, c'est une action sur le classement). */
+.status-sep {
+  width: 100%;
+  margin: 2px 0;
+  border: none;
+  border-top: 1px dashed var(--border);
+}
